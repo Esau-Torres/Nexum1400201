@@ -8,3 +8,136 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+:root {
+    --bg-main: #f0f2f5;
+    --text-primary: #121212;
+    --color-accent: #ff2c2c;
+    --color-rose-quartz: #ff7575;
+    --color-special: #fff9e1;
+    
+    /* Sombras Neumorficas */
+    --neu-flat: 6px 6px 14px #d1d5db, -6px -6px 14px #ffffff;
+    --neu-pressed: inset 4px 4px 8px #d1d5db, inset -4px -4px 8px #ffffff;
+    --neu-accent-flat: 5px 5px 12px rgba(255, 44, 44, 0.25), -5px -5px 12px #ffffff;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+}
+
+/* Clases Neumórficas */
+.neu-card {
+    background: var(--bg-main);
+    border-radius: 18px;
+    box-shadow: var(--neu-flat);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.neu-special-card {
+    background: var(--color-special);
+    border-radius: 18px;
+    box-shadow: var(--neu-flat);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.neu-sidebar {
+    background: var(--bg-main);
+    box-shadow: 4px 0 15px #d1d5db;
+    border-right: 1px solid rgba(255, 255, 255, 0.7);
+    min-height: 100vh;
+    width: 260px;
+}
+
+@media (min-width: 992px) {
+    .neu-sidebar {
+        box-shadow: 4px 0 15px #d1d5db;
+        min-height: 100vh;
+    }
+}
+
+.neu-navbar {
+    background: var(--bg-main);
+    box-shadow: 0 4px 14px #d1d5db;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.neu-btn {
+    background: var(--bg-main);
+    color: var(--text-primary);
+    border-radius: 12px;
+    box-shadow: var(--neu-flat);
+    border: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.neu-btn:hover {
+    box-shadow: var(--neu-pressed);
+    color: var(--color-accent);
+}
+
+.neu-btn-accent {
+    background: var(--color-accent);
+    color: #ffffff !important;
+    border-radius: 12px;
+    box-shadow: var(--neu-accent-flat);
+    border: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.neu-btn-accent:hover {
+    background: #e02424;
+    box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2);
+}
+
+.neu-nav-link {
+    color: var(--text-primary);
+    padding: 12px 18px;
+    margin-bottom: 10px;
+    border-radius: 14px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.neu-nav-link:hover {
+    color: var(--color-accent);
+    box-shadow: var(--neu-flat);
+}
+
+.neu-nav-link.active {
+    background: var(--bg-main);
+    color: var(--color-accent);
+    box-shadow: var(--neu-pressed);
+    font-weight: 700;
+}
+
+.neu-badge-accent {
+    background: var(--color-rose-quartz);
+    color: #ffffff;
+    box-shadow: 2px 2px 6px rgba(255, 117, 117, 0.4);
+    border-radius: 8px;
+}
+
+.neu-input {
+    background: var(--bg-main);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: var(--neu-pressed);
+    border-radius: 12px;
+    color: var(--text-primary);
+}
+
+.neu-input:focus {
+    background: var(--bg-main);
+    border-color: var(--color-accent);
+    box-shadow: var(--neu-pressed);
+    color: var(--text-primary);
+}
