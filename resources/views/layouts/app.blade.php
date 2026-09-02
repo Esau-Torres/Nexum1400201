@@ -1,86 +1,147 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Nexum')</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>@yield('title', config('app.name', 'NEXUM'))</title>
+
+    <!-- Fuente Inter desde Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+    <!-- Styles / Scripts Vite -->
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
 </head>
-<body>
-    <div class="d-flex flex-column flex-lg-row min-vh-100">
-        
-        <!-- Sidebar Responsivo (Offcanvas en móvil, fijo en desktop) -->
-        <div class="offcanvas-lg offcanvas-start neu-sidebar p-3 d-flex flex-column flex-shrink-0" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
-            <div class="d-flex align-items-center justify-content-between mb-4 px-2">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="p-2 rounded-circle neu-btn-accent d-inline-block" style="width: 24px; height: 24px;"></span>
-                    <h5 class="fw-bold m-0" style="color: var(--color-accent);" id="sidebarMenuLabel">UMA SANTA ANA</h5>
-                </div>
-                <!-- Botón cerrar solo visible en móvil -->
-                <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
+
+<body class="bg-light">
+
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <aside class="sidebar bg-white border-end d-flex flex-column">
+            <!-- Logo -->
+            <div class="p-3 border-bottom">
+                <img src="{{ asset('assets/images/logo-uma-santa-ana.png') }}" alt="Logo Universidad UMA Santa Ana" class="img-fluid" style="max-height: 50px;">
             </div>
 
-            <nav class="nav flex-column mb-auto">
-                <a href="{{ route('home') }}" class="neu-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
-                    <span>Inicio</span>
-                </a>
-                <a href="#" class="neu-nav-link">
-                    <span>Modulos</span>
-                </a>
-                <a href="#" class="neu-nav-link">
-                    <span>modulo</span>
-                </a>
-                <a href="{{ route('profile') }}" class="neu-nav-link {{ request()->routeIs('profile') ? 'active' : '' }}">
-                    <span>setting</span>
-                </a>
+            <!-- Navegación Principal -->
+            <nav class="flex-grow-1 p-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('pensum')) active @endif">
+                            <i class="fa-solid fa-book-open nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Pensum</div>
+                                <div class="nav-text-secondary">Plan académico</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('enlaces')) active @endif">
+                            <i class="fa-solid fa-link nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Enlaces</div>
+                                <div class="nav-text-secondary">Cursos virtuales</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('record-academico')) active @endif">
+                            <i class="fa-solid fa-graduation-cap nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Record Académico</div>
+                                <div class="nav-text-secondary">Notas ciclo</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('inscripcion')) active @endif">
+                            <i class="fa-solid fa-pen-to-square nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Inscripción</div>
+                                <div class="nav-text-secondary">En línea</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('evaluacion')) active @endif">
+                            <i class="fa-solid fa-clipboard-check nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Evaluación del Desempeño</div>
+                                <div class="nav-text-secondary">Docente</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('record-financiero')) active @endif">
+                            <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Record Financiero</div>
+                                <div class="nav-text-secondary">Credenciales de pago</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('buzon')) active @endif">
+                            <i class="fa-solid fa-envelope nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Buzón</div>
+                                <div class="nav-text-secondary">Observaciones, sugerencias y quejas</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('recursos')) active @endif">
+                            <i class="fa-solid fa-folder-open nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Recursos</div>
+                                <div class="nav-text-secondary">Bibliográficos</div>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
             </nav>
 
-            <hr class="text-secondary opacity-25">
-
-            <div class="px-2">
-                <span class="badge neu-badge-accent px-3 py-2 w-100 text-center">
-                    Modo Seguro 2FA
-                </span>
+            <!-- Sección Inferior -->
+            <div class="p-3 border-top">
+                <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark mb-1">
+                    <i class="fa-solid fa-gear nav-icon fs-5 me-3 text-muted"></i>
+                    <div class="fw-medium">Ajustes</div>
+                </a>
+                <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark">
+                    <i class="fa-solid fa-user-circle nav-icon fs-5 me-3 text-muted"></i>
+                    <div class="fw-medium">Perfil</div>
+                </a>
             </div>
-        </div>
+        </aside>
 
-        <!-- Contenedor Principal -->
-        <div class="flex-grow-1 d-flex flex-column" style="min-width: 0;">
-            <!-- Top Navbar -->
-            <header class="neu-navbar py-3 px-3 px-md-4 d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-2">
-                    <!-- Botón Hamburguesa para Móvil -->
-                    <button class="btn neu-btn d-lg-none p-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-5a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-5a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
-                        </svg>
-                    </button>
-                    <h6 class="m-0 medium d-sm-block fw-bold m-0" style="color: var(--color-accent);">@yield('titulo_navbar', 'Panel Principal')</h6>
-                </div>
-
-                <div class="d-flex align-items-center gap-2 gap-md-3">
-                    <span class="fw-semibold small px-2 px-md-3 py-2 neu-card text-truncate" style="max-width: 180px;">
-                        Usuario: <strong style="color: var(--color-accent);">{{ auth()->user()->name }}</strong>
-                    </span>
-
-                    <a href="{{ route('profile') }}" class="btn neu-btn btn-sm px-2 px-md-3 py-2 d-none d-sm-inline-block">
-                        Configuración
-                    </a>
-
-                    <form method="POST" action="{{ route('logout') }}" class="m-0">
-                        @csrf
-                        <button type="submit" class="btn neu-btn-accent btn-sm px-2 px-md-3 py-2">
-                            Cerrar Sesión
-                        </button>
-                    </form>
-                </div>
-            </header>
-
-            <!-- Renderizado de Vistas Parciales -->
-            <main class="p-3 p-md-4 flex-grow-1">
-                @yield('content')
-            </main>
-        </div>
+        <!-- Contenido Principal -->
+        <main class="main-content flex-grow-1">
+            @yield('content')
+        </main>
     </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    @stack('scripts')
 </body>
+
 </html>

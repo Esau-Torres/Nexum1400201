@@ -15,3 +15,10 @@ Route::middleware(['auth'])->group(function () {
         return view('profile');
     })->name('profile');
 });
+
+Route::view('/about', 'about')->name('about');
+
+// Ruta de prueba para ver el layout
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->name('dashboard');

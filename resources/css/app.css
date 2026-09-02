@@ -1,143 +1,148 @@
 /*@import 'tailwindcss';*/
-@import 'bootstrap/dist/css/bootstrap.min.css';
+@import "bootstrap/dist/css/bootstrap.min.css";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans:
+        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
 }
 
 :root {
     --bg-main: #f0f2f5;
     --text-primary: #121212;
-    --color-accent: #ff2c2c;
+    --color-accent: #dc3545;
     --color-rose-quartz: #ff7575;
     --color-special: #fff9e1;
-    
-    /* Sombras Neumorficas */
-    --neu-flat: 6px 6px 14px #d1d5db, -6px -6px 14px #ffffff;
-    --neu-pressed: inset 4px 4px 8px #d1d5db, inset -4px -4px 8px #ffffff;
-    --neu-accent-flat: 5px 5px 12px rgba(255, 44, 44, 0.25), -5px -5px 12px #ffffff;
+    --color-hover-bg: #fff5f5;
 }
 
 body {
-    background-color: var(--bg-main);
+    background-color: #ffffff;
     color: var(--text-primary);
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family:
+        "Inter",
+        system-ui,
+        -apple-system,
+        sans-serif;
     min-height: 100vh;
 }
 
-/* Clases Neumórficas */
-.neu-card {
-    background: var(--bg-main);
-    border-radius: 18px;
-    box-shadow: var(--neu-flat);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-}
-
-.neu-special-card {
-    background: var(--color-special);
-    border-radius: 18px;
-    box-shadow: var(--neu-flat);
-    border: 1px solid rgba(255, 255, 255, 0.9);
-}
-
-.neu-sidebar {
-    background: var(--bg-main);
-    box-shadow: 4px 0 15px #d1d5db;
-    border-right: 1px solid rgba(255, 255, 255, 0.7);
-    min-height: 100vh;
+/* ========== SIDEBAR LAYOUT ========== */
+.sidebar {
     width: 260px;
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
 }
 
-@media (min-width: 992px) {
-    .neu-sidebar {
-        box-shadow: 4px 0 15px #d1d5db;
-        min-height: 100vh;
+.main-content {
+    margin-left: 260px;
+    min-height: 100vh;
+}
+
+.nav-item-custom {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    padding: 12px 16px;
+    margin-bottom: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-item-custom::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background-color: var(--color-accent);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.nav-item-custom:hover::before {
+    transform: scaleY(1);
+}
+
+.nav-item-custom:hover {
+    background-color: var(--color-hover-bg);
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.08);
+}
+
+.nav-item-custom:hover .nav-icon {
+    color: var(--color-accent) !important;
+    transform: scale(1.1);
+}
+
+.nav-item-custom:hover .fw-medium {
+    color: var(--color-accent);
+}
+
+.nav-icon {
+    transition: all 0.3s ease;
+}
+
+.nav-item-custom.active {
+    background-color: var(--color-accent);
+    color: white;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
+}
+
+.nav-item-custom.active::before {
+    display: none;
+}
+
+.nav-item-custom.active .nav-text-secondary {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.nav-item-custom.active .nav-icon {
+    color: white !important;
+}
+
+.nav-item-custom.active .fw-medium {
+    color: white;
+}
+
+.nav-text-secondary {
+    font-size: 0.75rem;
+    color: #6c757d;
+    transition: color 0.3s ease;
+}
+
+@media (max-width: 991.98px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        min-height: auto;
+    }
+
+    .main-content {
+        margin-left: 0;
     }
 }
 
-.neu-navbar {
-    background: var(--bg-main);
-    box-shadow: 0 4px 14px #d1d5db;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+/* ========== WELCOME PAGE STYLES ========== */
+.portal-hover {
+    transition: all 0.3s ease;
 }
 
-.neu-btn {
-    background: var(--bg-main);
-    color: var(--text-primary);
-    border-radius: 12px;
-    box-shadow: var(--neu-flat);
-    border: none;
-    font-weight: 500;
-    transition: all 0.2s ease;
+.portal-hover:hover {
+    border-color: var(--color-accent) !important;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06) !important;
 }
 
-.neu-btn:hover {
-    box-shadow: var(--neu-pressed);
+.portal-hover:hover .fa-solid,
+.portal-hover:hover .fa-regular {
     color: var(--color-accent);
-}
-
-.neu-btn-accent {
-    background: var(--color-accent);
-    color: #ffffff !important;
-    border-radius: 12px;
-    box-shadow: var(--neu-accent-flat);
-    border: none;
-    font-weight: 600;
-    transition: all 0.2s ease;
-}
-
-.neu-btn-accent:hover {
-    background: #e02424;
-    box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2);
-}
-
-.neu-nav-link {
-    color: var(--text-primary);
-    padding: 12px 18px;
-    margin-bottom: 10px;
-    border-radius: 14px;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.neu-nav-link:hover {
-    color: var(--color-accent);
-    box-shadow: var(--neu-flat);
-}
-
-.neu-nav-link.active {
-    background: var(--bg-main);
-    color: var(--color-accent);
-    box-shadow: var(--neu-pressed);
-    font-weight: 700;
-}
-
-.neu-badge-accent {
-    background: var(--color-rose-quartz);
-    color: #ffffff;
-    box-shadow: 2px 2px 6px rgba(255, 117, 117, 0.4);
-    border-radius: 8px;
-}
-
-.neu-input {
-    background: var(--bg-main);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    box-shadow: var(--neu-pressed);
-    border-radius: 12px;
-    color: var(--text-primary);
-}
-
-.neu-input:focus {
-    background: var(--bg-main);
-    border-color: var(--color-accent);
-    box-shadow: var(--neu-pressed);
-    color: var(--text-primary);
 }
