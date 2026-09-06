@@ -32,6 +32,7 @@ body {
 }
 
 /* ========== SIDEBAR LAYOUT ========== */
+/* ========== SIDEBAR LAYOUT ========== */
 .sidebar {
     width: 260px;
     min-height: 100vh;
@@ -40,6 +41,8 @@ body {
     left: 0;
     bottom: 0;
     overflow-y: auto;
+    z-index: 1040;
+    transition: transform 0.3s ease;
 }
 
 .main-content {
@@ -47,6 +50,84 @@ body {
     min-height: 100vh;
 }
 
+/* ========== BOTÓN TOGGLE (HAMBURGUESA) ========== */
+.sidebar-toggle {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1030;
+    width: 44px;
+    height: 44px;
+    border: none;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sidebar-toggle:hover {
+    background-color: #fff5f5;
+    color: var(--color-accent);
+    transform: scale(1.05);
+}
+
+.sidebar-toggle i {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+}
+
+.sidebar-toggle:hover i {
+    color: var(--color-accent);
+}
+
+/* ========== BOTÓN CERRAR ========== */
+.sidebar-close {
+    border: none;
+    background-color: transparent;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-primary);
+}
+
+.sidebar-close:hover {
+    background-color: #fff5f5;
+    color: var(--color-accent);
+}
+
+.sidebar-close i {
+    font-size: 1.25rem;
+}
+
+/* ========== BACKDROP ========== */
+.sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1035;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.sidebar-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ========== ITEMS DE NAVEGACIÓN ========== */
 .nav-item-custom {
     border-radius: 8px;
     transition: all 0.3s ease;
@@ -119,15 +200,48 @@ body {
     transition: color 0.3s ease;
 }
 
+/* ========== RESPONSIVE - MÓVIL ========== */
 @media (max-width: 991.98px) {
     .sidebar {
-        position: relative;
-        width: 100%;
-        min-height: auto;
+        transform: translateX(-100%);
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar.sidebar-open {
+        transform: translateX(0);
     }
 
     .main-content {
         margin-left: 0;
+    }
+
+    .sidebar-toggle {
+        display: flex;
+    }
+
+    .sidebar-close {
+        display: flex;
+    }
+
+    /* Ajustar contenido principal para no solapar con el botón */
+    .main-content {
+        padding-top: 70px;
+    }
+
+    /* Desactivar transform en hover en móvil para mejor UX */
+    .nav-item-custom:hover {
+        transform: translateX(0);
+    }
+}
+
+/* ========== TABLETS (ajuste fino) ========== */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .sidebar {
+        width: 240px;
+    }
+
+    .main-content {
+        margin-left: 240px;
     }
 }
 

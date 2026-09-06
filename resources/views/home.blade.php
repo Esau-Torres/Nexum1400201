@@ -3,99 +3,204 @@
 @section('title', 'Dashboard - Home')
 
 @section('content')
-<div class="container-fluid px-0">
+<div class="container-fluid p-4">
 
     <!-- Mensajes de estado -->
     @if (session('status') == 'two-factor-authentication-enabled')
-        <div class="alert neu-special-card text-dark border-0 p-3 mb-4">
-            Autenticación en dos pasos habilitada. Escanea el código QR a continuación para configurarla.
+        <div class="alert alert-warning border-0 shadow-sm rounded-4 p-3 mb-4">
+            <div class="d-flex align-items-center">
+                <i class="fa-solid fa-shield-halved fs-4 me-3 text-warning"></i>
+                <div>
+                    <strong>Autenticación en dos pasos habilitada.</strong>
+                    <p class="mb-0 small">Escanea el código QR a continuación para configurarla.</p>
+                </div>
+            </div>
         </div>
     @elseif (session('status') == 'two-factor-authentication-confirmed')
-        <div class="alert neu-card border-0 p-3 mb-4 text-success fw-semibold">
-            Código 2FA confirmado correctamente. La cuenta ahora está protegida.
+        <div class="alert alert-success border-0 shadow-sm rounded-4 p-3 mb-4">
+            <div class="d-flex align-items-center">
+                <i class="fa-solid fa-circle-check fs-4 me-3 text-success"></i>
+                <div>
+                    <strong>Código 2FA confirmado correctamente.</strong>
+                    <p class="mb-0 small">La cuenta ahora está protegida.</p>
+                </div>
+            </div>
         </div>
     @endif
 
+    <!-- Encabezado de página -->
+    <div class="mb-4">
+        <h1 class="h3 fw-bold mb-1">Dashboard</h1>
+        <p class="text-muted mb-0">Bienvenido de vuelta. Aquí tienes un resumen de tu cuenta.</p>
+    </div>
+
     <div class="row g-4">
-        <!-- Tarjeta de Bienvenida y Datos -->
+        <!-- Columna Izquierda -->
         <div class="col-lg-6">
-            <div class="neu-card p-4 mb-4">
-                <h5 class="fw-bold mb-3" style="color: var(--color-accent);">Resumen General</h5>
-                <p class="text-muted">Has iniciado sesión correctamente en el sistema modular.</p>
-                <div class="d-flex justify-content-between py-2 border-bottom">
-                    <span class="text-muted">Correo:</span>
-                    <span class="fw-semibold">{{ auth()->user()->email }}</span>
-                </div>
-                <div class="d-flex justify-content-between py-2 border-bottom">
-                    <span class="text-muted">Estado 2FA:</span>
-                    @if (auth()->user()->two_factor_secret)
-                        <span class="badge neu-badge-accent px-2 py-1">Habilitado</span>
-                    @else
-                        <span class="badge bg-secondary px-2 py-1">Deshabilitado</span>
-                    @endif
+            <!-- Tarjeta de Resumen General -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle me-3" 
+                             style="width: 40px; height: 40px; background-color: #fff5f5;">
+                            <i class="fa-solid fa-chart-line text-danger"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0 text-danger">Resumen General</h5>
+                    </div>
+                    
+                    <p class="text-muted small mb-4">Has iniciado sesión correctamente en el sistema modular.</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                        <span class="text-muted small">Correo electrónico</span>
+                        <span class="fw-semibold">{{ auth()->user()->email }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-3">
+                        <span class="text-muted small">Estado 2FA</span>
+                        @if (auth()->user()->two_factor_secret)
+                            <span class="badge bg-danger px-3 py-2">
+                                <i class="fa-solid fa-shield-halved me-1"></i>Habilitado
+                            </span>
+                        @else
+                            <span class="badge bg-secondary px-3 py-2">
+                                <i class="fa-solid fa-shield me-1"></i>Deshabilitado
+                            </span>
+                        @endif
+                    </div>
                 </div>
             </div>
 
-            <!-- Tarjeta Especial con color #fff9e1 -->
-            <div class="neu-special-card p-4" x-data="{ count: 0 }">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="fw-bold m-0" style="color: var(--color-accent);">Módulo de Monitoreo</h6>
-                    <span class="badge bg-dark">Especial</span>
+            <!-- Tarjeta Especial de Monitoreo -->
+            <div class="card border-0 shadow-sm rounded-4" style="background-color: #fff9e1;">
+                <div class="card-body p-4" x-data="{ count: 0 }">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle me-3" 
+                                 style="width: 40px; height: 40px; background-color: rgba(220, 53, 69, 0.1);">
+                                <i class="fa-solid fa-bolt text-danger"></i>
+                            </div>
+                            <h6 class="fw-bold mb-0 text-danger">Módulo de Monitoreo</h6>
+                        </div>
+                        <span class="badge bg-dark px-3 py-2">Especial</span>
+                    </div>
+                    
+                    <p class="small text-muted mb-3">Canal reactivo de pruebas en memoria:</p>
+                    
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="display-4 fw-bold text-dark" x-text="count"></div>
+                            <small class="text-muted">Eventos registrados</small>
+                        </div>
+                        <button class="btn btn-danger btn-lg" @click="count++">
+                            <i class="fa-solid fa-plus me-2"></i>Incrementar
+                        </button>
+                    </div>
                 </div>
-                <p class="small text-muted mb-2">Canal reactivo de pruebas en memoria:</p>
-                <h3 class="fw-bold" x-text="count"></h3>
-                <button class="btn neu-btn btn-sm mt-2" @click="count++">Incrementar Evento</button>
             </div>
         </div>
 
-        <!-- Tarjeta de Gestión 2FA -->
+        <!-- Columna Derecha -->
         <div class="col-lg-6">
-            <div class="neu-card p-4">
-                <h5 class="fw-bold mb-3">Seguridad y 2FA</h5>
-                <p class="text-muted small">Protege tu cuenta vinculando una app como Google Authenticator o Authy.</p>
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle me-3" 
+                             style="width: 40px; height: 40px; background-color: #fff5f5;">
+                            <i class="fa-solid fa-lock text-danger"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Seguridad y 2FA</h5>
+                    </div>
+                    
+                    <p class="text-muted small mb-4">Protege tu cuenta vinculando una app como Google Authenticator o Authy.</p>
 
-                @if (! auth()->user()->two_factor_secret)
-                    <form method="POST" action="{{ url('/user/two-factor-authentication') }}">
-                        @csrf
-                        <button type="submit" class="btn neu-btn-accent w-100 py-2">
-                            Habilitar 2FA
-                        </button>
-                    </form>
-                @else
-                    @if (! auth()->user()->two_factor_confirmed_at)
-                        <div class="text-center my-3 p-3 neu-card">
-                            <p class="fw-semibold small mb-2">1. Escanea el código QR:</p>
-                            <div class="d-inline-block bg-white p-2 rounded shadow-sm">
-                                {!! auth()->user()->twoFactorQrCodeSvg() !!}
+                    @if (! auth()->user()->two_factor_secret)
+                        <!-- Habilitar 2FA -->
+                        <div class="text-center py-4">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" 
+                                 style="width: 80px; height: 80px; background-color: #fff5f5;">
+                                <i class="fa-solid fa-shield-halved fs-1 text-danger"></i>
                             </div>
-
-                            <form method="POST" action="{{ url('/user/confirmed-two-factor-authentication') }}" class="mt-3">
+                            <h6 class="fw-bold mb-2">Activa la autenticación en dos pasos</h6>
+                            <p class="text-muted small mb-4">Añade una capa extra de seguridad a tu cuenta</p>
+                            
+                            <form method="POST" action="{{ url('/user/two-factor-authentication') }}">
                                 @csrf
-                                <div class="input-group mb-2 mx-auto" style="max-width: 260px;">
-                                    <input type="text" name="code" class="form-control text-center font-monospace" placeholder="123456" required autofocus>
-                                    <button type="submit" class="btn neu-btn-accent">Confirmar</button>
-                                </div>
+                                <button type="submit" class="btn btn-danger btn-lg w-100 py-3">
+                                    <i class="fa-solid fa-shield-halved me-2"></i>Habilitar 2FA
+                                </button>
                             </form>
                         </div>
-                    @endif
+                    @else
+                        <!-- 2FA ya habilitado -->
+                        @if (! auth()->user()->two_factor_confirmed_at)
+                            <!-- Pendiente de confirmación -->
+                            <div class="text-center py-4 mb-4 border-bottom">
+                                <div class="alert alert-info border-0 rounded-4 mb-4">
+                                    <i class="fa-solid fa-circle-info me-2"></i>
+                                    <strong>Paso 1:</strong> Escanea el código QR con tu app de autenticación
+                                </div>
+                                
+                                <div class="d-inline-block bg-white p-3 rounded-4 shadow-sm mb-4">
+                                    {!! auth()->user()->twoFactorQrCodeSvg() !!}
+                                </div>
 
-                    <div class="my-3">
-                        <h6 class="fw-semibold small text-muted">Códigos de Recuperación:</h6>
-                        <div class="p-3 neu-card font-monospace small" style="max-height: 110px; overflow-y: auto;">
-                            @foreach (json_decode(decrypt(auth()->user()->two_factor_recovery_codes), true) as $code)
-                                <div>{{ $code }}</div>
-                            @endforeach
+                                <form method="POST" action="{{ url('/user/confirmed-two-factor-authentication') }}">
+                                    @csrf
+                                    <div class="mb-3">
+                                        <label class="form-label fw-medium small">Paso 2: Ingresa el código de verificación</label>
+                                        <div class="input-group mx-auto" style="max-width: 300px;">
+                                            <input type="text" name="code" class="form-control form-control-lg text-center font-monospace" 
+                                                   placeholder="123456" required autofocus>
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fa-solid fa-check me-1"></i>Confirmar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        @else
+                            <!-- 2FA confirmado -->
+                            <div class="alert alert-success border-0 rounded-4 mb-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa-solid fa-circle-check fs-4 me-3"></i>
+                                    <div>
+                                        <strong>2FA Activo y Confirmado</strong>
+                                        <p class="mb-0 small">Tu cuenta está protegida con autenticación en dos pasos.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Códigos de Recuperación -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fa-solid fa-key text-danger me-2"></i>
+                                <h6 class="fw-semibold mb-0 small">Códigos de Recuperación</h6>
+                            </div>
+                            <div class="card border-0 shadow-sm rounded-4 p-3" style="background-color: #f8f9fa;">
+                                <div class="font-monospace small" style="max-height: 150px; overflow-y: auto;">
+                                    @foreach (json_decode(decrypt(auth()->user()->two_factor_recovery_codes), true) as $code)
+                                        <div class="py-1 border-bottom">
+                                            <i class="fa-solid fa-circle-small text-muted me-2"></i>{{ $code }}
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <p class="text-muted small mt-2">
+                                <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                                Guarda estos códigos en un lugar seguro. Cada código solo puede usarse una vez.
+                            </p>
                         </div>
-                    </div>
 
-                    <form method="POST" action="{{ url('/user/two-factor-authentication') }}" class="mt-3">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn neu-btn w-100 py-2 text-danger">
-                            Deshabilitar 2FA
-                        </button>
-                    </form>
-                @endif
+                        <!-- Deshabilitar 2FA -->
+                        <form method="POST" action="{{ url('/user/two-factor-authentication') }}">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline-danger w-100 py-3">
+                                <i class="fa-solid fa-shield-slash me-2"></i>Deshabilitar 2FA
+                            </button>
+                        </form>
+                    @endif
+                </div>
             </div>
         </div>
     </div>

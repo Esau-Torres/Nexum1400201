@@ -26,12 +26,28 @@
 
 <body class="bg-light">
 
+    <!-- Botón Toggle (Solo Móvil) -->
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Abrir menú">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- Backdrop (Solo Móvil) -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
     <div class="d-flex">
         <!-- Sidebar -->
-        <aside class="sidebar bg-white border-end d-flex flex-column">
-            <!-- Logo -->
-            <div class="p-3 border-bottom">
-                <img src="{{ asset('assets/images/logo-uma-santa-ana.png') }}" alt="Logo Universidad UMA Santa Ana" class="img-fluid" style="max-height: 50px;">
+        <aside class="sidebar bg-white border-end d-flex flex-column" id="sidebar">
+            <!-- Header del Sidebar con botón de cerrar (solo móvil) -->
+            <div class="sidebar-header p-3 border-bottom d-flex align-items-center justify-content-between">
+                <a href="{{ route('home') }}" class="d-inline-block text-decoration-none">
+                    <img src="{{ asset('assets/images/logo-uma-santa-ana.png') }}"
+                        alt="Logo Universidad UMA Santa Ana"
+                        class="img-fluid"
+                        style="max-height: 50px; cursor: pointer;">
+                </a>
+                <button class="sidebar-close d-lg-none" id="sidebarClose" aria-label="Cerrar menú">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
 
             <!-- Navegación Principal -->
@@ -125,7 +141,7 @@
                     <i class="fa-solid fa-gear nav-icon fs-5 me-3 text-muted"></i>
                     <div class="fw-medium">Ajustes</div>
                 </a>
-                <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark">
+                <a href="{{ route('profile') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('profile')) active @endif">
                     <i class="fa-solid fa-user-circle nav-icon fs-5 me-3 text-muted"></i>
                     <div class="fw-medium">Perfil</div>
                 </a>
@@ -140,6 +156,37 @@
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script del Sidebar Mobile -->
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+        function openSidebar() {
+            sidebar.classList.add('sidebar-open');
+            sidebarBackdrop.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('sidebar-open');
+            sidebarBackdrop.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        sidebarToggle.addEventListener('click', openSidebar);
+        sidebarClose.addEventListener('click', closeSidebar);
+        sidebarBackdrop.addEventListener('click', closeSidebar);
+
+        // Cerrar con tecla ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && sidebar.classList.contains('sidebar-open')) {
+                closeSidebar();
+            }
+        });
+    </script>
 
     @stack('scripts')
 </body>
