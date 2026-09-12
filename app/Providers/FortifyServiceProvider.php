@@ -41,6 +41,16 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::redirectUserForTwoFactorAuthenticationUsing(RedirectIfTwoFactorAuthenticatable::class);
         
         $this->app->bind(LoginResponse::class, LoginUser::class);
+        
+        $this->app->singleton(VerifyEmailResponse::class, function () {
+            return new class implements VerifyEmailResponse {
+                public function toResponse($request)
+                {
+                    return redirect()->intended(config('fortify.home'))
+                        ->with('success', 'Dirección de correo institucional verificada correctamente.');
+                }
+            };
+        });
 
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
@@ -78,12 +88,22 @@ class FortifyServiceProvider extends ServiceProvider
 
         // 2. Definición de Vistas Blade
         Fortify::loginView(fn () => view('auth.login'));
+        Fortify::verifyEmailView(function () { return view('auth.verify-email');});
         Fortify::registerView(fn () => view('auth.register'));
         Fortify::requestPasswordResetLinkView(fn () => view('auth.forgot-password'));
         Fortify::resetPasswordView(fn ($request) => view('auth.reset-password', ['request' => $request]));
         Fortify::verifyEmailView(fn () => view('auth.verify-email'));
         Fortify::confirmPasswordView(fn () => view('auth.confirm-password'));
         Fortify::twoFactorChallengeView(fn () => view('auth.two-factor-challenge'));
+        Fortify::confirmPasswordsUsing(function ($user, string $password) {
+            $isValid = Hash::check($password, $user->password);
+
+            if (! $isValid) {
+                session()->flash('error', 'La contraseña ingresada no es válida. Verifique sus datos para continuar.');
+            }
+
+            return $isValid;
+        });
         
         
 
