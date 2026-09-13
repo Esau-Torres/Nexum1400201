@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\User;
+use App\Models\Users\User;
 use App\Actions\Fortify\CreateNewUser;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;

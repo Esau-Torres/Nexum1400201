@@ -11,6 +11,7 @@ import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import './toast';
 
+
 window.Pusher = Pusher;
 window.Alpine = Alpine;
 window.bootstrap = bootstrap;
