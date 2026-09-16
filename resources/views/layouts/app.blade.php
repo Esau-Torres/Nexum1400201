@@ -65,6 +65,8 @@
                             </div>
                         </a>
                     </li>
+                    
+                    @if(auth()->user()->hasrole('ESTUDIANTE'))
                     <li class="nav-item mb-1">
                         <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('pensum*') ? 'active' : '' }}">
                             <i class="fa-solid fa-book-open nav-icon fs-5 me-3 text-muted"></i>
@@ -74,6 +76,7 @@
                             </div>
                         </a>
                     </li>
+                    
                     <li class="nav-item mb-1">
                         <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('enlaces*') ? 'active' : '' }}">
                             <i class="fa-solid fa-link nav-icon fs-5 me-3 text-muted"></i>
@@ -92,6 +95,7 @@
                             </div>
                         </a>
                     </li>
+                    
                     <li class="nav-item mb-1">
                         <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('inscripcion*') ? 'active' : '' }}">
                             <i class="fa-solid fa-pen-to-square nav-icon fs-5 me-3 text-muted"></i>
@@ -101,6 +105,7 @@
                             </div>
                         </a>
                     </li>
+                    
                     <li class="nav-item mb-1">
                         <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('evaluacion*') ? 'active' : '' }}">
                             <i class="fa-solid fa-clipboard-check nav-icon fs-5 me-3 text-muted"></i>
@@ -137,6 +142,7 @@
                             </div>
                         </a>
                     </li>
+                    @endif
                 </ul>
             </nav>
 

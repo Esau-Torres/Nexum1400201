@@ -15,6 +15,8 @@ Route::get('/carreras', [registroController::class, 'carrera'])->name('carreras'
 // Rutas protegidas por autenticación y verificación de correo electrónico
 
 Route::middleware(['auth', 'verified'])->group(function () {
+
+
     Route::get('/home', function () {
         return view('home');
     })->name('home');
