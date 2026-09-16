@@ -18,6 +18,7 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Contracts\RegisterResponse;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -52,6 +53,21 @@ class FortifyServiceProvider extends ServiceProvider
             };
         });
 
+        $this->app->singleton(RegisterResponse::class, function () {
+            return new class implements RegisterResponse
+            {
+                public function toResponse($request)
+                {
+                    return redirect()
+                        ->route('login')
+                        ->with(
+                            'info',
+                            'Solicitud recibida. Tu expediente está en revisión por Administración Académica.'
+                        );
+                }
+            };
+        });
+
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
 
@@ -59,19 +75,50 @@ class FortifyServiceProvider extends ServiceProvider
         });
 
         Fortify::authenticateUsing(function (Request $request) {
+
             $user = User::where('email', $request->email)->first();
 
-            if ($user && Hash::check($request->password, $user->password)) {
-                return $user;
+            // Usuario no existe o contraseña incorrecta
+            if (!$user || !Hash::check($request->password, $user->password)) {
+
+                session()->flash(
+                    'error',
+                    'Credenciales inválidas. Verifique su correo institucional y contraseña.'
+                );
+
+                session()->flash(
+                    'error_title',
+                    'Acceso Denegado'
+                );
+
+                throw ValidationException::withMessages([
+                    Fortify::username() => ['Acceso no autorizado.'],
+                ]);
             }
 
-            // Inyectamos el flash global para activar el Toast
-            session()->flash('error', 'Credenciales inválidas. Verifique su correo institucional y contraseña.');
-            session()->flash('error_title', 'Acceso Denegado');
+            // Usuario existe y contraseña correcta,
+            // pero todavía no está habilitado
+            if ($user->estado == 0) {
 
-            throw ValidationException::withMessages([
-                Fortify::username() => ['Acceso no autorizado.'],
-            ]);
+                session()->flash(
+                    'error',
+                    'Su cuenta se encuentra pendiente de aprobación por Administración Académica.'
+                );
+
+                session()->flash(
+                    'error_title',
+                    'Cuenta pendiente'
+                );
+
+                throw ValidationException::withMessages([
+                    Fortify::username() => [
+                        'Su cuenta aún no está habilitada.'
+                    ],
+                ]);
+            }
+
+            // Usuario habilitado
+            return $user;
         });
 
         RateLimiter::for('two-factor', function (Request $request) {
@@ -87,7 +134,7 @@ class FortifyServiceProvider extends ServiceProvider
         });
 
         // 2. Definición de Vistas Blade
-        Fortify::loginView(fn () => view('auth.login'));
+        Fortify::loginView(fn () => view('welcome'));
         Fortify::verifyEmailView(function () { return view('auth.verify-email');});
         Fortify::registerView(fn () => view('auth.register'));
         Fortify::requestPasswordResetLinkView(fn () => view('auth.forgot-password'));
@@ -104,8 +151,6 @@ class FortifyServiceProvider extends ServiceProvider
 
             return $isValid;
         });
-        
-        
 
     }
 }

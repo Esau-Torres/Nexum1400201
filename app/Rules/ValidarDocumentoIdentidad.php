@@ -4,6 +4,8 @@ namespace App\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Support\Facades\DB;
+use App\Models\Users\TipoDocumentoIdentidad;
 
 class ValidarDocumentoIdentidad implements ValidationRule
 {
@@ -11,26 +13,27 @@ class ValidarDocumentoIdentidad implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!$this->tipoDocumentoId) {
-            $fail('Debe seleccionar un tipo de documento.');
+         $tipo = TipoDocumentoIdentidad::find($this->tipoDocumentoId);
+
+        if (!$tipo || !preg_match("/^(?:{$tipo->formato_regex})$/", trim($value))) {
+            $fail('El número de documento ingresado no es válido para el formato seleccionado.');
             return;
         }
-        
-        $esValido = match ((int) $this->tipoDocumentoId) {
-            1 => $this->validarDUI($value), // 1 = DUI
-            2 => $this->validarPasaporte($value), // 2 = Pasaporte
-            4 => $this->validarLicencia($value), // 4 = Licencia
-            3 => $this->validarMinoridad($value), // 3 = Carnet de Minoridad
-            default => false,
+
+        // Extra por ID de registro (DUI = DUI, PORT = Pasaporte, CDN = Minoridad)
+        $esValido = match ($tipo->codigo) {
+            'DUI' => $this->validarChecksumDUI($value),
+            default => true,
         };
 
         if (!$esValido) {
-            $fail('El número de documento ingresado no es válido para el formato seleccionado.');
+            $fail('El dígito verificador del DUI no es válido. Verifique el número ingresado.');
         }
     }
 
-    private function validarDUI(string $dui): bool
+    private function validarChecksumDUI(string $dui): bool
     {
+
         $duiLimpio = str_replace('-', '', trim($dui));
         
         if (strlen($duiLimpio) !== 9 || !ctype_digit($duiLimpio)) {
@@ -47,22 +50,5 @@ class ValidarDocumentoIdentidad implements ValidationRule
         $digitoReal = (int)$duiLimpio[8];
 
         return $digitoCalculado === $digitoReal;
-    }
-
-    private function validarPasaporte(string $pasaporte): bool
-    {
-        // Formato estándar pasaporte salvadoreño (Letra seguida de números)
-        return preg_match('/^[A-Z0-9]{6,15}$/i', trim($pasaporte));
-    }
-
-    private function validarLicencia(string $licencia): bool
-    {
-        // Usualmente la licencia en El Salvador homologa con el NIT o DUI
-        return preg_match('/^[0-9]{4}-[0-9]{6}-[0-9]{3}-[0-9]{1}$/', trim($licencia)) || $this->validarDUI($licencia);
-    }
-
-    private function validarMinoridad(string $carnet): bool
-    {
-        return preg_match('/^[A-Z0-9-]{7,15}$/i', trim($carnet));
     }
 }

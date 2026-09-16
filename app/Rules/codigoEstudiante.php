@@ -2,8 +2,6 @@
 
 namespace App\Rules;
 
-
-
 class CodigoEstudiante {
     public static function generar(string $nombreCompleto, int $userId): string
     {
@@ -16,6 +14,6 @@ class CodigoEstudiante {
         $anio = date('Y');
         $correlativo = str_pad((string)$userId, 5, '0', STR_PAD_LEFT);
 
-        return "{ $iniciales}{ $anio}{$correlativo}";
+        return $iniciales.$anio.$correlativo;
     }
 }

@@ -52,9 +52,8 @@ class CreateNewUser implements CreatesNewUsers
                 $alumno = $this->createStudentAction->execute($user, $input['id_carrera']);
                 $this->uploadDocsAction->execute($alumno, request());
 
-                session()->flash('info', 'Solicitud recibida. Tu expediente está en revisión por Administración Académica.');
-                
                 return $user;
+
             } catch (\Exception $e) {
                 throw ValidationException::withMessages([
                     'error_general' => 'Ocurrió un error de integridad al procesar el expediente. Contacte a soporte técnico.'

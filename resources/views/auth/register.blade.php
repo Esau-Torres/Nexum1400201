@@ -120,7 +120,9 @@
                                                     <option
                                                         value="{{ $tipo->tipo_documento_id }}"
                                                         data-regex="{{ $tipo->formato_regex }}"
-                                                        data-place="{{ $tipo->codigo }}"
+                                                        data-place="{{ $tipo->formato }}"
+                                                        data-name="{{ $tipo->nombre }}"
+                                                        data-codigo = "{{ $tipo->codigo }}"
                                                         {{ old('id_tipo_documento') == $tipo->tipo_documento_id ? 'selected' : '' }}>
                                                         {{ $tipo->nombre }}
                                                     </option>
@@ -136,7 +138,8 @@
                                                 id="documento_identidad"
                                                 class="form-control @error('documento_identidad') is-invalid @enderror"
                                                 value="{{ old('documento_identidad') }}"
-                                                x-on:input="mascarasRequex($event)" 
+                                                x-on:input="mascarasRequex($event)"
+                                                x-on:blur="validarDocumento(true)" 
                                                 required>
 
                                             @error('documento_identidad')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -230,8 +233,9 @@
 
     @push('scripts')
     <script>
-        function checksumDUI(dui) {
-            const limpio = dui.replace(/-/g, '').trim();
+        // validacion del formato del dui
+        function checksumDUI(valor) {
+            const limpio = valor.replace(/-/g, '').trim();
             if (limpio.length !== 9 || !/^\d+$/.test(limpio)) return false;
 
             let suma = 0;
@@ -241,9 +245,16 @@
             return (10 - (suma % 10)) % 10 === parseInt(limpio[8], 10);
         }
 
-        // Extra por código, NO regexes: si el código no está aquí, solo aplica el data-regex
+        // validacion extra del pasaporte en tiempo real 
+        function validarPasaporte(valor) {
+            const limpio = valor.trim();
+            return /^[A-Za-z]\d{8}$/.test(limpio);
+        }
+
+        // Clave = tipo_documento_id (DUI = DUI, PORT = Pasaporte, CDN = Minoridad)
         const VALIDACION_EXTRA = {
             'DUI': checksumDUI,
+            'PORT': validarPasaporte,
         };
 
         document.addEventListener('alpine:init', () => {
@@ -284,7 +295,8 @@
                     fechaLimite: '',
                     mascara: null,
                     timeoutValidacion: null,
-                    docInvalidoMostrado: false,
+                    errorMostrado: null, 
+
                     // init() se ejecuta automáticamente cuando el componente se carga
                     init() {
                         const hoy = new Date();
@@ -314,12 +326,11 @@
                             }
                             documento.value = '';
                             documento.classList.remove('is-invalid');
-                            this.docInvalidoMostrado = false;
+                            this.errorMostrado = null;
                         };
 
                         tipoDocumento.addEventListener('change', actualizar);
                         actualizar();
-
                     },
 
                     aplicarMascara(event) {
@@ -403,48 +414,310 @@
                         if (this.mascara) {
                             const input = event.target;
                             input.value = this.formatoConMascara(input.value, this.mascara);
-                        }
+                        }                       
+
                         clearTimeout(this.timeoutValidacion);
-                        this.timeoutValidacion = setTimeout(() => this.validarDocumento(), 500);
+                        this.timeoutValidacion = setTimeout(() => this.validarDocumento(false), 600);
                     },
 
-                    validarDocumento() {
-                        const tipoDocumento = document.getElementById('id_tipo_documento');
-                        const documento = document.getElementById('documento_identidad');
+                    esPrefijoValido(valor, tokens) {
+                        if (!tokens || valor.length > tokens.length) return false;
 
-                        const opcion = tipoDocumento.options[tipoDocumento.selectedIndex];
-                        const regex  = opcion?.dataset.regex;
-                        const codigo = opcion?.dataset.place;
-                        const valor  = documento.value.trim();
+                        for (let i = 0; i < valor.length; i++) {
+                            const tok = tokens[i];
+                            if (tok.literal) {
+                                if (valor[i] !== tok.literal) return false;
+                            } else if (!tok.test(valor[i])) {
+                                return false;
+                            }
+                        }
+                        return valor.length < tokens.length;
+                    },
 
-                        // Sin tipo, sin regex o campo vacío: solo limpiar estado visual
-                        if (!regex || valor === '') {
+                   
+                validarDocumento(alBlur = false) {
+
+                    const tipoDocumento = document.getElementById('id_tipo_documento');
+                    const documento = document.getElementById('documento_identidad');
+                    const hint = document.getElementById('documento_hint');
+                    const opcion = tipoDocumento.options[ tipoDocumento.selectedIndex ];
+                    const regex = opcion?.dataset.regex;
+                    const formato = opcion?.dataset.place;
+                    const codigo = opcion?.dataset.codigo;
+                    const nombre = opcion?.dataset.name;
+                    const valor = documento.value.trim();
+
+
+                    // =====================================================
+                    // CAMPO VACÍO
+                    // =====================================================
+
+                    if (!regex || valor === '') {
+
+                        documento.setCustomValidity('');
+
+                        documento.classList.remove('is-invalid');
+
+                        if (hint) {
+                            hint.textContent = '';
+                        }
+
+                        this.errorMostrado = null;
+
+                        return;
+                    }
+
+
+                    let tipoError = null;
+
+
+                    // =====================================================
+                    // 1. PREFIJO VÁLIDO / DOCUMENTO INCOMPLETO
+                    // =====================================================
+
+                    const prefijoValido = this.esPrefijoValido( valor, this.mascara );
+
+                    if (prefijoValido) {
+
+                        /*
+                        * Mientras escribe:
+                        * No mostramos error visual.
+                        *
+                        * PERO el campo sigue siendo inválido
+                        * para impedir que nextStep() avance.
+                        */
+
+                        documento.setCustomValidity(`El documento debe tener el formato ${formato}.`);
+
+
+                        if (!alBlur) {
+
                             documento.classList.remove('is-invalid');
-                            this.docInvalidoMostrado = false;
+
+                            if (hint) {
+                                hint.textContent = `Formato: ${formato}`;
+                            }
+
+                            this.errorMostrado = null;
+
                             return;
                         }
 
-                        // 1) Validación estructural directa desde data-regex (anclas incluidas)
-                        const re = new RegExp(`^(?:${regex})$`);
-                        let esValido = re.test(valor);
 
-                        // 2) Validación extra (checksum), solo si aplica para ese código
-                        if (esValido && VALIDACION_EXTRA[codigo]) {
-                            esValido = VALIDACION_EXTRA[codigo](valor);
+                        /*
+                        * Si salió del campo:
+                        * mostramos el error.
+                        */
+
+                        tipoError = 'incompleto';
+                    }
+
+
+                    // =====================================================
+                    // 2. VALIDACIÓN DEL FORMATO COMPLETO
+                    // =====================================================
+
+                    if (!tipoError) {
+
+                        const re = new RegExp(`^(?:${regex})$`);
+
+                        const formatoOk = re.test(valor);
+
+
+                        // =================================================
+                        // FORMATO INCORRECTO
+                        // =================================================
+                        if (codigo === 'PORT' && VALIDACION_EXTRA.PORT ) {  
+                                if (!VALIDACION_EXTRA.PORT(valor)) {
+                                    tipoError = 'pasaporte';
+                                } else {
+                                    tipoError = null;
+                                }
                         }
 
-                        documento.classList.toggle('is-invalid', !esValido);
+                        // =================================================
+                        // FORMATO CORRECTO
+                        // =================================================
 
-                        if (!esValido && !this.docInvalidoMostrado) {
-                            NexumToast.warning(
-                                'El número de documento no coincide con el formato del tipo seleccionado.',
-                                'Documento inválido'
-                            );
-                            this.docInvalidoMostrado = true;
-                        } else if (esValido) {
-                            this.docInvalidoMostrado = false;
+                        else if (codigo === 'DUI') {
+                            
+                            if (!formatoOk) {
+                                tipoError = 'formato';
+                            }
+                            else if (
+                                VALIDACION_EXTRA.DUI &&
+                                !VALIDACION_EXTRA.DUI(valor)
+                            ) {
+
+                                tipoError = 'checksum';
+                            }
+                        } else {
+
+                            if (!formatoOk) {
+
+                                tipoError = 'formato';
+                            }
                         }
                     }
+
+
+                    // =====================================================
+                    // 3. ESTADO REAL DEL CAMPO
+                    // =====================================================
+
+                    if (tipoError !== null) {
+
+                        /*
+                        * Esto es lo que hará que:
+                        *
+                        * input.checkValidity()
+                        *
+                        * devuelva FALSE.
+                        */
+
+                        let mensajeValidacion = '';
+
+                        switch (tipoError) {
+
+                            case 'incompleto':
+                                mensajeValidacion =
+                                    `El documento debe tener el formato ${formato}.`;
+                                break;
+
+                            case 'formato':
+                                mensajeValidacion =
+                                    `El ${nombre} debe cumplir el patrón ${formato}.`;
+                                break;
+
+                            case 'checksum':
+                                mensajeValidacion =
+                                    'El DUI no es válido. Verifique que el número sea correcto.';
+                                break;
+
+                            case 'pasaporte':
+                                mensajeValidacion =
+                                    'El pasaporte debe comenzar con una letra seguida de 8 dígitos.';
+                                break;
+                        }
+
+                        documento.setCustomValidity(
+                            mensajeValidacion
+                        );
+
+                    } else {
+                        documento.setCustomValidity('');
+                    }
+
+
+                    // =====================================================
+                    // 4. ESTADO VISUAL BOOTSTRAP
+                    // =====================================================
+
+                    documento.classList.toggle(
+                        'is-invalid',
+                        tipoError !== null
+                    );
+
+
+                    // =====================================================
+                    // 5. MENSAJES TOAST
+                    // =====================================================
+
+                    if (
+                        tipoError &&
+                        this.errorMostrado !== tipoError
+                    ) {
+
+                        const mensajes = {
+
+                            incompleto: {
+                                title: 'Documento incompleto',
+                                msg:
+                                    `El documento debe tener el formato ${formato}.`
+                            },
+
+                            formato: {
+                                title: 'Formato inválido',
+                                msg:
+                                    `El ${nombre} debe cumplir el patrón ${formato}.`
+                            },
+
+                            checksum: {
+                                title: 'Número de documento inválido',
+                                msg:
+                                    'El DUI no es válido. Verifique que el número sea correcto.'
+                            },
+
+                            pasaporte: {
+                                title: 'Pasaporte inválido',
+                                msg:
+                                    'El pasaporte debe comenzar con una letra seguida de 8 dígitos.'
+                            }
+                        };
+
+
+                        const mensaje = mensajes[tipoError];
+
+
+                        if (mensaje) {
+                            NexumToast.warning(
+                                mensaje.msg,
+                                mensaje.title
+                            );
+                        }
+                    }
+
+
+                    // =====================================================
+                    // 6. GUARDAR ÚLTIMO ERROR
+                    // =====================================================
+
+                    this.errorMostrado =
+                        tipoError;
+
+
+                    // =====================================================
+                    // 7. HINT
+                    // =====================================================
+
+                    if (hint) {
+
+                        switch (tipoError) {
+
+                            case 'incompleto':
+                            case 'formato':
+
+                                hint.textContent =
+                                    `Debe tener el formato ${formato}`;
+
+                                break;
+
+
+                            case 'checksum':
+
+                                hint.textContent =
+                                    'El número de DUI no es válido.';
+
+                                break;
+
+
+                            case 'pasaporte':
+
+                                hint.textContent =
+                                    'Debe tener una letra seguida de 8 dígitos.';
+
+                                break;
+
+
+                            default:
+
+                                hint.textContent =
+                                    `Formato: ${formato}`;
+
+                                break;
+                        }
+                    }
+                },
             }));
         });
     </script>

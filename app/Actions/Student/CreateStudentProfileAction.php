@@ -3,14 +3,14 @@ namespace App\Actions\Student;
 
 use App\Models\Users\User;
 use App\Rules\CodigoEstudiante;
-use App\Models\Estudiante\Alumno;
+use App\Models\Estudiante\Alumnos;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class CreateStudentProfileAction
 {
-    public function execute(User $user, int $carreraId): Alumno
+    public function execute(User $user, int $carreraId): Alumnos
     {
        return DB::transaction(function () use ($user, $carreraId) {
             $codigo = CodigoEstudiante::generar($user->name, $user->id);
