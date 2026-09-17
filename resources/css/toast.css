@@ -1,0 +1,39 @@
+#nexum-toast-container .toast {
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    border-left: 5px solid transparent !important;
+    min-width: 320px;
+    max-width: 420px;
+}
+
+/* Éxito (Success) */
+#nexum-toast-container .nexum-toast-success {
+    border-left-color: var(--bs-success) !important;
+}
+#nexum-toast-container .nexum-toast-success .bi {
+    color: var(--bs-success);
+}
+
+/* Error / Peligro */
+#nexum-toast-container .nexum-toast-error {
+    border-left-color: var(--bs-danger) !important;
+}
+#nexum-toast-container .nexum-toast-error .bi {
+    color: var(--bs-danger);
+}
+
+/* Advertencia (Warning) */
+#nexum-toast-container .nexum-toast-warning {
+    border-left-color: var(--bs-warning) !important;
+}
+#nexum-toast-container .nexum-toast-warning .bi {
+    color: #b78103; /* Contraste accesible WCAG AA sobre fondo claro */
+}
+
+/* Informativo (Info) */
+#nexum-toast-container .nexum-toast-info {
+    border-left-color: var(--bs-info) !important;
+}
+#nexum-toast-container .nexum-toast-info .bi {
+    color: var(--bs-info);
+}

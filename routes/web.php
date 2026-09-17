@@ -1,36 +1,33 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
-// Rutas públicas
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+use App\Http\Controllers\Estudiante\registroController;
 
 Route::view('/about', 'about')->name('about');
 
-// Rutas autenticadas
-Route::middleware(['auth'])->group(function () {
+Route::get('/', function () {
+    return view('welcome');
+});
 
-    // Ruta /home con redirección inteligente
+Route::get('/register', [registroController::class, 'index'])->name('register');
+Route::get('/carreras', [registroController::class, 'carrera'])->name('carreras');
+
+// Rutas protegidas por autenticación y verificación de correo electrónico
+
+Route::middleware(['auth', 'verified'])->group(function () {
+
+
     Route::get('/home', function () {
-        // Si es el docente (ID = 4), redirigir a home_docente
-        if (auth()->id() === 4) {
-            return redirect()->route('home.docente');
-        }
-        // Para otros usuarios, mostrar home normal
         return view('home');
     })->name('home');
-
-    Route::get('/home-docente', function () {
-        return view('auth.home_docente');
-    })->name('home.docente');
-
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
 
     Route::get('/profile', function () {
         return view('profile');
     })->name('profile');
+
+    // Ruta de prueba para ver el layout
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+    
 });
