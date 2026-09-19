@@ -11,10 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css','resources/css/toast.css' , 'resources/js/app.js'])
@@ -65,8 +62,7 @@
                             </div>
                         </a>
                     </li>
-                    
-                    @if(auth()->user()->hasrole('ESTUDIANTE'))
+                @if(auth()->user()->hasrole('ESTUDIANTE'))
                     <li class="nav-item mb-1">
                         <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('pensum*') ? 'active' : '' }}">
                             <i class="fa-solid fa-book-open nav-icon fs-5 me-3 text-muted"></i>
@@ -76,7 +72,6 @@
                             </div>
                         </a>
                     </li>
-                    
                     <li class="nav-item mb-1">
                         <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('enlaces*') ? 'active' : '' }}">
                             <i class="fa-solid fa-link nav-icon fs-5 me-3 text-muted"></i>
@@ -143,6 +138,44 @@
                         </a>
                     </li>
                     @endif
+                    @if(auth()->user()->hasrole('SUPER_ADMIN'))
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('superadmin.createuser') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/createuser*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-user nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Crear</div>
+                                    <div class="nav-text-secondary">Ingreso de usuarios</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('superadmin.panel-administrativo') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/panel-administrativo*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-gauge nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Panel Administrativo</div>
+                                    <div class="nav-text-secondary">Administrar usuarios</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('superadmin.create-rol') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/create-rol*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-sliders nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Gestion</div>
+                                    <div class="nav-text-secondary">Administar roles de usuario</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('superadmin.manage-ruler') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/manage-ruler*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-gavel nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Gestionar reglas</div>
+                                    <div class="nav-text-secondary">reglas de academicas</div>
+                                </div>
+                            </a>
+                        </li>
+                    @endif
                 </ul>
             </nav>
 
@@ -160,8 +193,6 @@
             @yield('content')
         </main>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <x-toast-container />
     @stack('scripts')
 </body>

@@ -9,7 +9,12 @@ import * as bootstrap from 'bootstrap';
 import Alpine from 'alpinejs';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
+import { registrarComponentesValidacion } from './validacion-documento';
 import './toast';
+
+import $ from 'jquery';
+window.$ = window.jQuery = $;
+import './datatable';
 
 
 window.Pusher = Pusher;
@@ -25,5 +30,8 @@ window.Echo = new Echo({
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
     enabledTransports: ['ws', 'wss'],
 });
+
+// Registrar los componentes en Alpine antes del inicio
+registrarComponentesValidacion(Alpine);
 
 Alpine.start();

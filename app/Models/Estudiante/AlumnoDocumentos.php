@@ -3,6 +3,7 @@
 namespace App\Models\Estudiante;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo; 
 
 class AlumnoDocumentos extends Model
 {
@@ -14,4 +15,9 @@ class AlumnoDocumentos extends Model
         'id_alumno', 'titulo_bachillerato', 'partida_nacimiento', 
         'fotografia_personal', 'constancia_paes', 'estado_documentos', 'observaciones', 'revisado_por'
     ];
+
+    // relaciones
+    public function alumno(): BelongsTo {
+        return $this->belongsTo(Alumnos::class, 'id_alumno', 'alumno_id');
+    }
 }

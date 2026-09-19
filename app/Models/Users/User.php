@@ -11,8 +11,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use App\Models\Users\Role;
+use App\Models\Estudiante\Alumnos;
+use App\Models\Users\TipoDocumentoIdentidad;
+use App\Models\Users\RegionalActivo;
+use App\Models\Docente\Docentes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo; 
 
-#[Fillable(['name', 'email', 'password', 'id_tipo_documento', 'documento_identidad', 'fecha_nacimiento', 'genero', 'estado_civil', 'celular', 'direccion', 'estado'])]
+#[Fillable(['name', 'email', 'password', 'id_regional_activo', 'id_tipo_documento', 'documento_identidad', 'fecha_nacimiento', 'genero', 'estado_civil', 'celular', 'direccion', 'estado'])]
 #[Hidden(['password', 'remember_token', 'two_factor_recovery_codes', 'two_factor_secret'])]
 class User extends Authenticatable
 {
@@ -24,7 +30,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'id_tipo_documento', 
+        'id_tipo_documento',
+        'id_regional_activo', 
         'documento_identidad', 
         'fecha_nacimiento', 
         'genero', 
@@ -61,8 +68,20 @@ class User extends Authenticatable
         return $this->roles()->whereIn('rol_id', $ids)->exists();
     }
 
-    public function alumno() {
-        return $this->hasOne(Alumnos::class, 'id_usuario');
+    public function alumno(): HasOne {
+        return $this->hasOne(Alumnos::class, 'id_usuario', 'id');
+    }
+
+    public function tipodocumentoidentidad(): BelongsTo {
+        return $this->belongsTo(TipoDocumentoIdentidad::class, 'id_tipo_documento', 'tipo_documento_id');
+    }
+
+    public function regionalactivo(): BelongsTo {
+        return $this->belongsTo(RegionalActivo::class, 'id_regional_activo', 'regional_activo_id');
+    }
+
+    public function docente(): HasOne {
+        return $this->hasOne(Docentes::class, 'id_usuario', 'id');
     }
 
     /**
@@ -75,6 +94,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'fecha_nacimiento' => 'date:Y-m-d',
+            'estado' => 'integer',
         ];
     }
 }

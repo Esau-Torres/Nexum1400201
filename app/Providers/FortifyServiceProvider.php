@@ -19,6 +19,7 @@ use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Contracts\RegisterResponse;
+use Laravel\Fortify\Contracts\VerifyEmailResponse;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -101,7 +102,7 @@ class FortifyServiceProvider extends ServiceProvider
             if ($user->estado == 0) {
 
                 session()->flash(
-                    'error',
+                    'info',
                     'Su cuenta se encuentra pendiente de aprobación por Administración Académica.'
                 );
 
