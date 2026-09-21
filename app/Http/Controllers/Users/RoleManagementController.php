@@ -13,6 +13,8 @@ use App\Models\Users\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use App\Mail\AssingRoleUsersMail;
+use Illuminate\Support\Facades\Mail;
 use Exception;
 
 class RoleManagementController extends Controller
@@ -101,7 +103,7 @@ class RoleManagementController extends Controller
                 $request->input('roles', [])
             );
 
-            $user = User::find($request->input('user_id'));
+            $user = User::findOrFail($request->input('user_id'));
 
             $parts = [];
             if (!empty($result['added'])) {
@@ -119,6 +121,17 @@ class RoleManagementController extends Controller
                 'deactivate' => ' Su perfil docente quedó INACTIVO.',
                 default      => '',
             };
+
+            // envio de correos
+            if (!empty($result['added']) || !empty($result['removed'])) {
+                Mail::to($user->email)->queue(
+                    new AssingRoleUsersMail(
+                        $user,
+                        $result['added'],     // roles asignados
+                        $result['removed']    // roles revocados
+                    )
+                );
+            }
 
             return back()->with(
                 'success',

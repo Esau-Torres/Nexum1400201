@@ -143,9 +143,12 @@ class AssignRolesToUserAction
                 /* --------------------------------------------------------------
                  * 8. Resultado
                  * -------------------------------------------------------------- */
+                $assignedRoleNames = Role::whereIn('rol_id', $toAdd)->pluck('nombre')->toArray();
+                $revokedRoleNames  = Role::whereIn('rol_id', $toRemove)->pluck('nombre')->toArray();
+
                 return [
-                    'added'     => Role::whereIn('rol_id', $toAdd)->pluck('nombre')->toArray(),
-                    'removed'   => Role::whereIn('rol_id', $toRemove)->pluck('nombre')->toArray(),
+                    'added'     => $assignedRoleNames,
+                    'removed'   => $revokedRoleNames,
                     'unchanged' => Role::whereIn('rol_id', $unchanged)->pluck('nombre')->toArray(),
                 ];
             });
