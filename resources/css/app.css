@@ -111,34 +111,4 @@ body {
 
 .neu-nav-link:hover {
     color: var(--color-accent);
-    box-shadow: var(--neu-flat);
-}
-
-.neu-nav-link.active {
-    background: var(--bg-main);
-    color: var(--color-accent);
-    box-shadow: var(--neu-pressed);
-    font-weight: 700;
-}
-
-.neu-badge-accent {
-    background: var(--color-rose-quartz);
-    color: #ffffff;
-    box-shadow: 2px 2px 6px rgba(255, 117, 117, 0.4);
-    border-radius: 8px;
-}
-
-.neu-input {
-    background: var(--bg-main);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    box-shadow: var(--neu-pressed);
-    border-radius: 12px;
-    color: var(--text-primary);
-}
-
-.neu-input:focus {
-    background: var(--bg-main);
-    border-color: var(--color-accent);
-    box-shadow: var(--neu-pressed);
-    color: var(--text-primary);
 }

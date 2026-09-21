@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Estudiante\registroController;
+use App\Http\Controllers\Users\homeController;
 
 Route::view('/about', 'about')->name('about');
 
@@ -10,16 +11,14 @@ Route::get('/', function () {
 });
 
 Route::get('/register', [registroController::class, 'index'])->name('register');
-Route::get('/carreras', [registroController::class, 'carrera'])->name('carreras');
+//Route::get('/carreras', [registroController::class, 'carrera'])->name('carreras');
 
 // Rutas protegidas por autenticación y verificación de correo electrónico
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
 
-    Route::get('/home', function () {
-        return view('home');
-    })->name('home');
+    Route::get('/home', [homeController::class, 'index'])->name('home');
 
     Route::get('/profile', function () {
         return view('profile');

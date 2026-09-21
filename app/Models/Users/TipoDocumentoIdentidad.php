@@ -3,6 +3,7 @@
 namespace App\Models\Users;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne; 
 
 class TipoDocumentoIdentidad extends Model 
 {
@@ -15,8 +16,8 @@ class TipoDocumentoIdentidad extends Model
     ];
 
     // relacion
-    public function tipo_documento_identidad() {
-        return $this->hasOne(User::class, 'id_tipo_documento');
+    public function user(): HasOne {
+        return $this->hasOne(User::class, 'id_tipo_documento', 'tipo_documento_id');
     }
 
 }

@@ -15,13 +15,14 @@ class CreateUserAccountAction
             'email'               => $input['email'],
             'password'            => Hash::make(Str::random(16)),
             'id_tipo_documento'   => $input['id_tipo_documento'],
+            'id_regional_activo'  => $input['id_regional_activo'],
             'documento_identidad' => $input['documento_identidad'],
             'fecha_nacimiento'    => $input['fecha_nacimiento'],
             'genero'              => $input['genero'],
             'estado_civil'        => $input['estado_civil'] ?? null,
             'celular'             => $input['celular'] ?? null,
             'direccion'           => $input['direccion'] ?? null,
-            'estado'              => 0, 
+            'estado'              => $input['estado']?? 0, 
         ]);
     }
 }

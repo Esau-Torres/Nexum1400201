@@ -11,6 +11,7 @@
             ];
         @endphp
 
+        {{-- Errores flash de navegacion --}}
         @foreach ($alerts as $type => $meta)
             @if (session()->has($type))
                 <div class="toast align-items-center border-0 shadow-sm nexum-toast-{{ $type }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
@@ -27,5 +28,26 @@
                 </div>
             @endif
         @endforeach
+
+        
+        {{-- Errores de validación de Laravel ($errors) --}}
+        @if ($errors->any())
+            @foreach ($errors->all() as $error)
+                <div class="toast align-items-center border-0 shadow-sm nexum-toast-error" 
+                     role="alert" aria-live="assertive" aria-atomic="true" 
+                     data-bs-autohide="true" data-bs-delay="7000">
+                    <div class="d-flex">
+                        <div class="toast-body d-flex align-items-start gap-2">
+                            <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0"></i>
+                            <div>
+                                <strong class="d-block mb-1 text-dark">Error de Validación</strong>
+                                <span class="text-secondary small">{{ $error }}</span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+                    </div>
+                </div>
+            @endforeach
+        @endif
     </div>
 </div>

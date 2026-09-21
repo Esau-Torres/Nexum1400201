@@ -11,7 +11,7 @@ class UploadStudentDocumentsAction
     public function execute(Alumnos $alumno, Request $request): AlumnoDocumentos
     {
         $rutapr = "documentos/alumnos-ingreso/{$alumno->alumno_id}";
-        $rutap = "estudiantes/imagenes/{$alumno->alumno_id}"
+        $rutap = "estudiantes/imagenes/{$alumno->alumno_id}";
 
         return AlumnoDocumentos::create([
             'id_alumno'           => $alumno->alumno_id,

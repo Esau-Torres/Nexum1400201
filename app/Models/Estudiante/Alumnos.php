@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Models\Estudiante;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo; 
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,7 +17,17 @@ class Alumnos extends Model
         'correo_institucional', 'tipo_arancel', 'descuento_arancel', 'estado_carrera'
     ];
 
-    public function documentos() {
-        return $this->hasOne(AlumnoDocumentos::class, 'id_alumno');
+    // relaciones
+    public function documentos(): HasOne {
+        return $this->hasOne(AlumnoDocumentos::class, 'id_alumno', 'alumno_id');
+    }
+
+    public function usuario(): BelongsTo {
+        return $this->belongsTo(User::class, 'id_usuario', 'id');
+    }
+
+    public function carrera(): BelongsTo
+    {
+        return $this->belongsTo(Carreras::class, 'id_carrera', 'carrera_id');
     }
 }
