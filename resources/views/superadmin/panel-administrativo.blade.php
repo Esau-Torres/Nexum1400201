@@ -23,7 +23,7 @@
     {{-- Tabla Principal --}}
     <div class="card border-0 rounded-4 shadow-sm overflow-hidden" style="background-color: #ffffff;">
         <div class="card-body p-4">
-            <div class="table-responsive">
+            <div>
                 <table id="usersTable" class="table table-hover align-middle mb-0 w-100" style="font-size: 0.9rem;">
                     <thead style="background-color: var(--bg-main); color: var(--text-primary); border-bottom: 2px solid #e2e8f0;">
                         <tr>

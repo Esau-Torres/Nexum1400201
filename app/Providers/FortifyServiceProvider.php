@@ -118,6 +118,19 @@ class FortifyServiceProvider extends ServiceProvider
                 ]);
             }
 
+               // 3. Usuario activo pero SIN roles activos asignados
+            if (!$user->roles()->where('roles.estado', true)->exists()) {
+                session()->flash(
+                    'warning',
+                    'Su cuenta está activa, pero no posee ningún permiso asignado. Contacte a Administración Académica para habilitar su acceso al sistema.'
+                );
+                session()->flash('error_title', 'Sin permisos asignados');
+
+                throw ValidationException::withMessages([
+                    Fortify::username() => ['Su cuenta no tiene roles activos asignados.'],
+                ]);
+            }
+
             // Usuario habilitado
             return $user;
         });

@@ -126,7 +126,7 @@
                             </a>
 
 
-                            <a href="{{ route('superadmin.create-rol') }}"
+                            <a href="{{ route('superadmin.roles.manageroles') }}"
                                class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
                                 <i class="fa-solid fa-user-tag me-2"></i>
                                 Administrar roles

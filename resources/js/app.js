@@ -16,6 +16,8 @@ import $ from 'jquery';
 window.$ = window.jQuery = $;
 import './datatable';
 
+import './roles-modal'; 
+
 
 window.Pusher = Pusher;
 window.Alpine = Alpine;

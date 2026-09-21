@@ -44,7 +44,7 @@
                 </div>
 
                 <div class="card-body p-4">
-                    <div class="table-responsive">
+                    <div>
                         <table id="rolesTable" class="table table-hover align-middle mb-0 w-100" style="font-size: 0.88rem;">
                             <thead style="background-color: var(--bg-main); color: var(--text-primary); border-bottom: 2px solid #e2e8f0;">
                                 <tr>
@@ -115,8 +115,8 @@
                     </div>
                 </div>
 
-                <div class="card-body p-4">
-                    <div class="table-responsive">
+                <div class="card-body p-2">
+                    <div>
                         <table id="usersAssignTable" class="table table-hover align-middle mb-0 w-100" style="font-size: 0.88rem;">
                             <thead style="background-color: var(--bg-main); color: var(--text-primary); border-bottom: 2px solid #e2e8f0;">
                                 <tr>
@@ -171,15 +171,16 @@
                                             @endif
                                         </td>
                                         <td class="pe-3 py-3 text-end">
-                                            <button type="button" 
-                                                    class="btn btn-sm text-white fw-medium shadow-sm btn-manage-user-roles"
-                                                    style="background-color: var(--color-accent); font-size: 0.75rem;"
-                                                    data-id="{{ $u->id }}"
-                                                    data-name="{{ $u->name }}"
-                                                    data-email="{{ $u->email }}"
-                                                    data-roles="{{ json_encode($u->roles->pluck('rol_id')->toArray()) }}"
-                                                    data-is-current="{{ auth()->id() === $u->id ? 'true' : 'false' }}"
-                                                    title="Modificar roles de usuario">
+                                            <button type="button"
+                                                class="btn btn-sm text-white fw-medium shadow-sm btn-manage-user-roles"
+                                                data-id="{{ $u->id }}"
+                                                data-name="{{ $u->name }}"
+                                                data-email="{{ $u->email }}"
+                                                data-roles="{{ json_encode($u->roles->where('estado', true)->pluck('rol_id')->toArray()) }}"
+                                                data-inactive-roles="{{ json_encode($u->roles->where('estado', false)->pluck('rol_id')->toArray()) }}"
+                                                data-is-current="{{ auth()->id() === $u->id ? 'true' : 'false' }}"
+                                                title="Modificar roles de usuario"
+                                                style="background-color: var(--color-accent);">
                                                 <i class="bi bi-shield-shaded me-1"></i> Asignar Roles
                                             </button>
                                         </td>
@@ -206,22 +207,26 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
-            <form id="formUpdateRoleStatus" method="POST" action="">
+            <form id="formUpdateRoleStatus" method="POST" action="" data-route="{{ route('superadmin.roles.update-status') }}">
                 @csrf
                 @method('PUT')
 
                 <input type="hidden" id="roleStatusModalId" name="role_id" value="">
+                
                 <div class="modal-body p-4">
-                    <div class="p-3 rounded-3 mb-3 border d-flex align-items-center gap-3" style="background-color: var(--color-hover-bg); border-color: rgba(220, 53, 69, 0.2) !important;">
+                    <div class="p-3 rounded-3 mb-3 border d-flex align-items-center gap-3" 
+                        style="background-color: var(--color-hover-bg); border-color: rgba(220, 53, 69, 0.2) !important;">
                         <i class="bi bi-shield-check fs-3" style="color: var(--color-accent);"></i>
                         <div>
                             <span class="text-muted small d-block">Rol seleccionado:</span>
-                            <strong class="text-dark font-monospace" id="roleStatusModalName">SUPER_ADMIN</strong>[cite: 2]
+                            <strong class="text-dark font-monospace" id="roleStatusModalName">SUPER_ADMIN</strong>
                         </div>
                     </div>
 
                     <div class="mb-2">
-                        <label class="form-label small fw-semibold text-dark mb-1">Estado Operativo <span class="text-danger">*</span></label>
+                        <label class="form-label small fw-semibold text-dark mb-1">
+                            Estado Operativo <span class="text-danger">*</span>
+                        </label>
                         <select class="form-select form-select-sm" name="estado" id="roleStatusModalSelect" required>
                             <option value="1">Activo (Habilitado para asignación)</option>
                             <option value="0">Inactivo (Deshabilitado temporalmente)</option>
@@ -230,14 +235,41 @@
                             Deshabilitar un rol impide que se asigne a nuevas cuentas institucionales.
                         </small>
                     </div>
+
+                    {{--  Advertencia  --}}
+                    <div id="roleImpactWarning" class="alert alert-warning p-3 rounded-3 mt-3 d-none">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                            <div class="flex-grow-1">
+                                <strong class="d-block mb-1">
+                                    Este rol está asignado a <span id="impactAffectedCount">0</span> usuario(s).
+                                </strong>
+                                <p class="mb-2 small">
+                                    Al desactivarlo, perderán los privilegios asociados de forma inmediata.
+                                </p>
+                                <div id="orphanUsersBlock" class="d-none">
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                        <i class="bi bi-person-x-fill me-1"></i>
+                                        <span id="impactOrphanCount">0</span> quedarán sin roles activos
+                                    </span>
+                                    <button type="button" class="btn btn-sm btn-link p-0 ms-2" 
+                                            data-bs-toggle="collapse" data-bs-target="#orphanUserList">
+                                        Ver usuarios
+                                    </button>
+                                    <div class="collapse mt-2" id="orphanUserList">
+                                        <ul id="orphanUserListItems" class="small mb-0 ps-3"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="modal-footer border-0 bg-light px-4 py-3 rounded-bottom-4">
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">
                         Cancelar
                     </button>
-                    <button type="button" 
-                            id="btnSubmitRoleStatus"
+                    <button type="button" id="btnSubmitRoleStatus"
                             class="btn btn-sm text-white fw-medium shadow-sm" 
                             style="background-color: var(--color-accent);">
                         <i class="bi bi-check2-circle me-1"></i> Guardar Estado
@@ -262,11 +294,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
-            <form id="formUpdateUserRoles" method="POST" action="">
+            <form id="formUpdateUserRoles" method="POST" action="" data-route="{{ route('superadmin.users.assign-roles', ['userId' => '__USER_ID__']) }}">
                 @csrf
                 @method('PUT')
 
                 <input type="hidden" id="userIdHiddenInput" name="user_id" value="">
+
                 <div class="modal-body p-4">
                     <div class="alert p-2 d-flex align-items-center mb-3 rounded-3 border" style="background-color: var(--color-special); font-size: 0.8rem;">
                         <i class="bi bi-shield-exclamation me-2 fs-5" style="color: var(--color-accent);"></i>
@@ -284,32 +317,52 @@
 
                     <div class="row g-3">
                         @foreach ($roles as $rol)
-                            <div class="col-12 col-md-6">
-                                <div class="p-3 rounded-3 border h-100" style="background-color: #ffffff; border-color: #e2e8f0;">
+                            @php
+                                $esInactivo = !$rol->estado;
+                            @endphp
+
+                            <div class="col-12 col-md-6 role-item {{ $esInactivo ? 'd-none' : '' }}"
+                                data-role-id="{{ $rol->rol_id }}"
+                                data-role-name="{{ $rol->nombre }}"
+                                data-role-active="{{ $rol->estado ? '1' : '0' }}">
+
+                                <div class="p-3 rounded-3 border h-100 role-wrapper"
+                                    style="background-color: #ffffff; border-color: #e2e8f0;">
+
                                     <div class="form-check form-switch d-flex justify-content-between align-items-center ps-0 mb-0">
                                         <div class="me-3">
-                                            <label class="form-check-label fw-bold text-dark d-block mb-0 font-monospace" for="rol_switch_{{ $rol->rol_id }}" style="font-size: 0.85rem;">
+                                            <label class="form-check-label fw-bold text-dark d-block mb-0 font-monospace"
+                                                for="rol_switch_{{ $rol->rol_id }}">
                                                 {{ $rol->nombre }}
                                             </label>
-                                            <small class="text-muted d-block" style="font-size: 0.74rem;">
+                                            <small class="text-muted d-block">
                                                 {{ $rol->descripcion ?? 'Acceso operativo en el módulo institucional.' }}
                                             </small>
+
+                                            @if($esInactivo)
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle mt-1 role-inactive-badge">
+                                                    <i class="bi bi-pause-circle-fill me-1"></i> Rol inactivo
+                                                </span>
+                                            @endif
                                         </div>
-                                        <input class="form-check-input user-role-checkbox flex-shrink-0" 
-                                               type="checkbox" 
-                                               name="roles[]" 
-                                               value="{{ $rol->rol_id }}" 
-                                               id="rol_switch_{{ $rol->rol_id }}"
-                                               data-role-name="{{ $rol->nombre }}"
-                                               style="width: 2.4rem; height: 1.25rem;">
+
+                                        <input class="form-check-input user-role-checkbox flex-shrink-0"
+                                            type="checkbox"
+                                            name="roles[]"
+                                            value="{{ $rol->rol_id }}"
+                                            id="rol_switch_{{ $rol->rol_id }}"
+                                            data-role-name="{{ $rol->nombre }}"
+                                            data-role-active="{{ $rol->estado ? '1' : '0' }}"
+                                            style="width: 2.4rem; height: 1.25rem;">
                                     </div>
                                 </div>
                             </div>
+
                         @endforeach
                     </div>
                 </div>
 
-                 <div class="modal-footer border-0 bg-light px-4 py-3 rounded-bottom-4">
+                <div class="modal-footer border-0 bg-light px-4 py-3 rounded-bottom-4">
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">
                         Cerrar
                     </button>
@@ -325,113 +378,4 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-/**
- * NEXUM - Gestión de Modales de Roles
- * Lógica desacoplada del DOM, usando modales nativos de Bootstrap 5
- */
-document.addEventListener('DOMContentLoaded', () => {
-
-    // ============================================================
-    // MODAL 1: Editar Estado del Rol
-    // ============================================================
-    const modalRoleStatusEl = document.getElementById('modalEditRoleStatus');
-    const formRoleStatus    = document.getElementById('formUpdateRoleStatus');
-    const inputRoleName     = document.getElementById('roleStatusModalName');
-    const selectRoleStatus  = document.getElementById('roleStatusModalSelect');
-    const hiddenRoleId      = document.getElementById('roleStatusModalId');
-
-    if (modalRoleStatusEl) {
-        const bsRoleStatusModal = new bootstrap.Modal(modalRoleStatusEl);
-
-        // Delegación de eventos: funciona incluso con filas añadidas por DataTables
-        document.addEventListener('click', (e) => {
-            const btn = e.target.closest('.btn-edit-role-status');
-            if (!btn) return;
-
-            const { id, name, status } = btn.dataset;
-            inputRoleName.textContent   = name;
-            selectRoleStatus.value      = status;
-            hiddenRoleId.value          = id;
-
-            bsRoleStatusModal.show();
-        });
-
-        // Envío real del formulario al guardar
-        document.getElementById('btnSubmitRoleStatus')?.addEventListener('click', () => {
-            formRoleStatus.submit();
-        });
-    }
-
-    // ============================================================
-    // MODAL 2: Asignación de Roles por Usuario
-    // ============================================================
-    const modalUserRolesEl  = document.getElementById('modalManageUserRoles');
-    const formUserRoles     = document.getElementById('formUpdateUserRoles');
-    const subtitleEl        = document.getElementById('modalUserRoleSubtitle');
-    const warningEl         = document.getElementById('selfRoleWarning');
-    const hiddenUserId      = document.getElementById('userIdHiddenInput');
-    const roleCheckboxes    = document.querySelectorAll('.user-role-checkbox');
-
-    if (modalUserRolesEl) {
-        const bsUserRolesModal = new bootstrap.Modal(modalUserRolesEl);
-
-        document.addEventListener('click', (e) => {
-            const btn = e.target.closest('.btn-manage-user-roles');
-            if (!btn) return;
-
-            const { id, name, email, roles, isCurrent } = btn.dataset;
-            const userRoles = JSON.parse(roles || '[]');
-
-            // Subtítulo del modal
-            subtitleEl.innerHTML = `Usuario: <strong>${escapeHtml(name)}</strong> (${escapeHtml(email)}) | ID: UMA-${String(id).padStart(5, '0')}`;
-
-            // Guardar ID de usuario en el hidden input del form
-            if (hiddenUserId) hiddenUserId.value = id;
-
-            // Resetear todos los checkboxes
-            roleCheckboxes.forEach(cb => {
-                cb.checked  = false;
-                cb.disabled = false;
-            });
-
-            // Marcar los roles actuales
-            userRoles.forEach(roleId => {
-                const cb = document.getElementById(`rol_switch_${roleId}`);
-                if (cb) cb.checked = true;
-            });
-
-            // Si es el usuario en sesión, proteger SUPER_ADMIN
-            if (isCurrent === 'true') {
-                warningEl.classList.remove('d-none');
-                roleCheckboxes.forEach(cb => {
-                    if (cb.dataset.roleName === 'SUPER_ADMIN') {
-                        cb.checked  = true;
-                        cb.disabled = true;
-                    }
-                });
-            } else {
-                warningEl.classList.add('d-none');
-            }
-
-            bsUserRolesModal.show();
-        });
-
-        // Envío real del formulario
-        document.getElementById('btnSubmitUserRoles')?.addEventListener('click', () => {
-            formUserRoles.submit();
-        });
-    }
-
-    // Utilidad de escape para evitar XSS al inyectar datos del dataset
-    function escapeHtml(str) {
-        if (!str) return '';
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
-});
-</script>
-@endpush
 @endsection

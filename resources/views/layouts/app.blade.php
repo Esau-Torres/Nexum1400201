@@ -158,7 +158,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('superadmin.create-rol') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/create-rol*') ? 'active' : '' }}">
+                            <a href="{{ route('superadmin.roles.manageroles') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/roles.manageroles*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-sliders nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Gestion</div>
