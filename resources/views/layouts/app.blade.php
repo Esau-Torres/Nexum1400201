@@ -11,7 +11,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
     <!-- Font Awesome 6 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
@@ -51,16 +50,19 @@
             <!-- Navegación Principal -->
             <nav class="flex-grow-1 p-3">
                 <ul class="nav flex-column">
+                    <!-- Inicio (común para todos los roles) -->
                     <li class="nav-item mb-1">
                         <a href="{{ route('home') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('home') ? 'active' : '' }}">
                             <i class="fa-solid fa-home nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Inicio</div>
-                                <div class="nav-text-secondary">Panel de rutas</div>
+                                <div class="nav-text-secondary">Panel principal</div>
                             </div>
                         </a>
                     </li>
-                @if(auth()->user()->hasrole('ESTUDIANTE'))
+
+                    {{-- Opciones para ESTUDIANTE --}}
+                    @if(auth()->user()->hasrole('ESTUDIANTE'))
                     <li class="nav-item mb-1">
                         <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('pensum*') ? 'active' : '' }}">
                             <i class="fa-solid fa-book-open nav-icon fs-5 me-3 text-muted"></i>
@@ -70,6 +72,7 @@
                             </div>
                         </a>
                     </li>
+
                     <li class="nav-item mb-1">
                         <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('enlaces')) active @endif">
                             <i class="fa-solid fa-link nav-icon fs-5 me-3 text-muted"></i>
@@ -139,44 +142,80 @@
                             </div>
                         </a>
                     </li>
-                    @endif
-                    @if(auth()->user()->hasrole('SUPER_ADMIN'))
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('superadmin.createuser') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/createuser*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-user nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Crear</div>
-                                    <div class="nav-text-secondary">Ingreso de usuarios</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('superadmin.panel-administrativo') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/panel-administrativo*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-gauge nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Panel Administrativo</div>
-                                    <div class="nav-text-secondary">Administrar usuarios</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('superadmin.create-rol') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/create-rol*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-sliders nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Gestion</div>
-                                    <div class="nav-text-secondary">Administar roles de usuario</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('superadmin.manage-ruler') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/manage-ruler*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-gavel nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Gestionar reglas</div>
-                                    <div class="nav-text-secondary">reglas de academicas</div>
-                                </div>
-                            </a>
-                        </li>
+
+                    {{-- Opciones exclusivas para DOCENTE --}}
+                    @elseif(auth()->user()->hasrole('DOCENTE'))
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('materias*')) active @endif">
+                            <i class="fa-solid fa-chalkboard-user nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Materias</div>
+                                <div class="nav-text-secondary">Cursos asignados</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('asistencia*')) active @endif">
+                            <i class="fa-solid fa-calendar-check nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Asistencia</div>
+                                <div class="nav-text-secondary">Control de clases</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('prueba.notas') ? 'active' : '' }}">
+                            <i class="fa-solid fa-file-pen nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Prueba de Notas</div>
+                                <div class="nav-text-secondary">Evaluaciones y calificaciones</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    {{-- Opciones para SUPER_ADMIN --}}
+                    @elseif(auth()->user()->hasrole('SUPER_ADMIN'))
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('superadmin.createuser') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/createuser*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-user nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Crear</div>
+                                <div class="nav-text-secondary">Ingreso de usuarios</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('superadmin.panel-administrativo') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/panel-administrativo*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-gauge nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Panel Administrativo</div>
+                                <div class="nav-text-secondary">Administrar usuarios</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('superadmin.create-rol') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/create-rol*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-sliders nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Gestión</div>
+                                <div class="nav-text-secondary">Administrar roles de usuario</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('superadmin.manage-ruler') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/manage-ruler*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-gavel nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Gestionar reglas</div>
+                                <div class="nav-text-secondary">Reglas académicas</div>
+                            </div>
+                        </a>
+                    </li>
                     @endif
                 </ul>
             </nav>
@@ -201,6 +240,42 @@
     </div>
     <x-toast-container />
     @stack('scripts')
+
+    <!-- Script del Sidebar Mobile -->
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+        function openSidebar() {
+            sidebar.classList.add('sidebar-open');
+            sidebarBackdrop.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('sidebar-open');
+            sidebarBackdrop.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', openSidebar);
+        }
+        if (sidebarClose) {
+            sidebarClose.addEventListener('click', closeSidebar);
+        }
+        if (sidebarBackdrop) {
+            sidebarBackdrop.addEventListener('click', closeSidebar);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && sidebar.classList.contains('sidebar-open')) {
+                closeSidebar();
+            }
+        });
+    </script>
 </body>
 
 </html>

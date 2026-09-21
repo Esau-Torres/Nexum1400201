@@ -28,5 +28,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
-    
+
+    // Rutas de Docente
+    Route::get('/home-docente', function () {
+        return view('home.home_docente');
+    })->name('home.docente');
+
+    Route::get('/prueba-notas', function () {
+        return view('docente.prueba-notas');
+    })->name('prueba.notas');
 });
