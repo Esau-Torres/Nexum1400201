@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Rules;
-
+ 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -18,7 +18,10 @@ class UpdateUserPersonalDataRule extends FormRequest
 
         return [
             'name'                => ['required', 'string', 'max:255'],
-            'email'               => ['required', 'string', 'email:rfc,dns', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
+            // en produccion esta linea
+            //'email'               => ['required', 'string', 'email:rfc,dns', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
+            // en desarrollo esta otra 
+            'email'               => ['required', 'string', 'email:rfc,strict', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'documento_identidad'  => ['required', 'string', 'max:30', Rule::unique('users', 'documento_identidad')->ignore($userId)],
             'celular'             => ['nullable', 'string', 'regex:/^[0-9]{4}-[0-9]{4}$/'],
             'fecha_nacimiento'    => ['required', 'date', 'before:today'],

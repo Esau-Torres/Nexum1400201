@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class UploadStudentDocumentsAction
 {
-    public function execute(Alumnos $alumno, Request $request): AlumnoDocumentos
+    public function execute(Alumnos $alumno, Request $request, string $estadoDocumentos = 'PENDIENTE', ?int $revisadoPor = null ): AlumnoDocumentos
     {
         $rutapr = "documentos/alumnos-ingreso/{$alumno->alumno_id}";
         $rutap = "estudiantes/imagenes/{$alumno->alumno_id}";
@@ -19,8 +19,9 @@ class UploadStudentDocumentsAction
             'partida_nacimiento'  => $request->file('partida_nacimiento')->store($rutapr),
             'fotografia_personal' => $request->file('fotografia_personal')->store($rutap, 'public'),
             'constancia_paes'     => $request->hasFile('constancia_paes') ? $request->file('constancia_paes')->store($rutapr) : null,
-            'estado_documentos'   => 'PENDIENTE',
+            'estado_documentos'   => $estadoDocumentos,
             'observaciones'       => $request->input('observaciones'),
+            'revisado_por'        => $revisadoPor,
         ]);
     }
 }

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Facultades Extends Model {
 
-    protected $table = 'Falcutades';
+    protected $table = 'facultades';
     protected $primaryKey = 'facultad_id';
     public $timestamps = false;
 

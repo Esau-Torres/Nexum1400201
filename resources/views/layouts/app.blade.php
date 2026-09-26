@@ -62,6 +62,51 @@
                             </div>
                         </a>
                     </li>
+
+                @if(auth()->user()->hasrole('ADMIN_ACADEMICO'))
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('admin-academico.create-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark  {{ request()->is('admin-academico/create-student*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-user-plus nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Nuevo Alumno</div>
+                                <div class="nav-text-secondary">Crear usuarios alumnos</div>
+                            </div>
+                        </a>
+                    </li>
+                @endif
+                
+                @if(auth()->user()->hasrole('DOCENTE'))
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('materias*')) active @endif">
+                            <i class="fa-solid fa-chalkboard-user nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Materias</div>
+                                <div class="nav-text-secondary">Cursos asignados</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('asistencia*')) active @endif">
+                            <i class="fa-solid fa-calendar-check nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Asistencia</div>
+                                <div class="nav-text-secondary">Control de clases</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('docentes.prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('prueba.notas') ? 'active' : '' }}">
+                            <i class="fa-solid fa-file-pen nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Prueba de Notas</div>
+                                <div class="nav-text-secondary">Evaluaciones y calificaciones</div>
+                            </div>
+                        </a>
+                    </li>
+                @endif
+
                 @if(auth()->user()->hasrole('ESTUDIANTE'))
                     <li class="nav-item mb-1">
                         <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('pensum*') ? 'active' : '' }}">
@@ -137,7 +182,7 @@
                             </div>
                         </a>
                     </li>
-                    @endif
+                @endif
                     @if(auth()->user()->hasrole('SUPER_ADMIN'))
                         <li class="nav-item mb-1">
                             <a href="{{ route('superadmin.createuser') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/createuser*') ? 'active' : '' }}">
@@ -157,6 +202,7 @@
                                 </div>
                             </a>
                         </li>
+
                         <li class="nav-item mb-1">
                             <a href="{{ route('superadmin.roles.manageroles') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/roles.manageroles*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-sliders nav-icon fs-5 me-3 text-muted"></i>
@@ -166,6 +212,7 @@
                                 </div>
                             </a>
                         </li>
+
                         <li class="nav-item mb-1">
                             <a href="{{ route('superadmin.manage-ruler') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/manage-ruler*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-gavel nav-icon fs-5 me-3 text-muted"></i>

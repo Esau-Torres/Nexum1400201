@@ -63,7 +63,7 @@
                                 <td class="py-3">
                                     <span class="text-dark small">
                                         <i class="bi bi-geo-alt-fill me-1" style="color: var(--color-accent);"></i>
-                                        {{ $u->regionalactivo->sede ?? 'No Asignada' }}
+                                        {{ $u->regionalactivo->sede ?? 'No Asignada' }} 
                                     </span>
                                 </td>
                                 <td class="py-3 text-center">
@@ -94,6 +94,11 @@
 
 {{-- Modales generados dinámicamente --}}
 @foreach ($usuarios as $u)
+     @php
+        $editandoEste = session('edit_user_id') == $u->id;
+        $old = fn($key, $default) => $editandoEste ? old($key, $default) : $default;
+    @endphp
+
     {{-- Modal Edición de Datos Personales --}}
     <div class="modal fade" id="editUserModal{{ $u->id }}" tabindex="-1" aria-labelledby="editUserLabel{{ $u->id }}" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -151,12 +156,18 @@
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-dark mb-1">Nombre Completo <span class="text-danger">*</span></label>
-                                <input type="text" name="name" class="form-control form-control-sm" value="{{ old('name', $u->name) }}" required>
+                                <input type="text" name="name" class="form-control form-control-sm @if($editandoEste) @error('name') is-invalid @enderror @endif" value="{{ $old('name', $u->name) }}" required>
+                                  @if($editandoEste)
+                                    @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                @endif
                             </div>
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-dark mb-1">Correo Institucional <span class="text-danger">*</span></label>
-                                <input type="email" name="email" class="form-control form-control-sm" value="{{ old('email', $u->email) }}" required>
+                                <input type="email" name="email" class="form-control form-control-sm @if($editandoEste) @error('email') is-invalid @enderror @endif" value="{{ $old('email', $u->email) }}" required>
+                                @if($editandoEste)
+                                    @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                @endif
                             </div>
 
                             <div class="col-12 col-md-4">
@@ -165,43 +176,63 @@
                                     type="text"
                                     name="documento_identidad"
                                     id="documento_identidad_{{ $u->id }}"
-                                    class="form-control form-control-sm @error('documento_identidad') is-invalid @enderror"
-                                    value="{{ old('documento_identidad', $u->documento_identidad) }}" 
+                                    class="form-control form-control-sm @if($editandoEste) @error('documento_identidad') is-invalid @enderror @endif"
+                                    value="{{ $old('documento_identidad', $u->documento_identidad) }}"
                                     required>
-                                @error('documento_identidad')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                @if($editandoEste)
+                                    @error('documento_identidad') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                @endif
                             </div>
 
                             {{-- Fecha de Nacimiento resuelta con Carbon seguro --}}
                             <div class="col-12 col-md-4">
                                 <label class="form-label small fw-semibold text-dark mb-1">Fecha de Nacimiento <span class="text-danger">*</span></label>
                                 @php
-                                    $fechaNac = $u->fecha_nacimiento ? (\Carbon\Carbon::hasFormat($u->fecha_nacimiento, 'Y-m-d') ? \Carbon\Carbon::parse($u->fecha_nacimiento)->format('Y-m-d') : \Carbon\Carbon::parse($u->fecha_nacimiento)->format('Y-m-d')) : '';
+                                    $fechaNac = $u->fecha_nacimiento
+                                        ? \Carbon\Carbon::parse($u->fecha_nacimiento)->format('Y-m-d')
+                                        : '';
                                 @endphp
-                                <input type="date" name="fecha_nacimiento" id="fecha_nacimiento_{{ $u->id }}" class="form-control form-control-sm @error('fecha_nacimiento') is-invalid @enderror" value="{{ old('fecha_nacimiento', $fechaNac) }}" :max="fechaLimite" required>
-                                @error('fecha_nacimiento')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <input type="date" name="fecha_nacimiento"
+                                       id="fecha_nacimiento_{{ $u->id }}"
+                                       class="form-control form-control-sm @if($editandoEste) @error('fecha_nacimiento') is-invalid @enderror @endif"
+                                       value="{{ $old('fecha_nacimiento', $fechaNac) }}"
+                                       :max="fechaLimite" required>
+                                @if($editandoEste)
+                                    @error('fecha_nacimiento') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                @endif
                             </div>
 
                             <div class="col-12 col-md-4">
                                 <label class="form-label small fw-semibold text-dark mb-1">Celular</label>
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text">+503</span>
-                                    <input type="text" name="celular" id="celular_{{ $u->id }}" class="form-control form-control-sm" value="{{ old('celular', $u->celular) }}" pattern="[0-9]{4}-[0-9]{4}" placeholder="0000-0000" maxlength="9" x-on:input="aplicarMascara($event)">
+                                    <input type="text" name="celular" id="celular_{{ $u->id }}" 
+                                            class="form-control form-control-sm @if($editandoEste) @error('celular') is-invalid @enderror @endif" 
+                                            value="{{ $old('celular', $u->celular) }}" 
+                                            pattern="[0-9]{4}-[0-9]{4}" 
+                                            placeholder="0000-0000" 
+                                            maxlength="9" 
+                                            x-on:input="aplicarMascara($event)">
+                                    @if($editandoEste)
+                                        @error('celular') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    @endif
                                 </div>
                             </div>
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-dark mb-1">Sede Regional UMA <span class="text-danger">*</span></label>
-                                <select class="form-select form-select-sm" name="id_regional_activo" required>
+                                <select class="form-select form-select-sm @if($editandoEste) @error('id_regional_activo') is-invalid @enderror @endif"
+                                        name="id_regional_activo" required>
                                     @foreach($regionales as $rg)
-                                        <option value="{{ $rg->regional_activo_id }}" {{ old('id_regional_activo', $u->id_regional_activo) == $rg->regional_activo_id ? 'selected' : '' }}>
+                                        <option value="{{ $rg->regional_activo_id }}"
+                                            {{ $old('id_regional_activo', $u->id_regional_activo) == $rg->regional_activo_id ? 'selected' : '' }}>
                                             {{ $rg->sede }}
                                         </option>
                                     @endforeach
                                 </select>
+                                @if($editandoEste)
+                                    @error('id_regional_activo') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                @endif
                             </div>
 
                             {{-- Estado: Protegido si el usuario autenticado es el mismo --}}
@@ -209,21 +240,34 @@
                                 <label class="form-label small fw-semibold text-dark mb-1">Estado de Cuenta <span class="text-danger">*</span></label>
                                 @if(auth()->id() === $u->id)
                                     <div class="input-group input-group-sm">
-                                        <input type="text" class="form-control bg-light text-muted border" value="Activo (Cuenta en Sesión)" disabled readonly>
+                                        <input type="text" class="form-control bg-light text-muted border"
+                                               value="Activo (Cuenta en Sesión)" disabled readonly>
                                         <input type="hidden" name="estado" value="1">
-                                        <span class="input-group-text bg-light text-muted border" title="No puedes alterar el estado de tu propia cuenta activa"><i class="bi bi-lock-fill"></i></span>
+                                        <span class="input-group-text bg-light text-muted border"
+                                              title="No puedes alterar el estado de tu propia cuenta activa">
+                                            <i class="bi bi-lock-fill"></i>
+                                        </span>
                                     </div>
                                 @else
-                                    <select class="form-select form-select-sm" name="estado" required>
-                                        <option value="1" {{ old('estado', (string)$u->estado) === '1' ? 'selected' : '' }}>Activo</option>
-                                        <option value="0" {{ old('estado', (string)$u->estado) === '0' ? 'selected' : '' }}>Inactivo</option>
+                                    <select class="form-select form-select-sm @if($editandoEste) @error('estado') is-invalid @enderror @endif"
+                                            name="estado" required>
+                                        <option value="1" {{ $old('estado', (string)$u->estado) === '1' ? 'selected' : '' }}>Activo</option>
+                                        <option value="0" {{ $old('estado', (string)$u->estado) === '0' ? 'selected' : '' }}>Inactivo</option>
                                     </select>
+                                    @if($editandoEste)
+                                        @error('estado') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    @endif
                                 @endif
                             </div>
 
                             <div class="col-12">
                                 <label class="form-label small fw-semibold text-dark mb-1">Dirección de Residencia</label>
-                                <textarea name="direccion" class="form-control form-control-sm" rows="2">{{ old('direccion', $u->direccion) }}</textarea>
+                                <textarea name="direccion"
+                                          class="form-control form-control-sm @if($editandoEste) @error('direccion') is-invalid @enderror @endif"
+                                          rows="2">{{ $old('direccion', $u->direccion) }}</textarea>
+                                @if($editandoEste)
+                                    @error('direccion') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                @endif
                             </div>
                         </div>
                     </div>

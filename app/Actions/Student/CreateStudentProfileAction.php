@@ -10,9 +10,10 @@ use RuntimeException;
 
 class CreateStudentProfileAction
 {
-    public function execute(User $user, int $carreraId): Alumnos
+    public function execute(User $user, int $carreraId, string $estadoCarrera = 'PENDIENTE', bool $generarPasswordTemporal = true ): Alumnos
     {
-       return DB::transaction(function () use ($user, $carreraId) {
+       return DB::transaction(function () use ($user, $carreraId, $estadoCarrera, $generarPasswordTemporal) {
+
             $codigo = CodigoEstudiante::generar($user->name, $user->id);
 
             // Verificación de colisión
@@ -26,16 +27,16 @@ class CreateStudentProfileAction
             }
 
             // Actualizar credenciales y crear perfil
-            $user->update([
-                'password' => Hash::make($codigo)
-            ]);
+            if ($generarPasswordTemporal) {
+                $user->update(['password' => Hash::make($codigo)]);
+            }
 
             return Alumnos::create([
                 'id_usuario'           => $user->id,
                 'id_carrera'           => $carreraId,
                 'codigo_estudiante'    => $codigo,
                 'correo_institucional' => strtolower($codigo) . '@uma.edu.sv',
-                'estado_carrera'       => 'PENDIENTE',
+                'estado_carrera'       => $estadoCarrera,
             ]);
         });
     }

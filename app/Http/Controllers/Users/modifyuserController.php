@@ -54,7 +54,7 @@ class ModifyUserController extends Controller
             // Obtener todos los errores formateados
             $errors = $e->validator->errors()->all();
             
-            // Si hay múltiples errores, mostrar el primero como principal
+            // Si hay múltiples errores, mostrar el primero como principal 
             $mainError = $errors[0] ?? 'Error de validación';
             
             return redirect()
