@@ -5,8 +5,7 @@ const spanishLanguage = {
     processing: "Procesando...",
     search: "",                     // Sin texto "Buscar:"
     searchPlaceholder: "Buscar...", // Placeholder visible
-    lengthMenu: "Mostrar _MENU_ registros",
-    info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+    info: "_START_ a _END_ de _TOTAL_",
     infoEmpty: "Mostrando 0 a 0 de 0 registros",
     infoFiltered: "(filtrado de _MAX_ registros en total)",
     loadingRecords: "Cargando...",
@@ -68,14 +67,22 @@ function initTable(selector, overrides = {}) {
     const el = document.querySelector(selector);
     if (!el) return null;
 
+    // 1. Definimos una regla segura: si falta una celda/dato, usa una cadena vacía
+    const safeColumnDef = { targets: '_all', defaultContent: '' };
+    
+    // 2. Extraemos los columnDefs del override (si existen) y el resto de propiedades
+    const { columnDefs: overrideColumnDefs = [], ...restOverrides } = overrides;
+    
     return new DataTable(el, {
         ...nexumDataTableDefaults,
-        ...overrides,
+        ...restOverrides,
+        columnDefs: [safeColumnDef, ...overrideColumnDefs]
     });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
     initTable('#usersTable', { columnDefs: [{ orderable: false, targets: 5 }] });
+    initTable('#tabla-solicitudes', { columnDefs: [{ orderable: false, targets: [0, 4] }] }); // es este mero
     initTable('#rolesTable', { 
         ...nexumDataTableRoles,
         columnDefs: [{ orderable: false, targets: 3 }] 

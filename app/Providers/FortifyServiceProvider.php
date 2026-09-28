@@ -20,6 +20,8 @@ use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Contracts\RegisterResponse;
 use Laravel\Fortify\Contracts\VerifyEmailResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -57,14 +59,14 @@ class FortifyServiceProvider extends ServiceProvider
         $this->app->singleton(RegisterResponse::class, function () {
             return new class implements RegisterResponse
             {
-                public function toResponse($request)
+                public function toResponse($request): RedirectResponse
                 {
-                    return redirect()
-                        ->route('login')
-                        ->with(
-                            'info',
-                            'Solicitud recibida. Tu expediente está en revisión por Administración Académica.'
-                        );
+                    // 1. Fuerza el cierre de cualquier sesión residual (por seguridad) no encontre el bug 
+                    auth()->guard()->logout(); 
+                    session()->invalidate();
+                    session()->regenerateToken();
+                    \Log::info('RegisterResponse ejecutado correctamente, redirigiendo a login.');
+                    return redirect()->route('login')->with('info', 'Solicitud recibida. Tu expediente está en revisión por Administración Académica.');
                 }
             };
         });

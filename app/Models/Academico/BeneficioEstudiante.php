@@ -11,9 +11,11 @@ use App\Models\Users\User;
 use App\Models\Estudiante\Alumnos;
 use App\Models\Academico\CargoEstudiante;
 use App\Enums\TipoBeneficio;
+use App\Enums\EstadoBeneficio;
 
 final class BeneficioEstudiante extends Model
 {
+    
     use HasFactory;
 
     protected $table = 'beneficios_estudiante';
@@ -28,18 +30,28 @@ final class BeneficioEstudiante extends Model
         'porcentaje_universidad',
         'monto_fijo_cuota',
         'resolucion_academica',
-        'activo',
         'asignado_por',
+        'estado',
+        'motivo_revocacion',
+        'revocado_por',
+        'revocado_en',
+        'incluye_matricula',
+        'incluye_laboratorio',
+        'incluye_derechos_grado',
+
     ];
 
     protected function casts(): array
     {
         return [
             'tipo_beneficio'         => TipoBeneficio::class,  
+            'estado'                 => EstadoBeneficio::class,
             'porcentaje_estudiante'  => 'decimal:2',
             'porcentaje_universidad' => 'decimal:2',
             'monto_fijo_cuota'       => 'decimal:2',
-            'activo'                 => 'boolean',
+            'incluye_matricula'      => 'boolean',
+            'incluye_laboratorio'    => 'boolean',
+            'incluye_derechos_grado' => 'boolean',
             'created_at'             => 'immutable_datetime',
             'updated_at'             => 'immutable_datetime',
         ];

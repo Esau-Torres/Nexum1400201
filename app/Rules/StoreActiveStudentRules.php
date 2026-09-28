@@ -55,6 +55,9 @@ class StoreActiveStudentRules extends FormRequest
             'porcentaje_universidad' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'monto_fijo_cuota'       => ['nullable', 'numeric', 'min:0', 'required_if:tipo_beneficio,FRANJA_BECARIA' ],
             'resolucion_academica' => ['nullable', 'string', 'max:100'],
+            'incluye_matricula' => ['nullable', 'boolean', Rule::prohibitedIf(fn () => !in_array($this->input('tipo_beneficio'), ['BECA_PARCIAL', 'CUOTA_ESPECIAL'], true))],
+            'incluye_laboratorio' => ['nullable', 'boolean', Rule::prohibitedIf(fn () => $this->input('tipo_beneficio') !== 'BECA_COMPLETA')],
+            'incluye_derechos_grado' => ['nullable', 'boolean'],
         ];
     }
 

@@ -65,11 +65,38 @@
 
                 @if(auth()->user()->hasrole('ADMIN_ACADEMICO'))
                     <li class="nav-item mb-1">
-                        <a href="{{ route('admin-academico.create-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark  {{ request()->is('admin-academico/create-student*') ? 'active' : '' }}">
+                        <a href="{{ route('admin-academico.create-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark  {{ request()->is('admin-academico.create-student*') ? 'active' : '' }}">
                             <i class="fa-solid fa-user-plus nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Nuevo Alumno</div>
                                 <div class="nav-text-secondary">Crear usuarios alumnos</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('admin-academico.admin.academico.solicitudes.approve-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.admin.academico.solicitudes.approve-student') ? 'active' : '' }}">
+                            <i class="fa-solid fa-user-check nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Aceptar Alumno</div>
+                                <div class="nav-text-secondary">Alumnos en espera</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('admin-academico.modify-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.modify-student') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-pie nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Gestionar Alumno</div>
+                                <div class="nav-text-secondary">Dar de baja a estudiantes</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('admin-academico.modify-benefit-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.modify-benefit-student') ? 'active' : '' }}">
+                            <i class="fa-solid fa-graduation-cap nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Gestionar becas</div>
+                                <div class="nav-text-secondary">Beneficios de estudiantes</div>
                             </div>
                         </a>
                     </li>

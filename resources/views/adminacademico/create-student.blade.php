@@ -480,6 +480,66 @@
                                 @enderror
                             </div>
 
+                            {{-- Inclusión de matrícula (BECA_PARCIAL y CUOTA_ESPECIAL) --}}
+                            <div class="col-12 campo-matricula" style="display:none;">
+                                <div class="border rounded-3 p-3 bg-light">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                            id="incluye_matricula"
+                                            name="incluye_matricula"
+                                            value="1"
+                                            {{ old('incluye_matricula') ? 'checked' : '' }}>
+                                        <label class="form-check-label fw-medium small" for="incluye_matricula">
+                                            Incluir <strong>matrícula del ciclo</strong> en la cobertura
+                                        </label>
+                                    </div>
+                                    <div class="form-text small ms-5">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Solo si la <strong>resolución o convenio</strong> lo autoriza expresamente.
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Inclusión de laboratorio (BECA_COMPLETA) --}}
+                            <div class="col-12 campo-laboratorio" style="display:none;">
+                                <div class="border rounded-3 p-3 bg-light">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                            id="incluye_laboratorio"
+                                            name="incluye_laboratorio"
+                                            value="1"
+                                            {{ old('incluye_laboratorio') ? 'checked' : '' }}>
+                                        <label class="form-check-label fw-medium small" for="incluye_laboratorio">
+                                            Incluir <strong>laboratorio de informática</strong> en la cobertura
+                                        </label>
+                                    </div>
+                                    <div class="form-text small ms-5">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Solo si el <strong>pensum de la carrera</strong> exige laboratorio.
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Inclusión de derechos de grado (nunca aplica según matriz, pero queda por completitud) --}}
+                            <div class="col-12 campo-derechos" style="display:none;">
+                                <div class="border rounded-3 p-3 bg-light">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                            id="incluye_derechos_grado"
+                                            name="incluye_derechos_grado"
+                                            value="1"
+                                            {{ old('incluye_derechos_grado') ? 'checked' : '' }}>
+                                        <label class="form-check-label fw-medium small" for="incluye_derechos_grado">
+                                            Incluir <strong>derechos de grado</strong> en la cobertura
+                                        </label>
+                                    </div>
+                                    <div class="form-text small ms-5">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Generalmente excluido. Marcar solo bajo autorización de Rectoría.
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -696,13 +756,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!toggle?.checked) return;
 
         const tipo = tipoSel.value;
-        const esParcial = tipo === 'BECA_PARCIAL' || tipo === 'CUOTA_ESPECIAL';
-        const esFranja  = tipo === 'FRANJA_BECARIA';
+        const esParcial  = tipo === 'BECA_PARCIAL' || tipo === 'CUOTA_ESPECIAL';
+        const esFranja   = tipo === 'FRANJA_BECARIA';
+        const esCompleta = tipo === 'BECA_COMPLETA';
 
+        // Campos numéricos
         pctFields.forEach(el => el.style.display = esParcial ? '' : 'none');
         montoFld.style.display = esFranja ? '' : 'none';
 
-        // Autocompletar porcentajes sugeridos
+        // Autocompletar valores sugeridos
         if (tipo === 'BECA_COMPLETA') {
             if (pctEst)  pctEst.value  = 0;
             if (pctUniv) pctUniv.value = 100;
@@ -713,6 +775,24 @@ document.addEventListener('DOMContentLoaded', function () {
             const monto = document.getElementById('monto_fijo_cuota');
             if (monto && !monto.value) monto.value = 53.00;
         }
+
+        // Checkboxes condicionales
+        const wrapMatricula   = document.querySelector('.campo-matricula');
+        const wrapLaboratorio = document.querySelector('.campo-laboratorio');
+        const wrapDerechos    = document.querySelector('.campo-derechos');
+
+        const chkMatricula    = document.getElementById('incluye_matricula');
+        const chkLaboratorio  = document.getElementById('incluye_laboratorio');
+        const chkDerechos     = document.getElementById('incluye_derechos_grado');
+
+        if (wrapMatricula)   wrapMatricula.style.display   = esParcial  ? '' : 'none';
+        if (wrapLaboratorio) wrapLaboratorio.style.display = esCompleta ? '' : 'none';
+        if (wrapDerechos)    wrapDerechos.style.display    = 'none'; // nunca aplica
+
+        // Al ocultar, desmarcar para no enviar valores residuales
+        if (!esParcial && chkMatricula)     chkMatricula.checked = false;
+        if (!esCompleta && chkLaboratorio)  chkLaboratorio.checked = false;
+        if (chkDerechos)                    chkDerechos.checked = false;
     }
 
     // Sincronizar % universidad automáticamente

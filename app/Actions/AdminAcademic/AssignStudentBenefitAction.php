@@ -9,6 +9,7 @@ use App\Models\Academico\CicloLectivo;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use App\Enums\EstadoBeneficio;
 
 class AssignStudentBenefitAction
 {
@@ -56,6 +57,8 @@ class AssignStudentBenefitAction
         return DB::transaction(function () use (
             $alumno, $data, $asignadoPor, $tipo, $pctEstudiante, $pctUniversidad, $montoFijo
         ) {
+            $inclusiones = $this->resolverInclusiones($tipo, $data);
+
             return BeneficioEstudiante::create([
                 'id_alumno'              => $alumno->alumno_id,
                 'id_ciclo_lectivo'       => $data['id_ciclo_lectivo'],
@@ -65,7 +68,10 @@ class AssignStudentBenefitAction
                 'porcentaje_universidad' => $pctUniversidad,
                 'monto_fijo_cuota'       => $montoFijo,
                 'resolucion_academica'   => $data['resolucion_academica'] ?? null,
-                'activo'                 => true,
+                'estado'                 => EstadoBeneficio::ACTIVO,
+                'incluye_matricula'      => $inclusiones['incluye_matricula'],
+                'incluye_laboratorio'    => $inclusiones['incluye_laboratorio'],
+                'incluye_derechos_grado' => $inclusiones['incluye_derechos_grado'],
                 'asignado_por'           => $asignadoPor->id,
             ]);
         });
@@ -114,5 +120,31 @@ class AssignStudentBenefitAction
                 "La suma de coberturas debe ser exactamente 100.00%. Recibido: {$suma}%."
             );
         }
+    }
+
+    private function resolverInclusiones(TipoBeneficio $tipo, array $data): array
+    {
+        return match ($tipo) {
+            TipoBeneficio::BECA_COMPLETA => [
+                'incluye_matricula'      => true,   // siempre
+                'incluye_laboratorio'    => (bool) ($data['incluye_laboratorio'] ?? false),
+                'incluye_derechos_grado' => false,  // nunca
+            ],
+            TipoBeneficio::BECA_PARCIAL => [
+                'incluye_matricula'      => (bool) ($data['incluye_matricula'] ?? false),
+                'incluye_laboratorio'    => false,
+                'incluye_derechos_grado' => false,
+            ],
+            TipoBeneficio::CUOTA_ESPECIAL => [
+                'incluye_matricula'      => (bool) ($data['incluye_matricula'] ?? false),
+                'incluye_laboratorio'    => false,
+                'incluye_derechos_grado' => false,
+            ],
+            TipoBeneficio::FRANJA_BECARIA => [
+                'incluye_matricula'      => false,
+                'incluye_laboratorio'    => false,
+                'incluye_derechos_grado' => false,
+            ],
+        };
     }
 }

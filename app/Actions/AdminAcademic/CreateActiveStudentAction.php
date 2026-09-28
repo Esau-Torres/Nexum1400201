@@ -81,6 +81,9 @@ class CreateActiveStudentAction
                         'porcentaje_universidad' => $input['porcentaje_universidad'] ?? null,
                         'monto_fijo_cuota'       => $input['monto_fijo_cuota']       ?? null,
                         'resolucion_academica'   => $input['resolucion_academica']   ?? null,
+                        'incluye_matricula'      => (bool) ($input['incluye_matricula']      ?? false),
+                        'incluye_laboratorio'    => (bool) ($input['incluye_laboratorio']    ?? false),
+                        'incluye_derechos_grado' => (bool) ($input['incluye_derechos_grado'] ?? false),
                     ],
                     asignadoPor: $admin,
                 );

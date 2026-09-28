@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use Illuminate\Support\Facades\Log;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -52,11 +53,12 @@ class CreateNewUser implements CreatesNewUsers
                 $alumno = $this->createStudentAction->execute($user, $input['id_carrera']);
                 $this->uploadDocsAction->execute($alumno, request());
 
+                \Log::info('Usuario enviando solicitud deregistro para crear cuenta de estudiante');
                 return $user;
 
             } catch (\Exception $e) {
                 throw ValidationException::withMessages([
-                    'error_general' => 'Ocurrió un error de integridad al procesar el expediente. Contacte a soporte técnico.'
+                    'error_general' => 'Ocurrió un error al procesar el expediente. Contacte a soporte.'
                 ]);
             }
         });
