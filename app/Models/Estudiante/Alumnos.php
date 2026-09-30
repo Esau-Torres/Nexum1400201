@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo; 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Academico\BeneficioEstudiante;
 Use App\Models\Users\User;
 
 class Alumnos extends Model

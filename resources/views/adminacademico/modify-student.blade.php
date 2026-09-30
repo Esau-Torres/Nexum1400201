@@ -4,6 +4,6 @@
 
 @section('content')
 
-<p>listo como la vagina de una virgen</p>
+<p>proxima vista a modificar</p>
 
 @endsection

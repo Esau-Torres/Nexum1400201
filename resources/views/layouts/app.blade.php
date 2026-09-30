@@ -92,7 +92,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('admin-academico.modify-benefit-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.modify-benefit-student') ? 'active' : '' }}">
+                        <a href="{{ route('admin-academico.admin-academico.beneficios.modify-benefit-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.modify-benefit-student') ? 'active' : '' }}">
                             <i class="fa-solid fa-graduation-cap nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Gestionar becas</div>
@@ -255,10 +255,25 @@
 
             <!-- Sección Inferior -->
             <div class="p-3 border-top">
-                <a href="{{ route('profile') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark mb-1 {{ request()->routeIs('profile') ? 'active' : '' }}">
-                    <i class="fa-solid fa-gear nav-icon fs-5 me-3 text-muted"></i>
-                    <div class="fw-medium">Ajustes</div>
-                </a>
+                <div class="d-flex align-items-center justify-content-between">
+                    
+                    {{-- Avatar + Nombre a la izquierda --}}
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
+                            style="width: 28px; height: 28px; background-color: var(--color-accent); font-size: 0.8rem;">
+                            {{ strtoupper(substr(auth()->user()->name ?? '??', 0, 2)) }}
+                        </div>
+                        <h5 class="mb-0 fw-semibold" style="font-size: 0.8rem;">{{ implode(' ', array_slice(explode(' ', auth()->user()->name), 0, 3)) }}</h5>
+                    </div>
+
+                    {{-- Icono de ajustes a la derecha --}}
+                    <a href="{{ route('profile') }}"
+                    class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('profile') ? 'active' : '' }}"
+                    title="Ajustes">
+                        <i class="fa-solid fa-gear nav-icon fs-5 text-muted"></i>
+                    </a>
+
+                </div>
             </div>
         </aside>
 

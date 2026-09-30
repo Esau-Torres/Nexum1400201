@@ -45,6 +45,7 @@ class AssignStudentBenefitAction
         //    (la BD también lo bloquea con uq_alumno_ciclo_beneficio, pero así el error es claro)
         $existe = BeneficioEstudiante::where('id_alumno', $alumno->alumno_id)
             ->where('id_ciclo_lectivo', $data['id_ciclo_lectivo'])
+            ->where('estado', EstadoBeneficio::ACTIVO) 
             ->exists();
 
         if ($existe) {

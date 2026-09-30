@@ -7,10 +7,10 @@
     <div class="mb-4 card shadow-sm rounded-4">
         <div class="card-body">
             <h4 class="fw-semibold mb-1">
-                Bienvenido, al sistema academico NEXUM 
+                BIENVENIDOS AL SISTEMA ACADEMICO UMA
             </h4>
             <p class="text-muted mb-0 px-1">
-                Este es tu espacio de trabajo en NEXUM.
+                Este es tu espacio para realizar tus primeras tareas.
             </p>
         </div>
     </div>
@@ -159,20 +159,39 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <div class="border rounded-3 p-3 h-100">
-                                    <small class="text-muted d-block mb-1">Tipo de arancel</small>
-                                    <span class="fw-medium">{{ $usuario->alumno->tipo_arancel }}</span>
-                                </div>
-                            </div>
+                            @php $beneficioActivo = $usuario->alumno->beneficioCicloActual; @endphp
 
-                            <div class="col-md-6">
-                                <div class="border rounded-3 p-3 h-100">
-                                    <small class="text-muted d-block mb-1">Descuento de arancel</small>
-                                    <span class="fw-medium">{{ $usuario->alumno->descuento_arancel }}%</span>
+                            @if($beneficioActivo)
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100">
+                                        <small class="text-muted d-block mb-1">Beneficio activo</small>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger">
+                                            <i class="bi bi-cash-coin me-1"></i>
+                                            {{ $beneficioActivo->tipo_beneficio->label() }}
+                                        </span>
+                                        <small class="text-muted d-block mt-2">
+                                            Ciclo: {{ $beneficioActivo->cicloLectivo->nombre_ciclo ?? '—' }}
+                                        </small>
+                                    </div>
                                 </div>
-                            </div>
 
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100">
+                                        <small class="text-muted d-block mb-1">Convenio / Beca</small>
+                                        <span class="fw-medium">{{ $beneficioActivo->nombre_convenio }}</span>
+
+                                        {{-- Cobertura resumida --}}
+                                        <div class="mt-2 d-flex gap-2 flex-wrap">
+                                            <span class="badge bg-secondary-subtle text-secondary border small">
+                                                Estudiante: {{ $beneficioActivo->porcentaje_estudiante }}%
+                                            </span>
+                                            <span class="badge bg-secondary-subtle text-secondary border small">
+                                                UMA: {{ $beneficioActivo->porcentaje_universidad }}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                             <div class="col-md-6">
                                 <div class="border rounded-3 p-3 h-100">
                                     <small class="text-muted d-block mb-1">Estado académico</small>
@@ -275,30 +294,6 @@
                     </div>
                 </div>
             @endif
-
-            @if($usuario->hasRole('ADMIN_ACADEMICO'))
-                <div class="card border-0 shadow-sm rounded-4 mb-4">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-4">
-                            <div class="me-3">
-                                <div class="bg-danger-subtle rounded-circle d-flex align-items-center justify-content-center"
-                                    style="width: 58px; height: 58px;">
-                                    <i class="fa-solid fa-graduation-cap fs-4 text-danger"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <h5 class="mb-1 fw-semibold">Panel Académico</h5>
-                                <span class="badge bg-success-subtle text-success border border-success">
-                                    <i class="bi bi-person-workspace me-1"></i>Admin Académico
-                                </span>
-                            </div>
-                        </div>
-
-                        {{-- Aquí van los datos específicos del ADMIN_ACADEMICO --}}
-                    </div>
-                </div>
-            @endif
-
         </div>
 
         {{-- ============================================================
@@ -335,6 +330,11 @@
                                 <i class="fa-solid fa-user-tag me-2"></i>
                                 Administrar roles
                             </a>
+                            <a href="{{ route('superadmin.manage-ruler') }}"
+                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-ruler me-2"></i>
+                                Gestionar reglas del sistema
+                            </a>
                         @endif
 
                         {{-- ESTUDIANTE --}}
@@ -342,7 +342,7 @@
                             <a href="#"
                                class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
                                 <i class="fa-solid fa-book-open me-2"></i>
-                                Pensum
+                                Calificaciones
                             </a>
 
                             <a href="#"
@@ -354,7 +354,7 @@
                             <a href="#"
                                class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
                                 <i class="fa-solid fa-pen-to-square me-2"></i>
-                                Inscripción
+                                Realizar pagos
                             </a>
 
                             <a href="#"
@@ -403,14 +403,6 @@
                                  </a>
                              @endif
 
-                             @if($usuario->hasRole('ADMIN_ACADEMICO'))
-                                <a href="{{ route('admin-academico.expedientes') }}"
-                                class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                    <i class="fa-solid fa-folder-open me-2"></i>
-                                    Expedientes académicos
-                                </a>
-                            @endif
-
                             @if($usuario->hasRole('DIRECTIVO'))
                                 <a href="{{ route('admin-academico.expedientes') }}"
                                 class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
@@ -419,7 +411,32 @@
                                 </a>
                             @endif
                         ============================================================ --}}
+                            @if($usuario->hasRole('ADMIN_ACADEMICO'))
+                                <a href="{{ route('admin-academico.create-student') }}"
+                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-user-plus me-2"></i>
+                                Crear usuario 
+                            </a>
 
+                            <a href="{{ route('admin-academico.admin.academico.solicitudes.approve-student') }}"
+                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-check me-2"></i>
+                                Solicitud de aprovación de cuentas
+                            </a>
+
+                            <a href="{{ route('admin-academico.modify-student') }}"
+                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-users-gear me-2"></i>
+                                Administrar usuarios
+                            </a>
+
+                            <a href="{{ route('admin-academico.admin-academico.beneficios.modify-benefit-student') }}"
+                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-user-tag me-2"></i>
+                                Gestionar Becas
+                            </a>
+                                
+                            @endif
                     </div>
 
                 </div>

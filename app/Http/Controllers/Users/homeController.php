@@ -14,6 +14,7 @@ class HomeController extends Controller
         if ($usuario->hasRole('ESTUDIANTE')) {
             $relations[] = 'alumno.carrera.facultad';
             $relations[] = 'alumno.documentos';
+            $relations[] = 'alumno.beneficioCicloActual.cicloLectivo'; 
         }
 
         if ($usuario->hasRole('DOCENTE')) {
