@@ -252,3 +252,139 @@ body {
 .portal-hover:hover .fa-regular {
     color: var(--color-accent);
 }
+
+/* ========== HOME DOCENTE STYLES ========== */
+
+/* Badges de período */
+.periodo-badge {
+    background-color: #ffffff;
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.25);
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* ========== STAT CARDS (Base) ========== */
+.stat-card {
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+}
+
+/* Variante clara (blanca) */
+.stat-card-light {
+    border: 1px solid #f1f3f5 !important;
+}
+
+.stat-card-light:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+    border-color: rgba(220, 53, 69, 0.2) !important;
+}
+
+/* Variante principal (roja destacada) */
+.stat-card-primary {
+    background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+    box-shadow: 0 4px 16px rgba(220, 53, 69, 0.3);
+}
+
+.stat-card-primary:hover {
+    box-shadow: 0 12px 28px rgba(220, 53, 69, 0.4) !important;
+}
+
+/* Variante warning (amarilla) */
+.stat-card-warning {
+    background-color: #fff9e1;
+    border: 1px solid #ffe89a !important;
+}
+
+.stat-card-warning:hover {
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.15) !important;
+    border-color: #ffd54f !important;
+}
+
+/* Iconos de stat cards */
+.stat-icon-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background-color: #fff5f5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #dc3545;
+    font-size: 1.25rem;
+}
+
+.stat-icon-circle-white {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1.25rem;
+    backdrop-filter: blur(10px);
+}
+
+.stat-icon-circle-warning {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background-color: #fff4e5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #f59e0b;
+    font-size: 1.25rem;
+}
+
+/* Jerarquía de texto */
+.stat-label-small {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.stat-value-big {
+    font-size: 2.75rem;
+    font-weight: 800;
+    color: #212529;
+    line-height: 1;
+    margin-bottom: 6px;
+    letter-spacing: -1px;
+}
+
+.stat-subtext {
+    font-size: 0.8rem;
+    color: #adb5bd;
+    font-weight: 500;
+}
+
+/* ========== MATERIA CARDS ========== */
+.materia-card {
+    border: 1px solid #f1f3f5 !important;
+    transition: all 0.25s ease;
+}
+
+.materia-card:hover {
+    border-color: rgba(220, 53, 69, 0.25) !important;
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.08) !important;
+    transform: translateY(-2px);
+}
+
+.horario-badge {
+    background-color: #fafbfc;
+    border: 1px solid #eef0f2;
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: inline-block;
+}
