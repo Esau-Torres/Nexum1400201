@@ -1,14 +1,21 @@
 <?php
+
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
 use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class HomeController extends Controller
 {
-  public function index(): View
+    public function index(): View|RedirectResponse
     {
         $usuario = auth()->user();
+
+        // Redirección según el rol del usuario
+        if ($usuario->hasRole('DOCENTE')) {
+            return redirect()->route('home.docente');
+        }
         $relations = ['roles', 'regionalactivo'];
 
         if ($usuario->hasRole('ESTUDIANTE')) {
@@ -19,10 +26,13 @@ class HomeController extends Controller
 
         if ($usuario->hasRole('DOCENTE')) {
             $relations[] = 'docente';
+            return view('home', compact('usuario'));
         }
 
+        if ($usuario->hasRole('SUPER_ADMIN')) {
+            return redirect()->route('superadmin.panel-administrativo');
+        }
         $usuario->load($relations);
-
         return view('home', compact('usuario'));
     }
 }
