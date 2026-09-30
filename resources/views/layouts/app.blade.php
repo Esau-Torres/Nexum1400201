@@ -23,24 +23,32 @@
 
 <body class="bg-light">
 
-    <!-- Botón Toggle (Solo Móvil) -->
-    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Abrir menú">
-        <i class="fa-solid fa-bars"></i>
-    </button>
+    <!-- Barra de cabecera fija solo en móvil/tablet para contener el botón sin alterar el flujo -->
+    <div class="d-lg-none bg-white border-bottom p-2 px-3 d-flex align-items-center justify-content-between sticky-top shadow-sm" style="z-index: 1010;">
+        <button class="btn btn-outline-secondary border-0 p-2"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#sidebarMenu"
+                aria-controls="sidebarMenu"
+                aria-label="Abrir Menú">
+            <i class="fa-solid fa-bars fs-5 text-dark"></i>
+        </button>
+        <span class="fw-bold small text-dark">@yield('titulo_navbar', 'NEXUM')</span>
+        <img src="{{ asset('assets/images/uma_santa_ana.png') }}" alt="UMA" style="height: 32px;">
+    </div>
 
-    <!-- Backdrop (Solo Móvil) -->
-    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <div class="layout-wrapper">
+        <!-- Sidebar Responsivo -->
+        <aside class="sidebar offcanvas-lg offcanvas-start bg-white border-end d-flex flex-column"
+               tabindex="-1"
+               id="sidebarMenu"
+               aria-labelledby="sidebarMenuLabel"
+               data-bs-scroll="true">
 
-    <div class="d-flex">
-        <!-- Sidebar -->
-        <aside class="sidebar bg-white border-end d-flex flex-column" id="sidebar">
-            <!-- Header del Sidebar con botón de cerrar (solo móvil) -->
-            <div class="sidebar-header p-3 border-bottom d-flex align-items-center justify-content-between">
-                <a href="{{ route('home') }}" class="d-inline-block text-decoration-none">
-                    <img src="{{ asset('assets/images/logo-uma-santa-ana.png') }}"
-                        alt="Logo Universidad UMA Santa Ana"
-                        class="img-fluid"
-                        style="max-height: 50px; cursor: pointer;">
+            <!-- Logo -->
+            <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
+                <a href="{{ route('home') }}">
+                    <img src="{{ asset('images/logo-uma-santa-ana.png') }}" alt="Logo UMA" class="img-fluid" style="max-height: 48px;">
                 </a>
                 <button class="sidebar-close d-lg-none" id="sidebarClose" aria-label="Cerrar menú">
                     <i class="fa-solid fa-xmark"></i>
@@ -60,163 +68,226 @@
                             </div>
                         </a>
                     </li>
-
-                    {{-- Opciones para ESTUDIANTE --}}
                     @if(auth()->user()->hasrole('ESTUDIANTE'))
-                    <li class="nav-item mb-1">
-                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('pensum*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-book-open nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Pensum</div>
-                                <div class="nav-text-secondary">Plan académico</div>
-                            </div>
-                        </a>
-                    </li>
+                        <li class="nav-item mb-1">
+                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('pensum*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-book-open nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Pensum</div>
+                                    <div class="nav-text-secondary">Plan académico</div>
+                                </div>
+                            </a>
+                        </li>
 
-                    <li class="nav-item mb-1">
-                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('enlaces')) active @endif">
-                            <i class="fa-solid fa-link nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Enlaces</div>
-                                <div class="nav-text-secondary">Cursos virtuales</div>
-                            </div>
-                        </a>
-                    </li>
+                        <li class="nav-item mb-1">
+                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('enlaces*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-link nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Enlaces</div>
+                                    <div class="nav-text-secondary">Cursos virtuales</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('record-academico*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-graduation-cap nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Record Académico</div>
+                                    <div class="nav-text-secondary">Notas ciclo</div>
+                                </div>
+                            </a>
+                        </li>
 
-                    <li class="nav-item mb-1">
-                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('record-academico')) active @endif">
-                            <i class="fa-solid fa-graduation-cap nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Record Académico</div>
-                                <div class="nav-text-secondary">Notas ciclo</div>
-                            </div>
-                        </a>
-                    </li>
+                        <li class="nav-item mb-1">
+                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('inscripcion*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-pen-to-square nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Inscripción</div>
+                                    <div class="nav-text-secondary">En línea</div>
+                                </div>
+                            </a>
+                        </li>
 
-                    <li class="nav-item mb-1">
-                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('inscripcion')) active @endif">
-                            <i class="fa-solid fa-pen-to-square nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Inscripción</div>
-                                <div class="nav-text-secondary">En línea</div>
-                            </div>
-                        </a>
-                    </li>
-
-                    <li class="nav-item mb-1">
-                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('evaluacion')) active @endif">
-                            <i class="fa-solid fa-clipboard-check nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Evaluación del Desempeño</div>
-                                <div class="nav-text-secondary">Docente</div>
-                            </div>
-                        </a>
-                    </li>
-
-                    <li class="nav-item mb-1">
-                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('record-financiero')) active @endif">
-                            <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Record Financiero</div>
-                                <div class="nav-text-secondary">Credenciales de pago</div>
-                            </div>
-                        </a>
-                    </li>
-
-                    <li class="nav-item mb-1">
-                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('buzon')) active @endif">
-                            <i class="fa-solid fa-envelope nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Buzón</div>
-                                <div class="nav-text-secondary">Observaciones, sugerencias y quejas</div>
-                            </div>
-                        </a>
-                    </li>
-
-                    <li class="nav-item mb-1">
-                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('recursos')) active @endif">
-                            <i class="fa-solid fa-folder-open nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Recursos</div>
-                                <div class="nav-text-secondary">Bibliográficos</div>
-                            </div>
-                        </a>
-                    </li>
-
-                    {{-- Opciones exclusivas para DOCENTE --}}
-                    @elseif(auth()->user()->hasrole('DOCENTE'))
-                    <li class="nav-item mb-1">
-                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('materias*')) active @endif">
-                            <i class="fa-solid fa-chalkboard-user nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Materias</div>
-                                <div class="nav-text-secondary">Cursos asignados</div>
-                            </div>
-                        </a>
-                    </li>
-
-                    <li class="nav-item mb-1">
-                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('asistencia*')) active @endif">
-                            <i class="fa-solid fa-calendar-check nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Asistencia</div>
-                                <div class="nav-text-secondary">Control de clases</div>
-                            </div>
-                        </a>
-                    </li>
-
-                    <li class="nav-item mb-1">
-                        <a href="{{ route('prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('prueba.notas') ? 'active' : '' }}">
-                            <i class="fa-solid fa-file-pen nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Prueba de Notas</div>
-                                <div class="nav-text-secondary">Evaluaciones y calificaciones</div>
-                            </div>
-                        </a>
-                    </li>
-
-                    {{-- Opciones para SUPER_ADMIN --}}
-                    @elseif(auth()->user()->hasrole('SUPER_ADMIN'))
-                    <li class="nav-item mb-1">
-                        <a href="{{ route('superadmin.createuser') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/createuser*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-user nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Crear</div>
-                                <div class="nav-text-secondary">Ingreso de usuarios</div>
-                            </div>
-                        </a>
-                    </li>
-
-                    <li class="nav-item mb-1">
-                        <a href="{{ route('superadmin.panel-administrativo') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/panel-administrativo*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-gauge nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Panel Administrativo</div>
-                                <div class="nav-text-secondary">Administrar usuarios</div>
-                            </div>
-                        </a>
-                    </li>
-
-                    <li class="nav-item mb-1">
-                        <a href="{{ route('superadmin.create-rol') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/create-rol*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-sliders nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Gestión</div>
-                                <div class="nav-text-secondary">Administrar roles de usuario</div>
-                            </div>
-                        </a>
-                    </li>
-
-                    <li class="nav-item mb-1">
-                        <a href="{{ route('superadmin.manage-ruler') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/manage-ruler*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-gavel nav-icon fs-5 me-3 text-muted"></i>
-                            <div>
-                                <div class="fw-medium">Gestionar reglas</div>
-                                <div class="nav-text-secondary">Reglas académicas</div>
-                            </div>
-                        </a>
-                    </li>
+                        <li class="nav-item mb-1">
+                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('evaluacion*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-clipboard-check nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Evaluación del Desempeño</div>
+                                    <div class="nav-text-secondary">Docente</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('record-financiero*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Record Financiero</div>
+                                    <div class="nav-text-secondary">Credenciales de pago</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('buzon*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-envelope nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Buzón</div>
+                                    <div class="nav-text-secondary">Observaciones, sugerencias y quejas</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('recursos*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-folder-open nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Recursos</div>
+                                    <div class="nav-text-secondary">Bibliográficos</div>
+                                </div>
+                            </a>
+                        </li>
                     @endif
+                    @if(auth()->user()->hasrole('SUPER_ADMIN'))
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('superadmin.createuser') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/createuser*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-user nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Crear</div>
+                                    <div class="nav-text-secondary">Ingreso de usuarios</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('superadmin.panel-administrativo') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/panel-administrativo*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-gauge nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Panel Administrativo</div>
+                                    <div class="nav-text-secondary">Administrar usuarios</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('superadmin.roles.manageroles') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/roles.manageroles*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-sliders nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Gestion</div>
+                                    <div class="nav-text-secondary">Administar roles de usuario</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('superadmin.manage-ruler') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/manage-ruler*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-gavel nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Gestionar reglas</div>
+                                    <div class="nav-text-secondary">reglas de academicas</div>
+                                </div>
+                            </a>
+                        </li>
+                    @endif
+
+                    @if(auth()->user()->hasrole('ADMIN_FINANCIERO'))
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('adfinanciero.conceptospagos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('adfinanciero.conceptospagos.*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-tags nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Aranceles</div>
+                                    <div class="nav-text-secondary">Gestión de aranceles</div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('reglas.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('reglas.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-scale-balanced nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Reglas de Cobro</div>
+                                    <div class="nav-text-secondary">Políticas institucionales</div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <li class="nav-item mb-1">
+                            <!-- Usamos adfinanciero.promociones.* para unificar el método -->
+                            <a href="{{ route('adfinanciero.promociones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('adfinanciero.promociones.*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-percent nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Promociones</div>
+                                    <div class="nav-text-secondary">Descuentos especiales</div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <li class="nav-item mb-1">
+                            <!-- Usamos adfinanciero.cargos.* para que se mantenga iluminado -->
+                            <a href="{{ route('adfinanciero.cargos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('adfinanciero.cargos.*') ? 'active' : '' }}">
+                                <!-- Cambié el ícono de 'porcentaje' por uno de 'factura' para que no sea idéntico al de Promociones -->
+                                <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Record estudiantil</div>
+                                    <div class="nav-text-secondary">Generación de cuotas</div>
+                                </div>
+                            </a>
+                        </li>
+                    @endif
+
+                    <!-- ============================================== -->
+                    <!-- MENÚ PARA CAJERO  aqui va la autenticacion del usuario de CAJERO-->
+                    <!-- ============================================== -->
+                    @if(auth()->user()->hasrole('CAJERO'))
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('cajero.deuda.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('cajero/deuda*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Deuda Pendiente</div>
+                                    <div class="nav-text-secondary">Liquidar cargos del alumno</div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <!-- 2. Módulo: concepto_pago -->
+                        <li class="nav-item mb-1">
+                            <!-- Aquí usamos request()->is('cajero/ventanilla*') que lee la URL real -->
+                            <a href="{{ route('cajero.ventanilla.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('*ventanilla*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-cash-register nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Consultas en ventanilla</div>
+                                    <div class="nav-text-secondary">Consulta de aranceles directos</div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <!-- 3. Módulo: promociones -->
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('cajero.promociones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('*promociones*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-tags nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Promociones</div>
+                                    <div class="nav-text-secondary">Consulta de beneficios activos</div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <!-- 4. Módulo: pagos -->
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('cajero.pagos.create') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('*pagos*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Cobrar</div>
+                                    <div class="nav-text-secondary">Registro de pagos y transacciones</div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('adfinanciero.cargos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('record-financiero*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Record Financiero</div>
+                                    <div class="nav-text-secondary">Credenciales de pago</div>
+                                </div>
+                            </a>
+                        </li>
+                    @endif
+                    <!-- aqui va el end cuandos termine todo -->
                 </ul>
             </nav>
 
