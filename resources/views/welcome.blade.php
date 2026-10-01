@@ -20,7 +20,7 @@
 
     <!-- Styles / Scripts Vite -->
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-    @vite(['resources/css/app.css','resources/css/toast.css' ,'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
 </head>
 
@@ -39,7 +39,7 @@
         <div class="row g-4 g-lg-5 w-100 justify-content-center align-items-center">
             <!-- Lado Izquierdo: Logo, Bienvenida y Descripción -->
             <div class="col-12 col-lg-5 text-center text-lg-start">
-                <img src="{{ asset('images/uma_logo.png') }}" alt="Logo Universidad UMA Santa Ana" class="mb-4" style="height: 80px; width: auto;">
+                <img src="{{ asset('assets/images/logo-uma-santa-ana.png') }}" alt="Logo Universidad UMA Santa Ana" class="mb-4" style="height: 80px; width: auto;">
                 <h2 class="h3 fw-bold mb-3">Bienvenido</h2>
                 <p class="fs-5 mb-3 text-dark">Estamos aquí para acompañarte en tu camino académico. Inicia sesión para acceder a todas las herramientas que necesitas.</p>
                 <p class="text-muted small mb-4">Plataforma integral de gestión académica y administrativa</p>
@@ -52,6 +52,16 @@
                     <div class="card-body p-4 p-lg-5">
                         <h3 class="fw-bold mb-2">Iniciar Sesión</h3>
                         <p class="text-muted small mb-4">Acceso al Sistema</p>
+
+                        @if ($errors->any())
+                        <div class="alert alert-danger small">
+                            <ul class="mb-0 ps-3">
+                                @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        @endif
 
                         <form method="POST" action="{{ route('login') }}">
                             @csrf
@@ -75,7 +85,6 @@
 
                         <div class="d-flex justify-content-between mt-4">
                             <a href="{{ route('password.request') }}" class="text-decoration-none small text-danger">¿Olvidaste tu contraseña?</a>
-                            <a href="{{ route('register') }}" class="text-decoration-none small" style="color: var(--color-accent);">Registrarse</a>
                         </div>
                     </div>
                 </div>
@@ -109,10 +118,6 @@
             }
         });
     </script>
-
-    <!-- para los toast -->
-    <x-toast-container />
-    @stack('scripts')
-
 </body>
+
 </html>

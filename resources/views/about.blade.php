@@ -20,7 +20,7 @@
 
     <!-- Styles / Scripts Vite -->
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-    @vite(['resources/css/app.css', 'resources/css/toast.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
 </head>
 
@@ -89,10 +89,6 @@
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-      <!-- para los toast -->
-    <x-toast-container />
-
-    @stack('scripts')
 </body>
 
 </html>

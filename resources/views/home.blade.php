@@ -6,9 +6,7 @@
 <div class="container-fluid px-3 px-md-4 py-4">
     <div class="mb-4 card shadow-sm rounded-4">
         <div class="card-body">
-            <h4 class="fw-semibold mb-1">
-                BIENVENIDOS AL SISTEMA ACADEMICO UMA
-            </h4>
+            <h4 class="fw-semibold mb-1">BIENVENIDOS AL SISTEMA ACADEMICO UMA</h4>
             <p class="text-muted mb-0 px-1">
                 Este es tu espacio para realizar tus primeras tareas.
             </p>
@@ -21,7 +19,6 @@
             {{-- Datos generales (común) --}}
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4">
-
                     <div class="d-flex align-items-center mb-4">
                         <div class="me-3">
                             <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
@@ -52,41 +49,30 @@
                                 <span class="fw-medium">{{ $usuario->name }}</span>
                             </div>
                         </div>
-
                         <div class="col-md-6">
                             <div class="border rounded-3 p-3 h-100">
                                 <small class="text-muted d-block mb-1">Correo electrónico</small>
                                 <span class="fw-medium">{{ $usuario->email }}</span>
                             </div>
                         </div>
-
                         <div class="col-md-6">
                             <div class="border rounded-3 p-3 h-100">
                                 <small class="text-muted d-block mb-1">Documento de identidad</small>
-                                <span class="fw-medium">
-                                    {{ $usuario->documento_identidad ?? 'No registrado' }}
-                                </span>
+                                <span class="fw-medium">{{ $usuario->documento_identidad ?? 'No registrado' }}</span>
                             </div>
                         </div>
-
                         <div class="col-md-6">
                             <div class="border rounded-3 p-3 h-100">
                                 <small class="text-muted d-block mb-1">Celular</small>
-                                <span class="fw-medium">
-                                    {{ $usuario->celular ?? 'No registrado' }}
-                                </span>
+                                <span class="fw-medium">{{ $usuario->celular ?? 'No registrado' }}</span>
                             </div>
                         </div>
-
                         <div class="col-md-6">
                             <div class="border rounded-3 p-3 h-100">
                                 <small class="text-muted d-block mb-1">Sede UMA</small>
-                                <span class="fw-medium">
-                                    {{ $usuario->regionalactivo->sede ?? 'No asignada' }}
-                                </span>
+                                <span class="fw-medium">{{ $usuario->regionalactivo->sede ?? 'No asignada' }}</span>
                             </div>
                         </div>
-
                         <div class="col-md-6">
                             <div class="border rounded-3 p-3 h-100">
                                 <small class="text-muted d-block mb-1">Estado de cuenta</small>
@@ -102,19 +88,13 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
 
-            {{-- ============================================================
-                 PANELES ESPECÍFICOS POR ROL
-            ============================================================ --}}
-
-            {{-- ESTUDIANTE: datos académicos --}}
+            {{-- ESTUDIANTE --}}
             @if($usuario->hasRole('ESTUDIANTE') && $usuario->alumno)
                 <div class="card border-0 shadow-sm rounded-4 mb-4">
                     <div class="card-body p-4">
-
                         <div class="d-flex align-items-center mb-4">
                             <div class="me-3">
                                 <div class="bg-danger-subtle rounded-circle d-flex align-items-center justify-content-center"
@@ -137,7 +117,6 @@
                                     <span class="fw-semibold">{{ $usuario->alumno->codigo_estudiante }}</span>
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="border rounded-3 p-3 h-100">
                                     <small class="text-muted d-block mb-1">Correo institucional</small>
@@ -179,8 +158,6 @@
                                     <div class="border rounded-3 p-3 h-100">
                                         <small class="text-muted d-block mb-1">Convenio / Beca</small>
                                         <span class="fw-medium">{{ $beneficioActivo->nombre_convenio }}</span>
-
-                                        {{-- Cobertura resumida --}}
                                         <div class="mt-2 d-flex gap-2 flex-wrap">
                                             <span class="badge bg-secondary-subtle text-secondary border small">
                                                 Estudiante: {{ $beneficioActivo->porcentaje_estudiante }}%
@@ -192,6 +169,7 @@
                                     </div>
                                 </div>
                             @endif
+
                             <div class="col-md-6">
                                 <div class="border rounded-3 p-3 h-100">
                                     <small class="text-muted d-block mb-1">Estado académico</small>
@@ -233,16 +211,14 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             @endif
 
-            {{-- DOCENTE: datos laborales --}}
+            {{-- DOCENTE --}}
             @if($usuario->hasRole('DOCENTE') && $usuario->docente)
                 <div class="card border-0 shadow-sm rounded-4 mb-4">
                     <div class="card-body p-4">
-
                         <div class="d-flex align-items-center mb-4">
                             <div class="me-3">
                                 <div class="bg-danger-subtle rounded-circle d-flex align-items-center justify-content-center"
@@ -267,14 +243,12 @@
                                     </span>
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="border rounded-3 p-3 h-100">
                                     <small class="text-muted d-block mb-1">Correo institucional</small>
                                     <span class="fw-medium">{{ $usuario->docente->correo_institucional }}</span>
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="border rounded-3 p-3 h-100">
                                     <small class="text-muted d-block mb-1">Estado laboral</small>
@@ -290,161 +264,78 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             @endif
         </div>
 
-        {{-- ============================================================
-             COLUMNA LATERAL: Accesos rápidos por rol
-        ============================================================ --}}
+        {{-- COLUMNA LATERAL --}}
         <div class="col-12 col-xl-4">
-
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-4">
-
                     <h5 class="fw-semibold mb-1">Acciones rápidas</h5>
                     <p class="text-muted small mb-4">
                         Accede a los módulos disponibles según tus roles.
                     </p>
 
                     <div class="d-grid gap-3">
-
-                        {{-- SUPER_ADMIN --}}
                         @if($usuario->hasRole('SUPER_ADMIN'))
-                            <a href="{{ route('superadmin.createuser') }}"
-                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                <i class="fa-solid fa-user-plus me-2"></i>
-                                Crear usuario
+                            <a href="{{ route('superadmin.createuser') }}" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-user-plus me-2"></i> Crear usuario
                             </a>
-
-                            <a href="{{ route('superadmin.panel-administrativo') }}"
-                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                <i class="fa-solid fa-users-gear me-2"></i>
-                                Administrar usuarios
+                            <a href="{{ route('superadmin.panel-administrativo') }}" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-users-gear me-2"></i> Administrar usuarios
                             </a>
-
-                            <a href="{{ route('superadmin.roles.manageroles') }}"
-                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                <i class="fa-solid fa-user-tag me-2"></i>
-                                Administrar roles
+                            <a href="{{ route('superadmin.roles.manageroles') }}" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-user-tag me-2"></i> Administrar roles
                             </a>
-                            <a href="{{ route('superadmin.manage-ruler') }}"
-                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                <i class="fa-solid fa-ruler me-2"></i>
-                                Gestionar reglas del sistema
+                            <a href="{{ route('superadmin.manage-ruler') }}" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-ruler me-2"></i> Gestionar reglas del sistema
                             </a>
                         @endif
 
-                        {{-- ESTUDIANTE --}}
                         @if($usuario->hasRole('ESTUDIANTE'))
-                            <a href="#"
-                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                <i class="fa-solid fa-book-open me-2"></i>
-                                Calificaciones
+                            <a href="#" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-book-open me-2"></i> Calificaciones
                             </a>
-
-                            <a href="#"
-                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                <i class="fa-solid fa-graduation-cap me-2"></i>
-                                Record académico
+                            <a href="#" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-graduation-cap me-2"></i> Record académico
                             </a>
-
-                            <a href="#"
-                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                <i class="fa-solid fa-pen-to-square me-2"></i>
-                                Realizar pagos
+                            <a href="#" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-pen-to-square me-2"></i> Realizar pagos
                             </a>
-
-                            <a href="#"
-                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                <i class="fa-solid fa-file-invoice-dollar me-2"></i>
-                                Record financiero
+                            <a href="#" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-file-invoice-dollar me-2"></i> Record financiero
                             </a>
                         @endif
 
-                        {{-- DOCENTE --}}
                         @if($usuario->hasRole('DOCENTE'))
-                            <a href="#"
-                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                <i class="fa-solid fa-chalkboard me-2"></i>
-                                Mis asignaturas
+                            <a href="#" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-chalkboard me-2"></i> Mis asignaturas
                             </a>
-
-                            <a href="#"
-                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                <i class="fa-solid fa-clipboard-list me-2"></i>
-                                Registro de notas
+                            <a href="#" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-clipboard-list me-2"></i> Registro de notas
                             </a>
                         @endif
 
-                        {{-- ============================================================
-                             EJEMPLO: Otros roles (descomentar cuando las rutas existan)
-                             
-                             @if($usuario->hasRole('CAJERO'))
-                                 <a href="#" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                     <i class="fa-solid fa-cash-register me-2"></i>
-                                     Módulo de caja
-                                 </a>
-                             @endif
-
-                             @if($usuario->hasRole('ADMIN_FINANCIERO'))
-                                 <a href="#" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                     <i class="fa-solid fa-chart-line me-2"></i>
-                                     Reportes financieros
-                                 </a>
-                             @endif
-
-                             @if($usuario->hasRole('COORDINADOR_FACULTAD'))
-                                 <a href="#" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                     <i class="fa-solid fa-building-columns me-2"></i>
-                                     Coordinación de facultad
-                                 </a>
-                             @endif
-
-                            @if($usuario->hasRole('DIRECTIVO'))
-                                <a href="{{ route('admin-academico.expedientes') }}"
-                                class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                    <i class="fa-solid fa-folder-open me-2"></i>
-                                    Dashboard
-                                </a>
-                            @endif
-                        ============================================================ --}}
-                            @if($usuario->hasRole('ADMIN_ACADEMICO'))
-                                <a href="{{ route('admin-academico.create-student') }}"
-                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                <i class="fa-solid fa-user-plus me-2"></i>
-                                Crear usuario 
+                        @if($usuario->hasRole('ADMIN_ACADEMICO'))
+                            <a href="{{ route('admin-academico.create-student') }}" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-user-plus me-2"></i> Crear usuario
                             </a>
-
-                            <a href="{{ route('admin-academico.admin.academico.solicitudes.approve-student') }}"
-                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                <i class="fa-solid fa-check me-2"></i>
-                                Solicitud de aprovación de cuentas
+                            <a href="{{ route('admin-academico.admin.academico.solicitudes.approve-student') }}" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-check me-2"></i> Solicitud de aprobación de cuentas
                             </a>
-
-                            <a href="{{ route('admin-academico.modify-student') }}"
-                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                <i class="fa-solid fa-users-gear me-2"></i>
-                                Administrar usuarios
+                            <a href="{{ route('admin-academico.modify-student') }}" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-users-gear me-2"></i> Administrar usuarios
                             </a>
-
-                            <a href="{{ route('admin-academico.admin-academico.beneficios.modify-benefit-student') }}"
-                               class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
-                                <i class="fa-solid fa-user-tag me-2"></i>
-                                Gestionar Becas
+                            <a href="{{ route('admin-academico.admin-academico.beneficios.modify-benefit-student') }}" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                                <i class="fa-solid fa-user-tag me-2"></i> Gestionar Becas
                             </a>
-                                
-                            @endif
+                        @endif
                     </div>
-
                 </div>
             </div>
-
         </div>
-
     </div>
-
 </div>
 @endsection

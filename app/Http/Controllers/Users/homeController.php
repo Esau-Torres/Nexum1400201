@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
@@ -29,10 +30,8 @@ class HomeController extends Controller
             return view('home', compact('usuario'));
         }
 
-        if ($usuario->hasRole('SUPER_ADMIN')) {
-            return redirect()->route('superadmin.panel-administrativo');
-        }
         $usuario->load($relations);
         return view('home', compact('usuario'));
     }
 }
+

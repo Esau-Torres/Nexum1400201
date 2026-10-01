@@ -41,11 +41,11 @@
                                 <span class="input-group-text bg-light border-end-0 text-muted">
                                     <i class="bi bi-person"></i>
                                 </span>
-                                <input type="text" 
-                                       name="name" 
-                                       id="name" 
-                                       class="form-control border-start-0 ps-0 @error('name', 'updateProfileInformation') is-invalid @enderror" 
-                                       value="{{ old('name', auth()->user()->name) }}" 
+                                <input type="text"
+                                       name="name"
+                                       id="name"
+                                       class="form-control border-start-0 ps-0 @error('name', 'updateProfileInformation') is-invalid @enderror"
+                                       value="{{ old('name', auth()->user()->name) }}"
                                        required>
                             </div>
                             @error('name', 'updateProfileInformation')
@@ -59,11 +59,11 @@
                                 <span class="input-group-text bg-light border-end-0 text-muted">
                                     <i class="bi bi-envelope"></i>
                                 </span>
-                                <input type="email" 
-                                       name="email" 
-                                       id="email" 
-                                       class="form-control border-start-0 ps-0 @error('email', 'updateProfileInformation') is-invalid @enderror" 
-                                       value="{{ old('email', auth()->user()->email) }}" 
+                                <input type="email"
+                                       name="email"
+                                       id="email"
+                                       class="form-control border-start-0 ps-0 @error('email', 'updateProfileInformation') is-invalid @enderror"
+                                       value="{{ old('email', auth()->user()->email) }}"
                                        required>
                             </div>
                             @error('email', 'updateProfileInformation')
@@ -103,10 +103,10 @@
                                 <span class="input-group-text bg-light border-end-0 text-muted">
                                     <i class="bi bi-key"></i>
                                 </span>
-                                <input type="password" 
-                                       name="current_password" 
-                                       id="current_password" 
-                                       class="form-control border-start-0 ps-0 @error('current_password', 'updatePassword') is-invalid @enderror" 
+                                <input type="password"
+                                       name="current_password"
+                                       id="current_password"
+                                       class="form-control border-start-0 ps-0 @error('current_password', 'updatePassword') is-invalid @enderror"
                                        required>
                             </div>
                             @error('current_password', 'updatePassword')
@@ -121,10 +121,10 @@
                                     <span class="input-group-text bg-light border-end-0 text-muted">
                                         <i class="bi bi-lock"></i>
                                     </span>
-                                    <input type="password" 
-                                           name="password" 
-                                           id="password" 
-                                           class="form-control border-start-0 ps-0 @error('password', 'updatePassword') is-invalid @enderror" 
+                                    <input type="password"
+                                           name="password"
+                                           id="password"
+                                           class="form-control border-start-0 ps-0 @error('password', 'updatePassword') is-invalid @enderror"
                                            required>
                                 </div>
                                 @error('password', 'updatePassword')
@@ -138,10 +138,10 @@
                                     <span class="input-group-text bg-light border-end-0 text-muted">
                                         <i class="bi bi-check2-circle"></i>
                                     </span>
-                                    <input type="password" 
-                                           name="password_confirmation" 
-                                           id="password_confirmation" 
-                                           class="form-control border-start-0 ps-0" 
+                                    <input type="password"
+                                           name="password_confirmation"
+                                           id="password_confirmation"
+                                           class="form-control border-start-0 ps-0"
                                            required>
                                 </div>
                             </div>
@@ -242,16 +242,16 @@
                                 @csrf
                                 <div class="row g-2 justify-content-center">
                                     <div class="col-12 col-sm-6 col-md-5">
-                                        <input type="text" 
-                                               name="code" 
-                                               id="code" 
-                                               class="form-control text-center font-monospace fs-5 py-2 @error('code') is-invalid @enderror" 
-                                               placeholder="000000" 
-                                               inputmode="numeric" 
-                                               pattern="[0-9]*" 
-                                               maxlength="6" 
-                                               autocomplete="one-time-code" 
-                                               required 
+                                        <input type="text"
+                                               name="code"
+                                               id="code"
+                                               class="form-control text-center font-monospace fs-5 py-2 @error('code') is-invalid @enderror"
+                                               placeholder="000000"
+                                               inputmode="numeric"
+                                               pattern="[0-9]*"
+                                               maxlength="6"
+                                               autocomplete="one-time-code"
+                                               required
                                                autofocus>
                                         @error('code')
                                             <span class="text-danger small mt-1 d-block text-center">{{ $message }}</span>
@@ -514,7 +514,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
-            
+
             <div class="modal-body py-3">
                 <p class="text-secondary mb-3">
                     Se enviará un enlace temporal de validación a tu bandeja de entrada: <strong class="text-dark">{{ auth()->user()->email }}</strong>.
@@ -550,17 +550,17 @@
                 secondsLeft--;
                 if (secondsLeft <= 0) {
                     clearInterval(interval);
-                    
+
                     // Disparar el logout automático
                     const logoutForm = document.createElement('form');
                     logoutForm.method = 'POST';
                     logoutForm.action = "{{ route('logout') }}";
-                    
+
                     const csrfToken = document.createElement('input');
                     csrfToken.type = 'hidden';
                     csrfToken.name = '_token';
                     csrfToken.value = "{{ csrf_token() }}";
-                    
+
                     logoutForm.appendChild(csrfToken);
                     document.body.appendChild(logoutForm);
                     logoutForm.submit();

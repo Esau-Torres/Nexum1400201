@@ -1,5 +1,15 @@
-@import 'bootstrap/dist/css/bootstrap.min.css';
+@import "bootstrap/dist/css/bootstrap.min.css";
 @import 'bootstrap-icons/font/bootstrap-icons.css';
+
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans:
+        "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+        "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
 
 :root {
     --bg-main: #f0f2f5;
@@ -13,68 +23,113 @@
 body {
     background-color: #ffffff;
     color: var(--text-primary);
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family:
+        "Inter",
+        system-ui,
+        -apple-system,
+        sans-serif;
     min-height: 100vh;
-    margin: 0;
-    padding: 0;
 }
 
-/* ==========================================================================
-   SIDEBAR & MAIN CONTENT LAYOUT
-   ========================================================================== */
-
+/* ========== SIDEBAR LAYOUT ========== */
 .sidebar {
     width: 260px;
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    z-index: 1040;
+    transition: transform 0.3s ease;
+}
+
+.main-content {
+    margin-left: 260px;
+    min-height: 100vh;
+}
+
+/* ========== BOTÓN TOGGLE (HAMBURGUESA) ========== */
+.sidebar-toggle {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1030;
+    width: 44px;
+    height: 44px;
+    border: none;
     background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-/* Escritorio (>= 992px) */
-@media (min-width: 992px) {
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        height: 100vh;
-        z-index: 1020;
-        transform: none !important;
-        visibility: visible !important;
-    }
-
-    .main-content {
-        margin-left: 260px;
-        width: calc(100% - 260px);
-        min-height: 100vh;
-    }
+.sidebar-toggle:hover {
+    background-color: #fff5f5;
+    color: var(--color-accent);
+    transform: scale(1.05);
 }
 
-/* Móviles y Tablets (< 992px) */
-@media (max-width: 991.98px) {
-    .sidebar.offcanvas-lg {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        height: 100vh;
-        max-width: 280px;
-        z-index: 1050;
-    }
-
-    .main-content {
-        margin-left: 0 !important;
-        width: 100% !important;
-        min-height: 100vh;
-        padding-top: 0 !important; /* Elimina el espacio en blanco superior */
-    }
+.sidebar-toggle i {
+    font-size: 1.25rem;
+    color: var(--text-primary);
 }
 
-/* ==========================================================================
-   NAVEGACIÓN INTERNA DEL SIDEBAR
-   ========================================================================== */
+.sidebar-toggle:hover i {
+    color: var(--color-accent);
+}
 
+/* ========== BOTÓN CERRAR ========== */
+.sidebar-close {
+    border: none;
+    background-color: transparent;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-primary);
+}
+
+.sidebar-close:hover {
+    background-color: #fff5f5;
+    color: var(--color-accent);
+}
+
+.sidebar-close i {
+    font-size: 1.25rem;
+}
+
+/* ========== BACKDROP ========== */
+.sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1035;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.sidebar-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ========== ITEMS DE NAVEGACIÓN ========== */
 .nav-item-custom {
     border-radius: 8px;
-    transition: all 0.25s ease;
+    transition: all 0.3s ease;
     padding: 12px 16px;
     margin-bottom: 4px;
     position: relative;
@@ -90,7 +145,7 @@ body {
     width: 3px;
     background-color: var(--color-accent);
     transform: scaleY(0);
-    transition: transform 0.25s ease;
+    transition: transform 0.3s ease;
 }
 
 .nav-item-custom:hover::before {
@@ -113,12 +168,12 @@ body {
 }
 
 .nav-icon {
-    transition: all 0.25s ease;
+    transition: all 0.3s ease;
 }
 
 .nav-item-custom.active {
     background-color: var(--color-accent);
-    color: #ffffff;
+    color: white;
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
 }
 
@@ -127,27 +182,64 @@ body {
 }
 
 .nav-item-custom.active .nav-text-secondary {
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .nav-item-custom.active .nav-icon {
-    color: #ffffff !important;
+    color: white !important;
 }
 
 .nav-item-custom.active .fw-medium {
-    color: #ffffff;
+    color: white;
 }
 
 .nav-text-secondary {
     font-size: 0.75rem;
     color: #6c757d;
-    transition: color 0.25s ease;
+    transition: color 0.3s ease;
 }
 
-/* ==========================================================================
-   WELCOME PAGE STYLES
-   ========================================================================== */
+/* ========== RESPONSIVE - MÓVIL ========== */
+@media (max-width: 991.98px) {
+    .sidebar {
+        transform: translateX(-100%);
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+    }
 
+    .sidebar.sidebar-open {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding-top: 70px;
+    }
+
+    .sidebar-toggle {
+        display: flex;
+    }
+
+    .sidebar-close {
+        display: flex;
+    }
+
+    .nav-item-custom:hover {
+        transform: translateX(0);
+    }
+}
+
+/* ========== TABLETS ========== */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .sidebar {
+        width: 240px;
+    }
+
+    .main-content {
+        margin-left: 240px;
+    }
+}
+
+/* ========== WELCOME PAGE STYLES ========== */
 .portal-hover {
     transition: all 0.3s ease;
 }
