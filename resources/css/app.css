@@ -388,3 +388,304 @@ body {
     padding: 10px 14px;
     display: inline-block;
 }
+
+/* ========== MATERIAS DOCENTE STYLES ========== */
+
+/* Tarjetas grandes de materias */
+.materia-large-card {
+    border: 1px solid #f1f3f5 !important;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.materia-large-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #dc3545 0%, #b02a37 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.materia-large-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(220, 53, 69, 0.12) !important;
+    border-color: rgba(220, 53, 69, 0.2) !important;
+}
+
+.materia-large-card:hover::before {
+    opacity: 1;
+}
+
+/* Icono grande de la materia */
+.materia-icon-large {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe3e3 100%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #dc3545;
+    font-size: 1.75rem;
+    transition: all 0.3s ease;
+}
+
+.materia-large-card:hover .materia-icon-large {
+    background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+    color: #ffffff;
+    transform: scale(1.05);
+}
+
+/* Descripción de la materia */
+.materia-description {
+    color: #6c757d;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 0;
+    min-height: 70px;
+}
+
+/* Stats de la materia */
+.materia-stats {
+    padding: 16px 0;
+    border-top: 1px solid #f1f3f5;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.materia-stats i {
+    width: 16px;
+    text-align: center;
+}
+
+/* ========== NOTAS MATERIA STYLES ========== */
+
+/* Tabla de notas por materia */
+.tabla-notas-materia {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.tabla-notas-materia thead th {
+    padding: 12px 8px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    border: none;
+    background-color: #fafbfc;
+    color: #495057;
+    border-bottom: 2px solid #eef0f2;
+}
+
+.tabla-notas-materia thead th .th-sub {
+    font-size: 0.68rem;
+    display: block;
+    margin-top: 1px;
+}
+
+.tabla-notas-materia tbody td {
+    padding: 16px 8px;
+    border-bottom: 1px solid #f1f3f5;
+    vertical-align: middle;
+    transition: background-color 0.2s ease;
+}
+
+.tabla-notas-materia tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.tabla-notas-materia tbody tr:hover td {
+    background-color: #fafbfc;
+}
+
+/* Avatar de estudiante */
+.avatar-notas {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe3e3 100%);
+    color: #dc3545;
+}
+
+/* Inputs de notas */
+.tabla-notas-materia .nota-input {
+    width: 54px;
+    height: 42px;
+    border: 1.5px solid #e2e6ea;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+    margin: 0 auto;
+    display: block;
+    color: #212529;
+}
+
+.tabla-notas-materia .nota-input:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+    outline: none;
+    background-color: #fff5f5;
+}
+
+.tabla-notas-materia .nota-input:hover:not(:focus):not(:disabled) {
+    border-color: #ced4da;
+}
+
+.tabla-notas-materia .nota-input:disabled {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    cursor: not-allowed;
+    border-color: #eef0f2;
+}
+
+/* Quitar flechas del input number */
+.tabla-notas-materia .nota-input::-webkit-outer-spin-button,
+.tabla-notas-materia .nota-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.tabla-notas-materia .nota-input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Columnas de promedio */
+.promedio-raw-display {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #adb5bd;
+    font-family: "Courier New", monospace;
+}
+
+.nota-aprobada {
+    color: #16a34a !important;
+}
+
+.nota-reprobada {
+    color: #dc3545 !important;
+}
+
+/* ========== ASISTENCIA MATERIA STYLES ========== */
+
+/* Tabla de asistencia */
+.tabla-asistencia {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.tabla-asistencia thead th {
+    padding: 12px 8px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    border: none;
+    background-color: #fafbfc;
+    color: #495057;
+    border-bottom: 2px solid #eef0f2;
+}
+
+.tabla-asistencia thead th .th-sub {
+    font-size: 0.68rem;
+    display: block;
+    margin-top: 1px;
+}
+
+.tabla-asistencia tbody td {
+    padding: 14px 8px;
+    border-bottom: 1px solid #f1f3f5;
+    vertical-align: middle;
+    transition: background-color 0.2s ease;
+}
+
+.tabla-asistencia tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.tabla-asistencia tbody tr:hover td {
+    background-color: #fafbfc;
+}
+
+/* Columnas sticky (fijas al hacer scroll horizontal) */
+.tabla-asistencia .sticky-col {
+    position: sticky;
+    background-color: #ffffff;
+    border-right: 2px solid #eef0f2;
+}
+
+.tabla-asistencia .sticky-col-porcentaje {
+    position: sticky;
+    background-color: #ffffff;
+    border-right: 2px solid #eef0f2;
+}
+
+.tabla-asistencia tbody tr:hover .sticky-col,
+.tabla-asistencia tbody tr:hover .sticky-col-porcentaje {
+    background-color: #fafbfc;
+}
+
+/* Avatar de estudiante */
+.avatar-asistencia {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe3e3 100%);
+    color: #dc3545;
+}
+
+/* Selects de asistencia */
+.tabla-asistencia .asistencia-select {
+    width: 75px;
+    height: 38px;
+    border: 1.5px solid #e2e6ea;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+    margin: 0 auto;
+    color: #212529;
+}
+
+.tabla-asistencia .asistencia-select:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+    outline: none;
+}
+
+.tabla-asistencia .asistencia-select:disabled {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    cursor: not-allowed;
+    border-color: #eef0f2;
+}
+
+/* Colores para los valores del select */
+.tabla-asistencia .asistencia-select option[value="Asis"] {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.tabla-asistencia .asistencia-select option[value="Falt"] {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.tabla-asistencia .asistencia-select option[value="Per"] {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+/* Porcentaje de asistencia */
+.porcentaje-display {
+    font-family: "Inter", sans-serif;
+}
+
+.nota-aprobada {
+    color: #16a34a !important;
+}
+
+.nota-reprobada {
+    color: #dc3545 !important;
+}

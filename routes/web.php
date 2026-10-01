@@ -37,4 +37,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/prueba-notas', function () {
         return view('docente.prueba-notas');
     })->name('prueba.notas');
+
+    Route::get('/materias-docente', function () {
+        return view('docente.materias_docente');
+    })->name('docente.materias');
+
+    Route::get('/notas/{materiaId}', function ($materiaId) {
+        // Futuro: Aquí buscarás la materia en la BD por ID
+        // y pasarás los datos a la vista
+        return view('docente.notas_materia', [
+            'materiaId' => $materiaId
+        ]);
+    })->name('docente.notas');
+
+    Route::get('/asistencia/{materiaId}', function ($materiaId) {
+        // Futuro: Aquí buscarás la materia en la BD por ID
+        // y pasarás los datos a la vista
+        return view('docente.asistencia_materia', [
+            'materiaId' => $materiaId
+        ]);
+    })->name('docente.asistencia');
 });

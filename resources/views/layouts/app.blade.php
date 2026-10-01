@@ -146,7 +146,7 @@
                     {{-- Opciones exclusivas para DOCENTE --}}
                     @elseif(auth()->user()->hasrole('DOCENTE'))
                     <li class="nav-item mb-1">
-                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('materias*')) active @endif">
+                        <a href="{{ route('docente.materias') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('docente.materias') ? 'active' : '' }}">
                             <i class="fa-solid fa-chalkboard-user nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Materias</div>
@@ -156,7 +156,7 @@
                     </li>
 
                     <li class="nav-item mb-1">
-                        <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('asistencia*')) active @endif">
+                        <a href="{{ route('docente.asistencia', 1) }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('docente.asistencia') ? 'active' : '' }}">
                             <i class="fa-solid fa-calendar-check nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Asistencia</div>
