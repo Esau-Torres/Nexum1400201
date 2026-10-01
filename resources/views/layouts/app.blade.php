@@ -209,26 +209,29 @@
                             </div>
                         </a>
                     </li>
-                @endif
-                    @if(auth()->user()->hasrole('SUPER_ADMIN'))
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('superadmin.createuser') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/createuser*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-user nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Crear</div>
-                                    <div class="nav-text-secondary">Ingreso de usuarios</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('superadmin.panel-administrativo') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/panel-administrativo*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-gauge nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Panel Administrativo</div>
-                                    <div class="nav-text-secondary">Administrar usuarios</div>
-                                </div>
-                            </a>
-                        </li>
+
+
+                    {{-- Opciones para SUPER_ADMIN --}}
+                    @elseif(auth()->user()->hasrole('SUPER_ADMIN'))
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('superadmin.createuser') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/createuser*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-user nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Crear</div>
+                                <div class="nav-text-secondary">Ingreso de usuarios</div>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('superadmin.panel-administrativo') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/panel-administrativo*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-gauge nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Panel Administrativo</div>
+                                <div class="nav-text-secondary">Administrar usuarios</div>
+                            </div>
+                        </a>
+                    </li>
 
                         <li class="nav-item mb-1">
                             <a href="{{ route('superadmin.roles.manageroles') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/roles.manageroles*') ? 'active' : '' }}">
