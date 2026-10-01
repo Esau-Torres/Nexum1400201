@@ -7,7 +7,7 @@ El sistema sirve como un núcleo centralizado que administra dos grandes áreas 
 1. **Gestión Académica:** Control absoluto sobre docentes, estudiantes, mallas curriculares, facultades, registro de asistencia y calificaciones.
 2. **Gestión Administrativa y Financiera:** Manejo de aranceles, tesorería, directivas, consejo académico, promociones, reglas de pago y emisión de comprobantes.
 
-El sistema implementa un Control de Acceso Basado en Roles (RBAC) altamente granular, estructurado para los siguientes perfiles: `SUPER_ADMIN`, `DIRECTIVO`, `ADMIN_ACADEMICO`, `COORDINADOR_FACULTAD`, `CAJERO / COLECTURIA`, `ADMIN_FINANCIERO`, `DOCENTE` y `ESTUDIANTE`[cite: 3]. 
+El sistema implementa un Control de Acceso Basado en Roles (RBAC) altamente granular, estructurado para los siguientes perfiles: `SUPER_ADMIN`, `DIRECTIVO`, `ADMIN_ACADEMICO`, `COORDINADOR_FACULTAD`, `CAJERO / COLECTURIA`, `ADMIN_FINANCIERO`, `DOCENTE` y `ESTUDIANTE`. 
 
 ##  Stack Tecnológico y Herramientas Utilizadas
 
@@ -39,7 +39,7 @@ Para levantar el entorno de desarrollo de la versión 0.1, necesitas tener insta
 
 ## Pasos para Desplegar el Proyecto Localmente
 
-git clone https://github.com/tu-organizacion/nexum.git
+git clone https://github.com/Esau-Torres/Nexum1400201.git
 - cd nexum
 ```
 composer install
