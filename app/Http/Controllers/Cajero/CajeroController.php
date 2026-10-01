@@ -12,9 +12,8 @@ use Illuminate\Support\Facades\Auth; // Para saber qué cajero cobró
 
 class CajeroController extends Controller
 {
-    /**
-     * Muestra la pantalla de ventanilla y busca cargos PENDIENTES.
-     */
+
+    //Muestra la pantalla de ventanilla y busca cargos PENDIENTES.
     public function deudaIndex(Request $request)
     {
         $cargos = collect();
@@ -38,6 +37,10 @@ class CajeroController extends Controller
                         ->where('codigo_estudiante', $request->id_alumno)
                         ->first();
 
+
+            $motor = new \App\Service\MotorPenalidadesService();
+            $motor->evaluarMultas($alumno->alumno_id);
+
             // 4. BÚSQUEDA DE CARGOS
             $cargos = \App\Models\Adfinanciero\CargoEstudiante::with('concepto')
                 ->where('id_alumno', $alumno->alumno_id)
@@ -49,9 +52,7 @@ class CajeroController extends Controller
         return view('cajero.deuda.index', compact('cargos'));
     }
 
-    /**
-     * Procesa el abono y cambia el estado del cargo a PAGADO.
-     */
+    //Procesa el abono y cambia el estado del cargo a PAGADO.
     public function deudaLiquidar(Request $request, $id)
     {
         // 1. Validamos que el request venga con los datos del modal

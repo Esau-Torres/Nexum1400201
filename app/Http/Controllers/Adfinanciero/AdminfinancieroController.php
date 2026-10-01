@@ -365,4 +365,55 @@ class AdminfinancieroController extends Controller
         ));
     }
 
+    //reglas de cobro
+    public function reglasIndex(Request $request)
+    {
+        // Utilizamos tu estructura de namespaces (Asegúrate de que el modelo se llame ReglaPago o ajusta el nombre)
+        $reglas = \App\Models\Adfinanciero\ReglaPago::with('conceptoRecargo')->get();
+
+        // Traemos los aranceles activos para el select del modal
+        $conceptos = \App\Models\Adfinanciero\ConceptoPago::where('estado', 'ACTIVO')->get();
+
+        // Ajusta la ruta de la vista según tu estructura de carpetas (ej. adfinanciero.reglas.index)
+        return view('adfinanciero.reglas.index', compact('reglas', 'conceptos'));
+    }
+
+    public function reglasStore(Request $request)
+    {
+        $request->validate([
+            'tipo' => 'required|string|max:255',
+            'dia_inicio_ordinario' => 'required|integer|min:1|max:31',
+            'dia_fin_ordinario' => 'required|integer|min:1|max:31|gte:dia_inicio_ordinario',
+            'dia_inicio_extra' => 'nullable|integer|min:1|max:31',
+            'dia_fin_extra' => 'nullable|integer|min:1|max:31|gte:dia_inicio_extra',
+            // Validamos contra tu tabla de conceptos usando tu namespace
+            'id_concepto_recargo' => 'nullable|exists:App\Models\Adfinanciero\ConceptoPago,concepto_pago_id',
+            'estado' => 'required|in:ACTIVO,INACTIVO'
+        ]);
+
+        \App\Models\Adfinanciero\ReglaPago::create($request->all());
+
+        // Usamos back() para mantener la consistencia con tus otros métodos store
+        return redirect()->back()->with('success', 'Regla de cobro creada exitosamente.');
+    }
+
+    public function reglasUpdate(Request $request, $id)
+    {
+        $regla = \App\Models\Adfinanciero\ReglaPago::findOrFail($id);
+
+        $request->validate([
+            'tipo' => 'required|string|max:255',
+            'dia_inicio_ordinario' => 'required|integer|min:1|max:31',
+            'dia_fin_ordinario' => 'required|integer|min:1|max:31|gte:dia_inicio_ordinario',
+            'dia_inicio_extra' => 'nullable|integer|min:1|max:31',
+            'dia_fin_extra' => 'nullable|integer|min:1|max:31|gte:dia_inicio_extra',
+            'id_concepto_recargo' => 'nullable|exists:App\Models\Adfinanciero\ConceptoPago,concepto_pago_id',
+            'estado' => 'required|in:ACTIVO,INACTIVO'
+        ]);
+
+        $regla->update($request->all());
+
+        return redirect()->back()->with('success', 'Regla actualizada correctamente.');
+    }
+
 }

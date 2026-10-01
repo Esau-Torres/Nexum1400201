@@ -17,7 +17,7 @@
 
     <!-- Styles / Scripts Vite -->
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
 </head>
 
@@ -34,7 +34,7 @@
             <i class="fa-solid fa-bars fs-5 text-dark"></i>
         </button>
         <span class="fw-bold small text-dark">@yield('titulo_navbar', 'NEXUM')</span>
-        <img src="{{ asset('assets/images/uma_santa_ana.png') }}" alt="UMA" style="height: 32px;">
+        <img src="{{ asset('images/uma_santa_ana.png') }}" alt="UMA" style="height: 32px;">
     </div>
 
     <div class="layout-wrapper">
@@ -48,7 +48,7 @@
             <!-- Logo -->
             <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
                 <a href="{{ route('home') }}">
-                    <img src="{{ asset('images/logo-uma-santa-ana.png') }}" alt="Logo UMA" class="img-fluid" style="max-height: 48px;">
+                    <img src="{{ asset('images/uma_santa_ana.png') }}" alt="Logo UMA" class="img-fluid" style="max-height: 48px;">
                 </a>
                 <button class="sidebar-close d-lg-none" id="sidebarClose" aria-label="Cerrar menú">
                     <i class="fa-solid fa-xmark"></i>
@@ -215,15 +215,35 @@
                                 </div>
                             </a>
                         </li>
+                    @endif
+
+                    @if(auth()->user()->hasrole('DOCENTE'))
+                        <li class="nav-item mb-1">
+                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('materias*')) active @endif">
+                                <i class="fa-solid fa-chalkboard-user nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Materias</div>
+                                    <div class="nav-text-secondary">Cursos asignados</div>
+                                </div>
+                            </a>
+                        </li>
 
                         <li class="nav-item mb-1">
-                            <!-- Usamos adfinanciero.cargos.* para que se mantenga iluminado -->
-                            <a href="{{ route('adfinanciero.cargos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('adfinanciero.cargos.*') ? 'active' : '' }}">
-                                <!-- Cambié el ícono de 'porcentaje' por uno de 'factura' para que no sea idéntico al de Promociones -->
-                                <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
+                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('asistencia*')) active @endif">
+                                <i class="fa-solid fa-calendar-check nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
-                                    <div class="fw-medium">Record estudiantil</div>
-                                    <div class="nav-text-secondary">Generación de cuotas</div>
+                                    <div class="fw-medium">Asistencia</div>
+                                    <div class="nav-text-secondary">Control de clases</div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('prueba.notas') ? 'active' : '' }}">
+                                <i class="fa-solid fa-file-pen nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Prueba de Notas</div>
+                                    <div class="nav-text-secondary">Evaluaciones y calificaciones</div>
                                 </div>
                             </a>
                         </li>
@@ -276,16 +296,6 @@
                                 </div>
                             </a>
                         </li>
-
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('adfinanciero.cargos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('record-financiero*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Record Financiero</div>
-                                    <div class="nav-text-secondary">Credenciales de pago</div>
-                                </div>
-                            </a>
-                        </li>
                     @endif
                     <!-- aqui va el end cuandos termine todo -->
                 </ul>
@@ -293,13 +303,9 @@
 
             <!-- Sección Inferior -->
             <div class="p-3 border-top">
-                <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark mb-1">
+                <a href="{{ route('profile') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark mb-1 {{ request()->routeIs('profile') ? 'active' : '' }}">
                     <i class="fa-solid fa-gear nav-icon fs-5 me-3 text-muted"></i>
                     <div class="fw-medium">Ajustes</div>
-                </a>
-                <a href="{{ route('profile') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark @if(request()->is('profile')) active @endif">
-                    <i class="fa-solid fa-user-circle nav-icon fs-5 me-3 text-muted"></i>
-                    <div class="fw-medium">Perfil</div>
                 </a>
             </div>
         </aside>
