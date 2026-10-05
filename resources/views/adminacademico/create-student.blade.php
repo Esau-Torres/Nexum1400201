@@ -572,7 +572,7 @@
                             {{-- Título bachillerato --}}
                             <div class="col-md-6">
                                 <label for="titulo_bachillerato" class="form-label fw-medium small">
-                                    Título de bachillerato <span class="text-danger">*</span>
+                                    Título de bachillerato
                                 </label>
                                 <input type="file"
                                        name="titulo_bachillerato"

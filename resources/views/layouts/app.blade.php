@@ -93,7 +93,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('admin-academico.modify-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.modify-student') ? 'active' : '' }}">
+                            <a href="{{ route('admin-academico.alumnos.modify-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.modify-student') ? 'active' : '' }}">
                                 <i class="fa-solid fa-chart-pie nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Gestionar Alumno</div>
@@ -107,6 +107,43 @@
                                 <div>
                                     <div class="fw-medium">Gestionar becas</div>
                                     <div class="nav-text-secondary">Beneficios de estudiantes</div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('admin-academico.pensum.pensum') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.pensum.pensum') ? 'active' : '' }}">
+                                <i class="fa-solid fa-book-open nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Gestionar pensum</div>
+                                    <div class="nav-text-secondary">crear o gestionar pensum</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('admin-academico.materias.materias') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.materias.materias') ? 'active' : '' }}">
+                                <i class="fa-solid fa-school nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Gestionar Materias</div>
+                                    <div class="nav-text-secondary">crear o gestionar materias</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('admin-academico.ciclolectivo.ciclo') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.ciclolectivo.ciclo') ? 'active' : '' }}">
+                                <i class="fa-solid fa-calendar-alt nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Gestionar ciclos</div>
+                                    <div class="nav-text-secondary">apertura de ciclos lectivo</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('admin-academico.facultades.facultad') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.facultades.facultad') ? 'active' : '' }}">
+                                <i class="fa-solid fa-building nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Gestionar facultad</div>
+                                    <div class="nav-text-secondary">facultades y carreras</div>
                                 </div>
                             </a>
                         </li>

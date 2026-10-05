@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ...nexumDataTableRoles,
         columnDefs: [{ orderable: false, targets: 3 }] 
     });
+    initTable('#modify-student-Table', { columnDefs: [{ orderable: false, targets: 5}] });
     initTable('#usersAssignTable', { columnDefs: [{ orderable: false, targets: 4 }] });
     
 });

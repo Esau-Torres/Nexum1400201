@@ -50,6 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('docente.notas_materia', [
             'materiaId' => $materiaId
         ]);
+        
     })->name('docente.notas');
 
     Route::get('/asistencia/{materiaId}', function ($materiaId) {

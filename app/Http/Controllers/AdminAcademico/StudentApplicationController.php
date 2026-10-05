@@ -84,14 +84,21 @@ class StudentApplicationController extends Controller
     public function downloadDocument(int $alumno, string $campo)
     {
         $camposValidos = ['titulo_bachillerato', 'partida_nacimiento', 'fotografia_personal', 'constancia_paes'];
-
         abort_unless(in_array($campo, $camposValidos, true), 404);
 
-        $doc = AlumnoDocumentos::where('id_alumno', $alumno)->firstOrFail();
+        $doc  = AlumnoDocumentos::where('id_alumno', $alumno)->firstOrFail();
         $path = $doc->$campo;
+        abort_unless($path, 404);
 
-        abort_unless($path && \Storage::exists($path), 404);
+        $disco = $campo === 'fotografia_personal' ? 'public' : 'local';
 
-        return \Storage::download($path);
+        abort_unless(\Storage::disk($disco)->exists($path), 404);
+
+        $mime = \Storage::disk($disco)->mimeType($path);
+
+        // Imagen → inline. PDF → descarga.
+        return str_starts_with($mime, 'image/')
+            ? \Storage::disk($disco)->response($path)
+            : \Storage::disk($disco)->download($path);
     }
 }

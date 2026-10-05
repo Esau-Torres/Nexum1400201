@@ -84,14 +84,15 @@ class FortifyServiceProvider extends ServiceProvider
             // Usuario no existe o contraseña incorrecta
             if (!$user || !Hash::check($request->password, $user->password)) {
 
+                Log::warning('NEXUM_AUTH_FAILED', [
+                    'ip' => $request->ip(),
+                    'email' => $request->email,
+                    'reason' => $user ? 'invalid_password' : 'user_not_found',
+                ]);
+
                 session()->flash(
                     'error',
                     'Credenciales inválidas. Verifique su correo institucional y contraseña.'
-                );
-
-                session()->flash(
-                    'error_title',
-                    'Acceso Denegado'
                 );
 
                 throw ValidationException::withMessages([

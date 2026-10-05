@@ -41,7 +41,7 @@ class StoreActiveStudentRules extends FormRequest
             'rol' => ['sometimes', 'string', Rule::in([Role::ESTUDIANTE])],
 
             // Documentos
-            'titulo_bachillerato' => ['required', 'file', 'mimes:pdf,jpg,png', 'max:2048'],
+            'titulo_bachillerato' => ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:2048'],
             'partida_nacimiento'  => ['required', 'file', 'mimes:pdf,jpg,png', 'max:2048'],
             'fotografia_personal' => ['required', 'file', 'mimes:jpg,png', 'max:2048'],
             'constancia_paes'     => ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:2048'],

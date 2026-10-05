@@ -15,7 +15,7 @@ class UploadStudentDocumentsAction
 
         return AlumnoDocumentos::create([
             'id_alumno'           => $alumno->alumno_id,
-            'titulo_bachillerato' => $request->file('titulo_bachillerato')->store($rutapr),
+            'titulo_bachillerato' => $request->hasFile('titulo_bachillerato') ? $request->file('titulo_bachillerato')->store($rutapr) : null,
             'partida_nacimiento'  => $request->file('partida_nacimiento')->store($rutapr),
             'fotografia_personal' => $request->file('fotografia_personal')->store($rutap, 'public'),
             'constancia_paes'     => $request->hasFile('constancia_paes') ? $request->file('constancia_paes')->store($rutapr) : null,

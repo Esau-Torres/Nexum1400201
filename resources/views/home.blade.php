@@ -325,7 +325,7 @@
                             <a href="{{ route('admin-academico.admin.academico.solicitudes.approve-student') }}" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
                                 <i class="fa-solid fa-check me-2"></i> Solicitud de aprobación de cuentas
                             </a>
-                            <a href="{{ route('admin-academico.modify-student') }}" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
+                            <a href="{{ route('admin-academico.alumnos.modify-student') }}" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">
                                 <i class="fa-solid fa-users-gear me-2"></i> Administrar usuarios
                             </a>
                             <a href="{{ route('admin-academico.admin-academico.beneficios.modify-benefit-student') }}" class="btn btn-outline-dark text-start p-3 rounded-3 portal-hover">

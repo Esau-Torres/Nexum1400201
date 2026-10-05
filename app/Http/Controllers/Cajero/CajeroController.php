@@ -22,7 +22,7 @@ class CajeroController extends Controller
 
             // 1. SANITIZAR EL INPUT (Ahora forzamos MINÚSCULAS)
             $request->merge([
-                'id_alumno' => strtolower(trim($request->id_alumno))
+                'id_alumno' => strtoupper(trim($request->id_alumno))
             ]);
 
             // 2. VALIDACIÓN
@@ -33,7 +33,7 @@ class CajeroController extends Controller
             ]);
 
             // 3. OBTENER EL ID NUMÉRICO
-            $alumno = \Illuminate\Support\Facades\DB::table('alumnos')
+            $alumno = DB::table('alumnos')
                         ->where('codigo_estudiante', $request->id_alumno)
                         ->first();
 
@@ -252,7 +252,7 @@ class CajeroController extends Controller
             'total_liquidado' => 'required|numeric|gt:0',
         ];
 
-        $canalPago = strtolower($request->input('canal', 'efectivo'));
+        $canalPago = strtoupper($request->input('canal', 'efectivo'));
 
         // Si es Efectivo, validamos que el dinero alcance
         if ($canalPago === 'efectivo') {

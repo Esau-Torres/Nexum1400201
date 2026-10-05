@@ -40,7 +40,7 @@ class CreateNewUser implements CreatesNewUsers
             'fecha_nacimiento'    => ['required', 'date', 'before:-17 years'],
             'genero'              => ['required', 'in:M,F'],
             'id_carrera'          => ['required', 'exists:carreras,carrera_id'],
-            'titulo_bachillerato' => ['required', 'file', 'mimes:pdf,jpg,png', 'max:2048'],
+            'titulo_bachillerato' => ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:2048'],
             'partida_nacimiento'  => ['required', 'file', 'mimes:pdf,jpg,png', 'max:2048'],
             'fotografia_personal' => ['required', 'file', 'mimes:jpg,png', 'max:2048'],
             'constancia_paes'     => ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:2048'],

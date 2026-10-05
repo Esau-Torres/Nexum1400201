@@ -19,7 +19,7 @@
             </div>
         </div>
         <div>
-            <a href="{{ route('admin-academico.modify-student') }}" class="btn bg-danger-subtle text-danger border border-danger px-3 py-2">
+            <a href="{{ route('admin-academico.alumnos.modify-student') }}" class="btn bg-danger-subtle text-danger border border-danger px-3 py-2">
                 <i class="fa-solid fa-user me-1"></i> gestionar alumnos
             </a>
         </div>
