@@ -25,7 +25,7 @@
     <!-- Encabezado y Datos del Estudiante -->
     <div class="row mb-4 align-items-center">
         <div class="col-md-8">
-            <h2 class="fw-bold text-dark mb-1"><i class="bi bi-wallet2 me-2" style="color: #ff7575;"></i> Mi estado de cuenta</h2>
+            <h2 class="fw-bold text-dark mb-1"><i class="bi bi-wallet2 me-2" style="color: #ff7575;"></i> MI ESTADO DE CUENTA</h2>
             <p class="text-muted mb-0">
                 <span class="fw-bold text-dark">{{ Auth::user()->name ?? 'Estudiante' }}</span> | {{ Auth::user()->alumno->carrera->nombre ?? 'Carrera no definida' }} <br>
                 <span class="badge text-white mt-2" style="background-color: #dc3545;">Ciclo Activo: 02-2026</span>

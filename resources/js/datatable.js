@@ -89,5 +89,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     initTable('#modify-student-Table', { columnDefs: [{ orderable: false, targets: 5}] });
     initTable('#usersAssignTable', { columnDefs: [{ orderable: false, targets: 4 }] });
-    
+    initTable('#materiasTable', { columnDefs: [{ orderable: false, targets: 5 }] });
+    initTable('#pensum-table', { columnDefs: [{ orderable: false, targets: 6 }] });
 });

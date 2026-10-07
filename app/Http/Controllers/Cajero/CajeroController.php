@@ -381,7 +381,7 @@ class CajeroController extends Controller
             // ==========================================
             else if ($request->has('aranceles_ids')) {
                 $arancelesIds = $request->input('aranceles_ids', []);
-                $codigoEstudiante = strtolower(trim($request->input('codigo_estudiante')));
+                $codigoEstudiante = strtoupper(trim($request->input('codigo_estudiante')));
 
                 if (empty($arancelesIds)) throw new \Exception('No se enviaron aranceles para cobrar.');
 

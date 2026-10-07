@@ -4,7 +4,7 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-0">Informes Contables y Conciliación</h2>
+            <h2 class="fw-bold mb-0">INFORMES CONTABLES Y CONCILIACIÓN</h2>
             <p class="text-muted">Visión global de ingresos institucionales.</p>
         </div>
         <!-- Se eliminó el botón de Exportar Informe -->

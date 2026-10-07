@@ -39,7 +39,7 @@
     </div>
 
     {{-- BARRA DE BÚSQUEDA Y FILTROS --}}
-    <div class="card stat-card stat-card-light border-0 shadow-sm mb-4">
+    <div class="card  border-0 shadow-sm mb-4">
         <div class="card-body p-4">
             <form method="GET" action="{{ route('admin-academico.ciclolectivo.ciclo') }}" id="filterForm">
                 <div class="row g-3 align-items-end">
