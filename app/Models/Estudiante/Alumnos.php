@@ -7,8 +7,13 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo; 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
-use App\Models\Academico\BeneficioEstudiante;
+
 Use App\Models\Users\User;
+Use App\Models\Estudiante\AlumnoDocumentos;
+Use App\Models\Estudiante\Carreras;
+Use App\Models\Academico\BeneficioEstudiante;
+Use App\Models\Academico\CargoEstudiante;
+use App\Enums\EstadoBeneficio;
 
 class Alumnos extends Model
 {
@@ -66,5 +71,10 @@ class Alumnos extends Model
             'carrera.facultad',
             'documentos',
         ]);
+    }
+
+    public function beneficioActivo(): ?BeneficioEstudiante
+    {
+        return $this->beneficios->firstWhere('estado', EstadoBeneficio::ACTIVO);
     }
 }

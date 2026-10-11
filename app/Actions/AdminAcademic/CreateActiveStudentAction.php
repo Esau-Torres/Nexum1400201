@@ -3,6 +3,7 @@
 namespace App\Actions\AdminAcademic;
 
 use App\Models\Users\User;
+use App\Models\Estudiante\Alumnos;
 use App\Actions\User\CreateUserAccountAction;
 use App\Actions\User\AssignUserRoleAction;
 use App\Actions\Student\CreateStudentProfileAction;
@@ -28,7 +29,7 @@ class CreateActiveStudentAction
         protected AssignStudentBenefitAction $assignBenefitAction, 
     ) {}
 
-    public function execute(array $input, User $admin, Request $request): User
+    public function execute(array $input, User $admin, Request $request): Alumnos
     {
         // 1. Validación defensiva del rol solicitado
         $this->validarRolSolicitado($input['rol'] ?? 'ESTUDIANTE');
@@ -89,7 +90,7 @@ class CreateActiveStudentAction
                 );
             }
 
-            return $user;
+            return $alumno; 
         });
     }
 

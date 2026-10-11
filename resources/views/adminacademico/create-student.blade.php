@@ -29,6 +29,11 @@
                     <i class="fa-solid fa-home me-1"></i>
                     Inicio
                 </a>
+                <a href="{{ route('admin-academico.create-student.massive') }}" class="btn bg-outline-danger text-danger
+                            border border-danger px-3 py-2">
+                    <i class="fa-solid fa-plus me-1"></i>
+                    Carga Masiva
+                </a>
             </div>
         </div>
 
@@ -572,14 +577,13 @@
                             {{-- Título bachillerato --}}
                             <div class="col-md-6">
                                 <label for="titulo_bachillerato" class="form-label fw-medium small">
-                                    Título de bachillerato
+                                    Título de bachillerato <span class="text-muted">(Se permite subir después )</span>
                                 </label>
                                 <input type="file"
                                        name="titulo_bachillerato"
                                        id="titulo_bachillerato"
                                        class="form-control @error('titulo_bachillerato') is-invalid @enderror"
-                                       accept=".pdf,.jpg,.jpeg,.png"
-                                       required>
+                                       accept=".pdf,.jpg,.jpeg,.png">
                                 @error('titulo_bachillerato')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -623,7 +627,7 @@
                             {{-- Constancia PAES --}}
                             <div class="col-md-6">
                                 <label for="constancia_paes" class="form-label fw-medium small">
-                                    Constancia PAES <span class="text-muted">(opcional)</span>
+                                    Constancia PAES <span class="text-muted">(Se permite subir después )</span>
                                 </label>
                                 <input type="file"
                                        name="constancia_paes"
@@ -639,7 +643,7 @@
                             {{-- Observaciones --}}
                             <div class="col-12">
                                 <label for="observaciones" class="form-label fw-medium small">
-                                    Observaciones
+                                    Observaciones <span class="text-muted">(opcional)</span>
                                 </label>
                                 <textarea name="observaciones"
                                           id="observaciones"

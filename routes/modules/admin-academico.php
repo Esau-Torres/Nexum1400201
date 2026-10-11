@@ -9,6 +9,7 @@
     use App\Http\Controllers\AdminAcademico\CicloLectivoController;    
     use App\Http\Controllers\AdminAcademico\MateriaController;
     use App\Http\Controllers\AdminAcademico\PensumController;
+    use App\Http\Controllers\AdminAcademico\FacultadCarreraController;
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('role:'.Role::ADMIN_ACADEMICO)->group(function () {
@@ -17,6 +18,11 @@
             Route::get('/crearestudiante', [ActiveStudentController::class, 'index'])->name('create-student');
             // Procesar creación directa (activo)
             Route::post('/estudiantes/crear-activo', [ActiveStudentController::class, 'store'])->name('students.store');
+
+            // crear estudiante masivo
+            Route::get('/crear-estudiante/masivo', [ActiveStudentController::class, 'massiveForm'])->name('create-student.massive');
+            Route::post('/crear-estudiante/masivo', [ActiveStudentController::class, 'massiveStore'])->name('create-student.massive.store');
+            Route::get('/crear-estudiante/masivo/plantilla', [ActiveStudentController::class, 'massiveTemplate'])->name('create-student.massive.template');
 
             // aprobar o rechazar solicitudes de usuarios que quieren crear cuentas de estudiante
             Route::get('/documentos/{alumno}/{campo}', [StudentApplicationController::class, 'downloadDocument'] )->name('documentos.download');
@@ -40,6 +46,7 @@
                 Route::put('/{alumno}',                       [StudentModifyController::class, 'update'])->name('update');
                 Route::delete('/{alumno}/documentos/{campo}', [StudentModifyController::class, 'deleteDocument'])->name('documentos.delete');
                 Route::post('/{alumno}/documentos',           [StudentModifyController::class, 'uploadDocuments'])->name('documentos.upload');
+                Route::post('/{alumno}/beneficio',            [StudentModifyController::class, 'assignBenefit'])->name('beneficios.assign');
             });
             
             // gestionamiento de pensum, materias y ciclo lectivo
@@ -58,7 +65,17 @@
             });
 
             Route::prefix('facultades')->name('facultades.')->group(function () {
-                Route::get('/facultad', function () { return view('adminacademico.facultad'); })->name('facultad');
+                Route::get('/facu', [FacultadCarreraController::class, 'index'])->name('facultad');
+                
+                // Facultades
+                Route::post('/facultad',                  [FacultadCarreraController::class, 'storeFacultad'])->name('facultad.store');
+                Route::put('/facultad/{facultad}',        [FacultadCarreraController::class, 'updateFacultad'])->name('facultad.update');
+                Route::delete('/facultad/{facultad}',     [FacultadCarreraController::class, 'deleteFacultad'])->name('facultad.delete');
+
+                // Carreras
+                Route::post('/carrera',                   [FacultadCarreraController::class, 'storeCarrera'])->name('carrera.store');
+                Route::put('/carrera/{carrera}',          [FacultadCarreraController::class, 'updateCarrera'])->name('carrera.update');
+                Route::delete('/carrera/{carrera}',       [FacultadCarreraController::class, 'deleteCarrera'])->name('carrera.delete');
             });
 
             

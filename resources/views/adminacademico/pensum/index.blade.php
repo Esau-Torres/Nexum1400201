@@ -6,7 +6,7 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
             <h1 class="h3 fw-bold text-dark mb-1">
-                <i class="bi bi-diagram-3-fill text-danger me-2"></i>Gestión de Pensums
+                <i class="bi bi-diagram-3-fill text-danger me-2"></i>GESTIÓN DE PENSUMS
             </h1>
             <p class="text-muted mb-0 small">Planes de estudio por carrera.</p>
         </div>

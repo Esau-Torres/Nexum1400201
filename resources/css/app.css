@@ -794,3 +794,88 @@ ul.pagination .page-item.disabled .page-link {
 .nota-reprobada {
     color: #dc3545 !important;
 }
+
+/* ========== NAV PILLS PERSONALIZADOS ========== */
+.custom-pills {
+    /* Matamos las variables por defecto de Bootstrap (azul) */
+    --bs-nav-pills-link-active-bg: #ffffff;
+    --bs-nav-pills-link-active-color: var(--color-accent);
+    --bs-nav-pills-border-radius: 0.5rem;
+    --bs-nav-link-color: #6c757d;
+    --bs-nav-link-hover-color: var(--color-accent);
+
+    background-color: #fafbfc;
+    padding: 6px;
+    border: 1px solid #eef0f2;
+    border-radius: 12px;
+}
+
+/* Estado base del link (no activo) */
+.custom-pills .nav-link {
+    color: #6c757d;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 1rem;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+/* Hover en link NO activo */
+.custom-pills .nav-link:not(.active):hover {
+    color: var(--color-accent);
+    background-color: var(--color-hover-bg);
+}
+
+/* ======================================
+   ESTADO ACTIVO
+   ====================================== */
+.custom-pills .nav-link.active,
+.custom-pills .nav-link.show {
+    background-color: #ffffff !important;
+    color: var(--color-accent) !important;
+    border: 1px solid var(--color-accent) !important;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.12) !important;
+}
+
+/* Hover sobre el link ACTIVO: no debe cambiar */
+.custom-pills .nav-link.active:hover,
+.custom-pills .nav-link.show:hover {
+    background-color: #ffffff !important;
+    color: var(--color-accent) !important;
+    border-color: var(--color-accent) !important;
+}
+
+/* ======================================
+   KILL SWITCH del focus azul de Bootstrap
+   ====================================== */
+.custom-pills .nav-link:focus,
+.custom-pills .nav-link:focus-visible,
+.custom-pills .nav-link.active:focus,
+.custom-pills .nav-link.active:focus-visible {
+    outline: none !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15) !important;
+    border-color: var(--color-accent) !important;
+}
+
+/* Quitamos cualquier color azul residual del reset de Bootstrap */
+.custom-pills .nav-link:active {
+    background-color: #ffffff;
+    color: var(--color-accent);
+}
+
+/*-- Estilos CSS personalizados para la interacción de las pestañas --*/
+
+.nav-tabs .nav-link {
+        color: #6c757d; 
+    }
+    .nav-tabs .nav-link:hover {
+        color: #dc3545;
+        background-color: #f8f9fa;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #dc3545 !important;
+        background-color: #ffffff !important;
+        border-bottom: 3px solid #dc3545 !important;
+        box-shadow: 0 -2px 6px rgba(0,0,0,0.03);
+    }

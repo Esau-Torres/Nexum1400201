@@ -22,6 +22,7 @@ class AlumnoDocumentos extends Model
         'fotografia_personal',
         'constancia_paes',
     ];
+    
     // relaciones
     public function alumno(): BelongsTo {
         return $this->belongsTo(Alumnos::class, 'id_alumno', 'alumno_id');

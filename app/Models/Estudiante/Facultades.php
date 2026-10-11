@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Models\Estudiante;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Estudiante\Carreras;
 
 class Facultades Extends Model {
 
@@ -16,8 +18,14 @@ class Facultades Extends Model {
     ];
 
     // relaciones una facultad puede tener muchas carreras 
-     public function carrera(): HasMany
+     public function carreras(): HasMany
     {
         return $this->hasMany(Carreras::class, 'id_facultad', 'facultad_id');
+    }
+
+    // --Helpers --
+    public function tieneCarreras(): bool
+    {
+        return $this->carreras()->exists();
     }
 }

@@ -4,18 +4,32 @@
 <div class="container-fluid py-4">
 
     {{-- HEADER --}}
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-        <div>
-            <h1 class="h3 fw-bold text-dark mb-1">
-                <i class="bi bi-journal-bookmark-fill text-danger me-2"></i>Gestión de Materias
-            </h1>
-            <p class="text-muted mb-0 small">Administración del catálogo de asignaturas de la UMA.</p>
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <!-- Título y Descripción con Identidad Institucional -->
+            <div>
+                <div class="d-flex align-items-center mb-1">
+                    <span class="stat-icon-circle me-3" style="width: 42px; height: 42px; font-size: 1.2rem;">
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                    </span>
+                    <h1 class="h3 fw-bold text-dark mb-0 tracking-tight">GESTIÓN DE MATERIAS</h1>
+                </div>
+                <p class="text-muted mb-0 small ps-5">
+                    Administración integral del catálogo oficial de asignaturas de la Universidad Modular Abierta (UMA).
+                </p>
+            </div>
+
+            <!-- Botón de Acción Principal (Modal) -->
+            <div>
+                <button type="button" class="btn btn-danger btn-sm px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#createMateriaModal"
+                        style="transition: all 0.2s ease;">
+                    <i class="bi bi-plus-circle-fill fs-5"></i>
+                    <span>Nueva Materia</span>
+                </button>
+            </div>
         </div>
-        <button type="button" class="btn btn-danger d-flex align-items-center gap-2"
-                data-bs-toggle="modal" data-bs-target="#createMateriaModal">
-            <i class="bi bi-plus-circle-fill"></i>
-            Nueva Materia
-        </button>
     </div>
 
     {{-- FILTROS --}}

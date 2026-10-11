@@ -7,6 +7,7 @@ use App\Models\Academico\Pensum;
 use App\Rules\CrearPensumRules;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Models\Estudiante\Carreras;
 
 class CreatePensumAction
 {
@@ -22,6 +23,8 @@ class CreatePensumAction
         }
 
         return DB::transaction(function () use ($data) {
+            // Invalidar cache porque cambió el estado del pensum
+            Carreras::olvidarCacheActivas();
             return Pensum::create([
                 'id_carrera'    => $data['id_carrera'],
                 'nombre'        => trim($data['nombre']),

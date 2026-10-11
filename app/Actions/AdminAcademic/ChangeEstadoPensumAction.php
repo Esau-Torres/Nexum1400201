@@ -7,6 +7,7 @@ use App\Models\Academico\Pensum;
 use App\Rules\CambiarEstadoPensumRules;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Models\Estudiante\Carreras;
 
 class ChangeEstadoPensumAction
 {
@@ -24,6 +25,8 @@ class ChangeEstadoPensumAction
         return DB::transaction(function () use ($pensum, $nuevoEstado) {
             $pensum->estado = $nuevoEstado;
             $pensum->save();
+            // Invalidar cache porque cambió el estado del pensum
+            Carreras::olvidarCacheActivas();
 
             return $pensum->refresh();
         });

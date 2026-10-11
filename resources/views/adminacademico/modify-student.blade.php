@@ -193,20 +193,49 @@
                 </div>
 
                 <div class="modal-body p-0">
-                    <ul class="nav nav-tabs px-4 pt-3" role="tablist">
-                        <li class="nav-item">
-                            <button class="nav-link active" data-bs-toggle="tab"
-                                    data-bs-target="#tab-datos-{{ $uid }}">
-                                <i class="bi bi-person-vcard me-1"></i> Datos
-                            </button>
-                        </li>
-                        <li class="nav-item">
-                            <button class="nav-link" data-bs-toggle="tab"
-                                    data-bs-target="#tab-docs-{{ $uid }}">
-                                <i class="bi bi-folder2-open me-1"></i> Documentos
-                            </button>
-                        </li>
-                    </ul>
+                <ul class="nav nav-tabs px-4 pt-3 border-bottom-0" role="tablist">
+                    {{-- Tab Datos --}}
+                    <li class="nav-item me-2" role="presentation">
+                        <button class="nav-link active px-3 py-2 fw-semibold text-secondary rounded-top border-0 bg-transparent" 
+                                style="transition: all 0.2s ease-in-out;"
+                                data-bs-toggle="tab"
+                                data-bs-target="#tab-datos-{{ $uid }}"
+                                type="button" 
+                                role="tab" 
+                                aria-selected="true">
+                            <i class="bi bi-person-vcard me-1"></i> Datos
+                        </button>
+                    </li>
+
+                    {{-- Tab Documentos --}}
+                    <li class="nav-item me-2" role="presentation">
+                        <button class="nav-link px-3 py-2 fw-semibold text-secondary rounded-top border-0 bg-transparent" 
+                                style="transition: all 0.2s ease-in-out;"
+                                data-bs-toggle="tab"
+                                data-bs-target="#tab-docs-{{ $uid }}"
+                                type="button" 
+                                role="tab" 
+                                aria-selected="false">
+                            <i class="bi bi-folder2-open me-1"></i> Documentos
+                        </button>
+                    </li>
+
+                    {{-- Tab Beneficio --}}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link px-3 py-2 fw-semibold text-secondary rounded-top border-0 bg-transparent position-relative" 
+                                style="transition: all 0.2s ease-in-out;"
+                                data-bs-toggle="tab"
+                                data-bs-target="#tab-beneficio-{{ $uid }}"
+                                type="button" 
+                                role="tab" 
+                                aria-selected="false">
+                            <i class="bi bi-cash-coin me-1"></i> Beneficio
+                            @if($alumno->beneficios->isNotEmpty())
+                                <span class="badge bg-success rounded-pill ms-1 align-text-top" style="font-size:0.6rem; padding: 0.25em 0.4em;">Activo</span>
+                            @endif
+                        </button>
+                    </li>
+                </ul>
 
                     <div class="tab-content p-4">
 
@@ -511,6 +540,254 @@
                                 </div>
                             </form>
                         </div>
+
+                        {{-- ==================== TAB BENEFICIO ==================== --}}
+                        <div class="tab-pane fade" id="tab-beneficio-{{ $uid }}">
+
+                            @php
+                                $beneficioActivo = $alumno->beneficioActivo();
+                            @endphp
+
+                            @if($beneficioActivo)
+                                {{-- ============================================================
+                                    MODO LECTURA
+                                    ============================================================ --}}
+                                <div class="alert alert-info d-flex align-items-start gap-2 small mb-4">
+                                    <i class="bi bi-info-circle-fill"></i>
+                                    <div>
+                                        Este estudiante ya tiene un beneficio activo. Para <strong>reasignar o revocar</strong>,
+                                        usá la vista
+                                        <a href="{{ route('admin-academico.admin-academico.beneficios.modify-benefit-student') }}"
+                                        class="alert-link">Gestión de Beneficios</a>.
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="border rounded-3 p-3 bg-light">
+                                            <small class="text-muted d-block mb-1">Tipo de beneficio</small>
+                                            <strong>{{ $beneficioActivo->tipo_beneficio->label() ?? $beneficioActivo->tipo_beneficio->value }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="border rounded-3 p-3 bg-light">
+                                            <small class="text-muted d-block mb-1">Ciclo lectivo</small>
+                                            <strong>{{ $beneficioActivo->cicloLectivo->nombre_ciclo ?? '—' }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="border rounded-3 p-3 bg-light">
+                                            <small class="text-muted d-block mb-1">Convenio / resolución</small>
+                                            <strong>{{ $beneficioActivo->nombre_convenio }}</strong>
+                                            @if($beneficioActivo->resolucion_academica)
+                                                <div class="small text-muted">RA: {{ $beneficioActivo->resolucion_academica }}</div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="border rounded-3 p-3 bg-light">
+                                            <small class="text-muted d-block mb-1">Estado</small>
+                                            <span class="badge bg-success-subtle text-success border">
+                                                {{ $beneficioActivo->estado->label() }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    @if($beneficioActivo->porcentaje_estudiante !== null)
+                                        <div class="col-md-6">
+                                            <div class="border rounded-3 p-3 bg-light">
+                                                <small class="text-muted d-block mb-1">% Estudiante</small>
+                                                <strong>{{ number_format((float) $beneficioActivo->porcentaje_estudiante, 2) }}%</strong>
+                                            </div>
+                                        </div>
+                                    @endif
+                                    @if($beneficioActivo->porcentaje_universidad !== null)
+                                        <div class="col-md-6">
+                                            <div class="border rounded-3 p-3 bg-light">
+                                                <small class="text-muted d-block mb-1">% Universidad</small>
+                                                <strong>{{ number_format((float) $beneficioActivo->porcentaje_universidad, 2) }}%</strong>
+                                            </div>
+                                        </div>
+                                    @endif
+                                    @if($beneficioActivo->monto_fijo_cuota !== null)
+                                        <div class="col-md-6">
+                                            <div class="border rounded-3 p-3 bg-light">
+                                                <small class="text-muted d-block mb-1">Monto fijo de cuota</small>
+                                                <strong>${{ number_format((float) $beneficioActivo->monto_fijo_cuota, 2) }}</strong>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <div class="col-12">
+                                        <div class="border rounded-3 p-3 bg-light">
+                                            <small class="text-muted d-block mb-2">Inclusiones en exoneración de pagos</small>
+                                            <div class="d-flex flex-wrap gap-3 small">
+                                                <span class="{{ $beneficioActivo->incluye_matricula ? 'text-success' : 'text-muted' }}">
+                                                    <i class="bi bi-{{ $beneficioActivo->incluye_matricula ? 'check-circle-fill' : 'x-circle' }}"></i>
+                                                    Matrícula
+                                                </span>
+                                                <span class="{{ $beneficioActivo->incluye_laboratorio ? 'text-success' : 'text-muted' }}">
+                                                    <i class="bi bi-{{ $beneficioActivo->incluye_laboratorio ? 'check-circle-fill' : 'x-circle' }}"></i>
+                                                    Laboratorio
+                                                </span>
+                                                <span class="{{ $beneficioActivo->incluye_derechos_grado ? 'text-success' : 'text-muted' }}">
+                                                    <i class="bi bi-{{ $beneficioActivo->incluye_derechos_grado ? 'check-circle-fill' : 'x-circle' }}"></i>
+                                                    Derechos de grado
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            @else
+                                {{-- ============================================================
+                                    MODO ASIGNACIÓN
+                                    ============================================================ --}}
+                                <div class="alert alert-warning d-flex align-items-start gap-2 small mb-4">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    <div>
+                                        Este estudiante <strong>no tiene beneficio activo</strong>. Podés asignarle uno nuevo.
+                                    </div>
+                                </div>
+
+                                <form action="{{ route('admin-academico.alumnos.beneficios.assign', $alumno) }}" method="POST" class="form-beneficio-asignar">
+                                    @csrf
+                                    <div class="row g-3">
+
+                                        {{-- Ciclo lectivo --}}
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-medium">
+                                                Ciclo lectivo <span class="text-danger">*</span>
+                                            </label>
+                                            <select name="id_ciclo_lectivo"
+                                                    class="form-select form-select-sm @error('id_ciclo_lectivo') is-invalid @enderror"
+                                                    required>
+                                                <option value="">Seleccione...</option>
+                                                @foreach($ciclosLectivos as $ciclo)
+                                                    <option value="{{ $ciclo->ciclo_lectivo_id }}"
+                                                        {{ old('id_ciclo_lectivo') == $ciclo->ciclo_lectivo_id ? 'selected' : '' }}>
+                                                        {{ $ciclo->nombre_ciclo }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('id_ciclo_lectivo')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        {{-- Tipo de beneficio --}}
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-medium">
+                                                Tipo de beneficio <span class="text-danger">*</span>
+                                            </label>
+                                            <select name="tipo_beneficio"
+                                                    class="form-select form-select-sm @error('tipo_beneficio') is-invalid @enderror"
+                                                    required>
+                                                <option value="">Seleccione...</option>
+                                                @foreach(\App\Enums\TipoBeneficio::cases() as $tb)
+                                                    <option value="{{ $tb->value }}"
+                                                        {{ old('tipo_beneficio') === $tb->value ? 'selected' : '' }}>
+                                                        {{ $tb->label() }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('tipo_beneficio')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        {{-- Convenio --}}
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-medium">
+                                                Nombre del convenio / beca <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text" name="nombre_convenio"
+                                                class="form-control form-control-sm @error('nombre_convenio') is-invalid @enderror"
+                                                value="{{ old('nombre_convenio') }}"
+                                                placeholder="Ej: Convenio UMA-FUSAL" required>
+                                            @error('nombre_convenio')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        {{-- Resolución --}}
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-medium">Resolución académica</label>
+                                            <input type="text" name="resolucion_academica"
+                                                class="form-control form-control-sm @error('resolucion_academica') is-invalid @enderror"
+                                                value="{{ old('resolucion_academica') }}"
+                                                placeholder="Ej: RA-2026-014">
+                                            @error('resolucion_academica')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        {{-- Porcentajes (solo BECA_PARCIAL / CUOTA_ESPECIAL) --}}
+                                        <div class="col-12 campo-pct-beneficio d-none">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-medium">% Estudiante</label>
+                                                    <input type="number" step="0.01" min="0" max="100"
+                                                        name="porcentaje_estudiante"
+                                                        class="form-control form-control-sm"
+                                                        value="{{ old('porcentaje_estudiante') }}">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-medium">% Universidad</label>
+                                                    <input type="number" step="0.01" min="0" max="100"
+                                                        name="porcentaje_universidad"
+                                                        class="form-control form-control-sm"
+                                                        value="{{ old('porcentaje_universidad') }}">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- Monto fijo (solo FRANJA_BECARIA) --}}
+                                        <div class="col-md-6 campo-monto-beneficio d-none">
+                                            <label class="form-label small fw-medium">Monto fijo de cuota ($)</label>
+                                            <input type="number" step="0.01" min="0"
+                                                name="monto_fijo_cuota"
+                                                class="form-control form-control-sm"
+                                                value="{{ old('monto_fijo_cuota') }}"
+                                                placeholder="Ej: 53.00">
+                                        </div>
+
+                                        {{-- Matrícula (BECA_PARCIAL / CUOTA_ESPECIAL) --}}
+                                        <div class="col-md-6 campo-matricula-beneficio d-none">
+                                            <div class="form-check form-switch mt-4">
+                                                <input class="form-check-input" type="checkbox"
+                                                    name="incluye_matricula" value="1"
+                                                    id="{{ $prefijo }}-matricula"
+                                                    {{ old('incluye_matricula') ? 'checked' : '' }}>
+                                                <label class="form-check-label small" for="{{ $prefijo }}-matricula">
+                                                    Incluir <strong>matrícula</strong> en la cobertura
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        {{-- Laboratorio (BECA_COMPLETA) --}}
+                                        <div class="col-md-6 campo-laboratorio-beneficio d-none">
+                                            <div class="form-check form-switch mt-4">
+                                                <input class="form-check-input" type="checkbox"
+                                                    name="incluye_laboratorio" value="1"
+                                                    id="{{ $prefijo }}-lab"
+                                                    {{ old('incluye_laboratorio') ? 'checked' : '' }}>
+                                                <label class="form-check-label small" for="{{ $prefijo }}-lab">
+                                                    Incluir <strong>laboratorio</strong> en la cobertura
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-end mt-4">
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="bi bi-check-circle me-1"></i> Asignar beneficio
+                                        </button>
+                                    </div>
+                                </form>
+                            @endif
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -558,6 +835,71 @@ document.addEventListener('DOMContentLoaded', function () {
 
         select.addEventListener('change', actualizar);
         actualizar();
+    });
+
+    /* ============================================================
+        3. TAB BENEFICIO: mostrar/ocultar campos según tipo
+    ============================================================ */
+    document.querySelectorAll('.form-beneficio-asignar').forEach(form => {
+
+        const selectTipo   = form.querySelector('select[name="tipo_beneficio"]');
+        
+        if (!selectTipo) return;
+
+        const bloquePct       = form.querySelectorAll('.campo-pct-beneficio');
+        const bloqueMonto     = form.querySelectorAll('.campo-monto-beneficio');
+        const bloqueMatricula = form.querySelectorAll('.campo-matricula-beneficio');
+        const bloqueLab       = form.querySelectorAll('.campo-laboratorio-beneficio');
+
+        const pctEst  = form.querySelector('input[name="porcentaje_estudiante"]');
+        const pctUniv = form.querySelector('input[name="porcentaje_universidad"]');
+        const monto   = form.querySelector('input[name="monto_fijo_cuota"]');
+
+        const chkMatricula = form.querySelector('input[name="incluye_matricula"]');
+        const chkLab       = form.querySelector('input[name="incluye_laboratorio"]');
+
+        function actualizar() {
+            const tipo = selectTipo.value;
+
+            const esParcial  = tipo === 'BECA_PARCIAL' || tipo === 'CUOTA_ESPECIAL';
+            const esFranja   = tipo === 'FRANJA_BECARIA';
+            const esCompleta = tipo === 'BECA_COMPLETA';
+
+            // Mostrar / ocultar
+            bloquePct.forEach(el       => el.classList.toggle('d-none', !esParcial));
+            bloqueMonto.forEach(el     => el.classList.toggle('d-none', !esFranja));
+            bloqueMatricula.forEach(el => el.classList.toggle('d-none', !esParcial));
+            bloqueLab.forEach(el       => el.classList.toggle('d-none', !esCompleta));
+
+            // Valores sugeridos
+            if (esCompleta) {
+                if (pctEst)  pctEst.value  = '0';
+                if (pctUniv) pctUniv.value = '100';
+            } else if (tipo === 'CUOTA_ESPECIAL') {
+                if (pctEst && !pctEst.value)   pctEst.value  = '88.33';
+                if (pctUniv && !pctUniv.value) pctUniv.value = '11.67';
+            } else if (tipo === 'BECA_PARCIAL') {
+                if (pctEst && !pctEst.value)   pctEst.value  = '50';
+                if (pctUniv && !pctUniv.value) pctUniv.value = '50';
+            } else if (esFranja) {
+                if (monto && !monto.value) monto.value = '53.00';
+            }
+
+            // Desmarcar checkboxes al ocultarlos (para no enviar valores residuales)
+            if (!esParcial  && chkMatricula) chkMatricula.checked = false;
+            if (!esCompleta && chkLab)       chkLab.checked       = false;
+        }
+
+        // Sincroniza % Universidad cuando cambia % Estudiante
+        pctEst?.addEventListener('input', () => {
+            if (pctUniv && pctEst.value !== '') {
+                const est = parseFloat(pctEst.value || 0);
+                pctUniv.value = (100 - est).toFixed(2);
+            }
+        });
+
+        selectTipo.addEventListener('change', actualizar);
+        actualizar(); // inicializar
     });
 });
 </script>
