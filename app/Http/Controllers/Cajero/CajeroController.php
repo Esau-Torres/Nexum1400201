@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Cajero;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Adfinanciero\CargoEstudiante; 
+use App\Models\Adfinanciero\CargoEstudiante;
 use App\Models\Adfinanciero\ConceptoPago;
 use Illuminate\Support\Facades\DB; // Para actualizar el estado y guardar el pago
+use App\Mail\ReciboPagoMail;
 use Illuminate\Support\Facades\Mail; // Para el correo
 use Illuminate\Support\Facades\Auth; // Para saber qué cajero cobró
 
@@ -36,7 +37,6 @@ class CajeroController extends Controller
             $alumno = DB::table('alumnos')
                         ->where('codigo_estudiante', $request->id_alumno)
                         ->first();
-
 
             // 4. BÚSQUEDA DE CARGOS
             $cargos = CargoEstudiante::with('concepto')
@@ -487,6 +487,40 @@ class CajeroController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Ocurrió un error al procesar el pago: ' . $e->getMessage());
+        }
+    }
+
+    //deuda pendiente ver la caja con el nombre y el carnet
+    public function verificarAlumnoAPI($carnet)
+    {
+        try {
+            $alumno = \Illuminate\Support\Facades\DB::table('alumnos')
+                        // Hacemos JOIN con 'users' usando 'alumnos.id_usuario' y 'users.id'
+                        ->join('users', 'alumnos.id_usuario', '=', 'users.id')
+                        ->select(
+                            'alumnos.codigo_estudiante',
+                            'users.name' // <-- Traemos la columna 'name' de la tabla users
+                        )
+                        ->where('alumnos.codigo_estudiante', strtoupper(trim($carnet)))
+                        ->first();
+
+            if ($alumno) {
+                return response()->json([
+                    'success' => true,
+                    'alumno' => $alumno
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'El carnet ingresado no corresponde a ningún alumno registrado.'
+            ], 404);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error del servidor: ' . $e->getMessage()
+            ], 500);
         }
     }
 

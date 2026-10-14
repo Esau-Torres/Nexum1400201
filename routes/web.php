@@ -103,6 +103,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/adfinanciero/reglas-pago', [\App\Http\Controllers\Reglaspago\ReglasController::class, 'store'])->name('reglas.store');
         // Ruta para actualizar (Editar)
         Route::put('/adfinanciero/reglas-pago/{id}', [\App\Http\Controllers\Reglaspago\ReglasController::class, 'update'])->name('reglas.update');
+
+        Route::post('/adfinanciero/cargosestudiante/pagar', [\App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'procesarPagoEnLinea'])->name('adfinanciero.cargos.pagar');
     });
 
 
@@ -121,6 +123,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // En routes/cajero.php (o web.php)
         Route::get('/cajero/pagos/nuevo', [\App\Http\Controllers\Cajero\CajeroController::class, 'crearPago'])->name('cajero.pagos.create');
         Route::post('/cajero/pagos/guardar', [\App\Http\Controllers\Cajero\CajeroController::class, 'guardarPago'])->name('cajero.pagos.store');
+
+
+        Route::get('/api/verificar-alumno/{carnet}', [App\Http\Controllers\Cajero\CajeroController::class, 'verificarAlumnoAPI'])->name('cajero.api.verificar');
     });
 
 

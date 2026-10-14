@@ -89,10 +89,11 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="ps-4">N° Cargo</th>
+                                <th class="text-center">Ciclo</th>
                                 <th>Periodo</th>
                                 <th>Concepto a Pagar</th>
                                 <th class="text-center">Vencimiento</th>
-                                <th class="text-center">Monto original</th>
+                                <th class="text-center">Monto</th>
 
                                 <!-- Columna movida a la derecha -->
                                 <th class="text-end pe-4">
@@ -105,8 +106,14 @@
                             @forelse($cargos as $cargo)
                             <tr class="border-bottom fila-deuda">
                                 <td class="ps-4 py-3 fw-bold text-muted">#{{ $cargo->cargo_id }}</td>
+                                <td class="py-3 text-dark">
+                                    <!-- Si tienes relación en el modelo usa $cargo->ciclo->nombre, si no, usa el ID directo como abajo -->
+                                    {{ $cargo->ciclo->nombre ?? 'Ciclo ' . $cargo->id_ciclo_lectivo }}
+                                </td>
                                 <td class="py-3 text-dark">{{ str_pad($cargo->mes_arancel, 2, '0', STR_PAD_LEFT) }}/{{ $cargo->anio_arancel }}</td>
-                                <td class="py-3 text-uppercase fw-medium" style="font-size: 0.9rem;">{{ $cargo->concepto->nombre ?? 'N/A' }}</td>
+                                <td class="py-3 text-uppercase fw-medium" style="font-size: 0.9rem;">
+                                    {{ \Illuminate\Support\Str::before($cargo->concepto->nombre ?? 'N/A', ' DE PREGRADOS') }}
+                                </td>
                                 <td class="py-3 text-center">
                                     @php
                                         $vencido = \Carbon\Carbon::parse($cargo->fecha_vencimiento)->isPast();

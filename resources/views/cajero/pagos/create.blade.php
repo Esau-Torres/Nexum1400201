@@ -3,10 +3,10 @@
 @section('content')
 <style>
     /* Estilos personalizados para el Punto de Venta (POS) */
-    .brand-text { color: #ff7575 !important; }
-    .brand-bg { background-color: #ff7575 !important; }
-    .brand-btn { background-color: #ff7575 !important; border: none; transition: all 0.3s ease; }
-    .brand-btn:hover { background-color: #e66262 !important; transform: translateY(-2px); box-shadow: 0 8px 15px rgba(255, 117, 117, 0.3); }
+    .brand-text { color: #dc3545 !important; }
+    .brand-bg { background-color: #dc3545 !important; }
+    .brand-btn { background-color: #dc3545 !important; border: none; transition: all 0.3s ease; }
+    .brand-btn:hover { background-color: #dc3545 !important; transform: translateY(-2px); box-shadow: 0 8px 15px rgba(255, 117, 117, 0.3); }
     .brand-btn:disabled { background-color: #6c757d !important; transform: none; box-shadow: none; }
 
     .pos-card { border-radius: 1.25rem; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); }
@@ -18,7 +18,7 @@
     }
 
     /* Estilo de ticket para el resumen */
-    .ticket-container { background: #fdfdfd; border-radius: 1.25rem; border-top: 6px solid #ff7575; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+    .ticket-container { background: #fdfdfd; border-radius: 1.25rem; border-top: 6px solid #dc3545; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
     .ticket-item { border-bottom: 1px dashed #dee2e6; }
     .ticket-item:last-child { border-bottom: none; }
 
@@ -64,6 +64,22 @@
         @endif
         <!-- ============================================================= -->
 
+        <!-- BANNER DE VERIFICACIÓN DINÁMICO (Oculto inicialmente) -->
+        <div id="bannerEstudianteDirecto" class="d-none mt-4 mb-4">
+            <div class="card border-0 shadow-sm" style="background-color: #f0f7fb; border-left: 5px solid #dc3545 !important; border-radius: 12px;">
+                <div class="card-body p-3 d-flex align-items-center">
+                    <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm me-3" style="width: 55px; height: 55px; flex-shrink: 0;">
+                        <i class="fa-solid fa-user-check fs-4 brand-text"></i>
+                    </div>
+                    <div>
+                        <span class="text-muted fw-bold mb-1 d-block" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Verificación de Identidad</span>
+                        <h5 class="fw-bold text-dark mb-1" id="nombreAlumnoDinamico">--</h5>
+                        <span class="badge bg-secondary text-white px-2 py-1 shadow-sm" style="font-size: 0.85rem;" id="carnetAlumnoDinamico">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- NUEVO: TARJETA DE CONFIRMACIÓN DE IDENTIDAD ANTES DE COBRAR -->
         @if(isset($alumno))
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 1.25rem; background-color: #f0f7fb; border-left: 6px solid #dc3545 !important;">
@@ -102,15 +118,24 @@
 
 
                         <!-- PEDIR CARNET (Solo para Venta Directa, NO para Deudas) -->
+                        <!-- PEDIR CARNET Y VALIDAR (Solo para Venta Directa, NO para Deudas) -->
                         @if(isset($esPagoDeuda) && $esPagoDeuda === false)
                             <div class="bg-light p-4 rounded-4 mb-4 border border-light shadow-sm">
                                 <label class="form-label fw-bold text-dark mb-3 fs-6">
                                     <i class="fa-solid fa-id-badge brand-text me-2"></i> Identificación del Estudiante
                                 </label>
-                                <input type="text" name="codigo_estudiante" class="form-control input-carnet shadow-none border-secondary"  style="text-transform: uppercase;" required autofocus>
+
+                                <div class="input-group input-group-lg mb-2 shadow-sm rounded-3">
+                                    <input type="text" id="inputCarnetDirecto" name="codigo_estudiante" class="form-control input-carnet border-end-0 shadow-none bg-white" style="text-transform: uppercase;" placeholder="Ej. MV224100040" required autofocus>
+                                    <button type="button" id="btnValidarCarnet" class="btn text-white fw-bold px-4 brand-btn">
+                                        <i class="fa-solid fa-magnifying-glass me-2"></i> Validar
+                                    </button>
+                                </div>
                                 <div class="text-center mt-2">
                                     <small class="text-muted"><i class="fa-solid fa-circle-info me-1"></i> Este cobro se registrará en el expediente de este carnet.</small>
                                 </div>
+
+
                             </div>
                         @endif
 
@@ -342,6 +367,78 @@
                 }
                 e.target.value = val;
             });
+        }
+    });
+</script>
+
+<!-- Script AJAX para validar al estudiante sin recargar -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const btnValidar = document.getElementById('btnValidarCarnet');
+        const inputCarnet = document.getElementById('inputCarnetDirecto');
+        const banner = document.getElementById('bannerEstudianteDirecto');
+        const nombreAlumno = document.getElementById('nombreAlumnoDinamico');
+        const carnetAlumno = document.getElementById('carnetAlumnoDinamico');
+
+        // Solo ejecutar si el botón existe (es decir, si estamos en venta directa)
+        if (btnValidar && inputCarnet) {
+            btnValidar.addEventListener('click', function() {
+                let carnet = inputCarnet.value.trim();
+
+                if(!carnet) {
+                    alert('Por favor, ingrese un carnet para validar.');
+                    return;
+                }
+
+                // Efecto visual de carga
+                btnValidar.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Buscando';
+                btnValidar.disabled = true;
+
+                // Petición al backend
+                fetch("{{ url('/cajero/api/verificar-alumno') }}/" + carnet)
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.success) {
+                        // Mostrar banner con datos
+                        banner.classList.remove('d-none');
+
+                        // Como tu BD solo tiene 'name', lo leemos directamente
+                        let nombreCompleto = data.alumno.name || 'Estudiante Registrado';
+
+                        // Asignar los valores a la tarjeta azul
+                        nombreAlumno.textContent = nombreCompleto;
+                        carnetAlumno.textContent = 'CARNET: ' + data.alumno.codigo_estudiante;
+
+                        // Cambiar el botón a verde (éxito)
+                        btnValidar.innerHTML = '<i class="fa-solid fa-check me-2"></i> Validado';
+                        btnValidar.style.backgroundColor = '#198754';
+                    } else {
+                            // Ocultar banner si falla
+                            banner.classList.add('d-none');
+                            alert(data.message);
+                            resetBoton();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Hubo un error de conexión al buscar el carnet. Revise su conexión.');
+                        resetBoton();
+                    });
+            });
+
+            // Si el cajero cambia el input, se oculta el banner para obligarlo a re-validar
+            inputCarnet.addEventListener('input', function() {
+                if (!banner.classList.contains('d-none')) {
+                    banner.classList.add('d-none');
+                    resetBoton();
+                }
+            });
+
+            function resetBoton() {
+                btnValidar.innerHTML = '<i class="fa-solid fa-magnifying-glass me-2"></i> Validar';
+                btnValidar.style.backgroundColor = ''; // Regresa al color de la clase brand-btn
+                btnValidar.disabled = false;
+            }
         }
     });
 </script>
