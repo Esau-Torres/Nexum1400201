@@ -93,4 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initTable('#pensum-table', { columnDefs: [{ orderable: false, targets: 6 }] });
     initTable('#facultadesTable', { columnDefs: [{ orderable: false, targets: 2 }] });
     initTable('#carrerasTable', { columnDefs: [{ orderable: false, targets: 5 }] });
+    initTable('#aulatable', { columnDefs: [{ orderable: false, targets: 6}] });
+    initTable('#grupohorariotable', { columnDefs: [{ orderable: false, targets: 4}] });
+    initTable('#horariotable', { columnDefs: [{ orderable: false, targets: 6}] });
 });

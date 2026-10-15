@@ -3,40 +3,45 @@
 @section('content')
 <div class="container-fluid py-4">
 
-  <!-- HEADER PRINCIPAL -->
-<div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-        <!-- Título e Identidad -->
-        <div class="d-flex align-items-center gap-3">
-            <div class="stat-icon-circle bg-danger bg-opacity-10 text-danger rounded-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">
-                <i class="bi bi-building-gear"></i>
-            </div>
-            <div>
-                <h1 class="h3 fw-bold text-dark mb-1 tracking-tight">GESTIÓN DE FACULTADES Y CARRERAS</h1>
-                <p class="text-muted mb-0 small">Administración y control de la estructura académica institucional de la UMA.</p>
-            </div>
-        </div>
-
-        <!-- Botón de Acción Global -->
-        <div>
-            <button type="button" class="btn btn-danger btn-sm px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3 transition-all"
-                    data-bs-toggle="modal" data-bs-target="#createFacultadModal">
-                <i class="bi bi-plus-circle-fill fs-5"></i>
-                <span>Nueva Facultad</span>
-            </button>
-            <button type="button" class="btn btn-outline-danger btn-sm px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3 transition-all"
-                    data-bs-toggle="modal" data-bs-target="#createCarreraModal">
-                <i class="fas fa-graduation-cap fs-5"></i>
-                <span>Nueva Carrera</span>
-            </button>
-        </div>
-    </div>
-</div>
-
-    <!-- NAVEGACIÓN POR PESTAÑAS (TABS) -->
+ <!-- NAVEGACIÓN POR PESTAÑAS (TABS) -->
     @php
         $activeTab = request('tab', 'facultades');
     @endphp
+
+  <!-- HEADER PRINCIPAL -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <!-- Título e Identidad -->
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon-circle bg-danger bg-opacity-10 text-danger rounded-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">
+                    <i class="bi bi-building-gear"></i>
+                </div>
+                <div>
+                    <h1 class="h3 fw-bold text-dark mb-1 tracking-tight">GESTIÓN DE FACULTADES Y CARRERAS</h1>
+                    <p class="text-muted mb-0 small">Administración y control de la estructura académica institucional de la UMA.</p>
+                </div>
+            </div>
+
+            <!-- Botón de Acción Global -->
+            <div>
+                {{-- Botón para agregar Facultad --}}
+                <button type="button" id="btn-facultades" 
+                        class="btn btn-danger btn-sm px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3 transition-all {{ $activeTab === 'facultades' ? '' : 'd-none' }}"
+                        data-bs-toggle="modal" data-bs-target="#createFacultadModal">
+                    <i class="bi bi-plus-circle-fill fs-5"></i>
+                    <span>Nueva Facultad</span>
+                </button>
+
+                {{-- Botón para agregar Carrera --}}
+                <button type="button" id="btn-carreras" 
+                        class="btn btn-outline-danger btn-sm px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3 transition-all {{ $activeTab === 'carreras' ? '' : 'd-none' }}"
+                        data-bs-toggle="modal" data-bs-target="#createCarreraModal">
+                    <i class="fas fa-graduation-cap fs-5"></i>
+                    <span>Nueva Carrera</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <ul class="nav custom-pills gap-2" role="tablist">
@@ -567,4 +572,27 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabs = document.querySelectorAll('button[data-bs-toggle="pill"]');
+        const btnFacultades = document.getElementById('btn-facultades');
+        const btnCarreras = document.getElementById('btn-carreras');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function (event) {
+                const target = event.target.getAttribute('data-bs-target');
+
+                if (target === '#tab-facultades') {
+                    btnFacultades.classList.remove('d-none');
+                    btnCarreras.classList.add('d-none');
+                } else if (target === '#tab-carreras') {
+                    btnFacultades.classList.add('d-none');
+                    btnCarreras.classList.remove('d-none');
+                }
+            });
+        });
+    });
+</script>
+@endpush
 @endsection
