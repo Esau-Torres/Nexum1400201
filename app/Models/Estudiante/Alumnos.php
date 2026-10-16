@@ -4,7 +4,7 @@ namespace App\Models\Estudiante;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\BelongsTo; 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -22,7 +22,7 @@ class Alumnos extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'id_usuario', 'id_carrera', 'codigo_estudiante', 
+        'id_usuario', 'id_carrera', 'codigo_estudiante',
         'correo_institucional', 'estado_carrera'
     ];
 

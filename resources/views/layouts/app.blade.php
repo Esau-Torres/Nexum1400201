@@ -232,7 +232,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('record-financiero*') ? 'active' : '' }}">
+                            <a href="{{ route('adfinanciero.cargos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('record-financiero*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Record Financiero</div>

@@ -62,7 +62,7 @@
             <ul class="nav nav-pills mb-0" id="estadoCuentaTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active px-4 py-2 d-flex align-items-center" id="deuda-tab" data-bs-toggle="tab" data-bs-target="#deuda" type="button" role="tab" aria-controls="deuda" aria-selected="true" style="border-radius: 8px;">
-                        <i class="bi bi-exclamation-circle me-2"></i> Deudas pendientes
+                        <i class="bi bi-exclamation-circle me-2"></i> Saldo pendiente
                     </button>
                 </li>
                 <li class="nav-item ms-2" role="presentation">

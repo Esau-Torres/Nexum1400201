@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold text-dark mb-0">Reglas de cobro</h2>
-            <span class="text-muted">CONFIGURACION DE  POLITICAS INSTITUCIONALES Y PERIODOS DE GRACIA</span>
+            <span class="text-muted">Configuración de reglas de cobro</span>
         </div>
         <!-- Botón con el color Rose Quartz de tu diseño -->
         <button type="button" class="btn text-white px-4 py-2" style="background-color: #dc3545; border-radius: 6px;" data-bs-toggle="modal" data-bs-target="#modalCrearRegla">
