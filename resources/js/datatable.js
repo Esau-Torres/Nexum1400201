@@ -96,4 +96,5 @@ document.addEventListener('DOMContentLoaded', function () {
     initTable('#aulatable', { columnDefs: [{ orderable: false, targets: 6}] });
     initTable('#grupohorariotable', { columnDefs: [{ orderable: false, targets: 4}] });
     initTable('#horariotable', { columnDefs: [{ orderable: false, targets: 6}] });
+    initTable('#tabla-seccion', { columnDefs: [{ orderable: false, targets: 6}] });
 });

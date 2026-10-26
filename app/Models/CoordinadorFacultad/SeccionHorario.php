@@ -9,6 +9,7 @@ use App\Models\CoordinadorFacultad\Seccion;
 use App\Models\CoordinadorFacultad\Horarios;
 use App\Models\CoordinadorFacultad\Aula;
 use App\Models\CoordinadorFacultad\ClaseSesion;
+use App\Models\CoordinadorFacultad\ClaseCompartida;
 
 class SeccionHorario extends Model
 {
@@ -20,6 +21,7 @@ class SeccionHorario extends Model
         'id_seccion',
         'id_horario',
         'id_aula',
+        'id_clase_compartida',
     ];
 
     public function seccion(): BelongsTo
@@ -40,5 +42,10 @@ class SeccionHorario extends Model
     public function sesiones(): HasMany
     {
         return $this->hasMany(ClaseSesion::class, 'id_seccion_horario', 'seccion_horario_id');
+    }
+
+    public function claseCompartida(): BelongsTo
+    {
+        return $this->belongsTo(ClaseCompartida::class, 'id_clase_compartida', 'clase_compartida_id');
     }
 }

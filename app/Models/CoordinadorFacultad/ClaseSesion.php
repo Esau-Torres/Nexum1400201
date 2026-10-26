@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Academico;
+namespace App\Models\CoordinadorFacultad;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

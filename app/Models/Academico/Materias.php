@@ -38,4 +38,6 @@ class Materias extends Model
     {
         return $this->hasMany(Seccion::class, 'id_materia', 'materia_id');
     }
+
+
 }

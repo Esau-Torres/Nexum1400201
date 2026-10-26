@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Docente\Docentes;
 use App\Models\Academico\CicloLectivo;
 use App\Models\Academico\Materias;
+use App\Models\CoordinadorFacultad\Grupo;
 use App\Models\CoordinadorFacultad\SeccionHorario;
 use App\Models\CoordinadorFacultad\ClaseSesion;
 use App\Models\Estudiante\DetalleInscripcion;
@@ -58,6 +59,11 @@ class Seccion extends Model
     public function horarios(): HasMany
     {
         return $this->hasMany(SeccionHorario::class, 'id_seccion', 'seccion_id');
+    }
+
+    public function grupo(): BelongsTo
+    {
+        return $this->belongsTo(Grupo::class, 'id_grupo', 'grupo_id');
     }
 
     public function sesiones(): HasMany
