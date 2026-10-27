@@ -389,6 +389,44 @@
                             </a>
                         </li>
                     @endif
+                    @if(auth()->user()->hasRole('COORDINADOR_FACULTAD'))
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('coordinador-facultad.infraestructura-horarios.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/infraestructura-horarios.index*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-industry nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Infraestructura</div>
+                                    <div class="nav-text-secondary">Administrar edificios y aulas</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('coordinador-facultad.horarios-grupohorario.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/horarios-grupohorario.index*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-calendar nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Horarios</div>
+                                    <div class="nav-text-secondary">Administrar horarios y grupos de un ciclo</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('coordinador-facultad.secciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/secciones.index*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-people-group nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Secciones</div>
+                                    <div class="nav-text-secondary">gestion secciones de clase</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('coordinador-facultad.dashboard') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/dashboard*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-chart-line nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Dasboard</div>
+                                    <div class="nav-text-secondary">Proyección de secciones</div>
+                                </div>
+                            </a>
+                        </li>
+                    @endif
 
                 </ul>
             </nav>
