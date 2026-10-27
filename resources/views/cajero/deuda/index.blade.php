@@ -41,7 +41,7 @@
                         <option value="tarjeta">💳 Tarjeta (POS)</option>
                     </select>
 
-                    <button type="submit" form="formCobroDeuda" id="btnGenerarRecibo" class="btn text-white fw-bold shadow-sm d-flex align-items-center gap-2 px-3" style="background-color: #ff9b9b; border: none; height: 48px; transition: all 0.3s;" disabled>
+                    <button type="submit" form="formCobroDeuda" id="btnGenerarRecibo" class="btn text-white fw-bold shadow-sm d-flex align-items-center gap-2 px-3" style="background-color: #dc3545; border: none; height: 48px; transition: all 0.3s;" disabled>
                         <i class="fa-solid fa-file-invoice-dollar fs-5"></i> Pagar
                         <span class="badge bg-white rounded-pill ms-1 fs-6" style="color: #dc3545;" id="contadorSeleccionados">0</span>
                     </button>
@@ -55,30 +55,11 @@
     <!-- Resultados de Deuda Pendiente -->
     @if(request()->has('id_alumno'))
 
-    <!-- NUEVO: TARJETA DE CONFIRMACIÓN DE IDENTIDAD -->
-    @if(isset($alumno))
-    <div class="card border-0 shadow-sm rounded-4 mb-4" style="background-color: #f0f7fb; border-left: 5px solid #dc3545 !important;">
-        <div class="card-body p-3 d-flex align-items-center">
-            <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm me-3" style="width: 50px; height: 50px;">
-                <i class="fa-solid fa-user-check fs-4" style="color: #dc3545;"></i>
-            </div>
-            <div>
-                <h6 class="text-muted mb-1" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Confirmar Identidad del Estudiante</h6>
-                <h5 class="fw-bold text-dark mb-0">
-                    {{ $alumno->nombres ?? 'Leandro Antonio' }} {{ $alumno->apellidos ?? 'Melara Villa' }}
-                </h5>
-                <span class="text-muted" style="font-size: 0.9rem;">
-                    Carnet: <strong class="text-dark">{{ strtoupper($alumno->carnet ?? request('id_alumno')) }}</strong>
-                </span>
-            </div>
-        </div>
-    </div>
-    @endif
     <!-- FIN NUEVO -->
 
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold"><i class="fa-solid fa-user-graduate me-2 text-muted"></i> Estado de cuenta: Alumno ID #{{ strtoupper(request('id_alumno')) }}</h5>
+            <h5 class="mb-0 fw-bold"><i class="fa-solid fa-user-graduate me-2 text-muted"></i> Estado de cuenta</h5>
             <span class="badge bg-warning bg-opacity-10 text-warning border border-warning px-3 py-2">Solo Cargos PENDIENTES</span>
         </div>
         <div class="card-body p-0">
@@ -104,17 +85,27 @@
                         </thead>
                         <tbody>
                             @forelse($cargos as $cargo)
-                            <tr class="border-bottom fila-deuda">
-                                <td class="ps-4 py-3 fw-bold text-muted">#{{ $cargo->cargo_id }}</td>
-                                <td class="py-3 text-dark">
-                                    <!-- Si tienes relación en el modelo usa $cargo->ciclo->nombre, si no, usa el ID directo como abajo -->
+                            <tr class="border-bottom fila-deuda align-middle">
+                                <!-- ID Cargo -->
+                                <td class="ps-4 py-3 fw-bold text-muted text-nowrap">#{{ $cargo->cargo_id }}</td>
+
+                                <!-- Ciclo (text-nowrap evita que se baje de línea) -->
+                                <td class="py-3 text-dark text-nowrap">
                                     {{ $cargo->ciclo->nombre ?? 'Ciclo ' . $cargo->id_ciclo_lectivo }}
                                 </td>
-                                <td class="py-3 text-dark">{{ str_pad($cargo->mes_arancel, 2, '0', STR_PAD_LEFT) }}/{{ $cargo->anio_arancel }}</td>
-                                <td class="py-3 text-uppercase fw-medium" style="font-size: 0.9rem;">
-                                    {{ \Illuminate\Support\Str::before($cargo->concepto->nombre ?? 'N/A', ' DE PREGRADOS') }}
+
+                                <!-- Periodo -->
+                                <td class="py-3 text-dark text-nowrap">
+                                    {{ str_pad($cargo->mes_arancel, 2, '0', STR_PAD_LEFT) }}/{{ $cargo->anio_arancel }}
                                 </td>
-                                <td class="py-3 text-center">
+
+                                <!-- Concepto -->
+                                <td class="py-3 text-uppercase fw-medium" style="font-size: 0.85rem;">
+                                    {{ \Illuminate\Support\Str::before($cargo->concepto->nombre ?? 'N/A', ':') }}
+                                </td>
+
+                                <!-- Vencimiento (text-nowrap mantiene la fecha y el icono unidos) -->
+                                <td class="py-3 text-center text-nowrap">
                                     @php
                                         $vencido = \Carbon\Carbon::parse($cargo->fecha_vencimiento)->isPast();
                                     @endphp
@@ -123,25 +114,44 @@
                                         @if($vencido) <i class="fa-solid fa-circle-exclamation ms-1" title="Vencido"></i> @endif
                                     </span>
                                 </td>
-                                <td class="py-3 text-center fw-bold fs-5 text-dark">${{ number_format($cargo->monto_original, 2) }}</td>
 
-                                <!-- Checkbox individual a la derecha -->
-                                <td class="py-3 text-end pe-4">
+                                <!-- Monto Rediseñado (Total en grande, desglose en pequeño) -->
+                                <td class="py-3 pe-3 text-end">
+                                    @php
+                                        // Definimos el monto base a mostrar (con o sin beneficio)
+                                        $montoBaseMostrar = $cargo->monto_neto_estudiante ?? $cargo->monto_original;
+                                    @endphp
+
+                                    @if(isset($cargo->tiene_mora) && $cargo->tiene_mora)
+                                        <div class="d-flex flex-column align-items-end justify-content-center">
+                                            <!-- Total a cobrar resaltado en rojo -->
+                                            <span class="text-danger fw-bold fs-5">${{ number_format($cargo->total_con_mora, 2) }}</span>
+                                            <!-- Desglose sutil abajo -->
+                                            <span class="text-muted" style="font-size: 0.75rem;">
+                                                <s class="me-1">${{ number_format($montoBaseMostrar, 2) }}</s>
+                                                <span class="text-danger"><i class="fa-solid fa-arrow-trend-up ms-1"></i> +${{ number_format($cargo->monto_mora, 2) }} mora</span>
+                                            </span>
+                                        </div>
+                                    @else
+                                        <!-- Monto normal si no hay mora, reflejando el beneficio si existe -->
+                                        <span class="text-dark fw-bold fs-5">${{ number_format($montoBaseMostrar, 2) }}</span>
+                                    @endif
+                                </td>
+
+                                <!-- Checkbox -->
+                                <td class="py-3 text-center">
                                     <input class="form-check-input check-deuda shadow-sm border-secondary" type="checkbox" name="cargos_ids[]" value="{{ $cargo->cargo_id }}" style="transform: scale(1.2); cursor:pointer;">
 
                                     <!-- Campos ocultos de apoyo requeridos por el script -->
                                     <input type="hidden" name="id_cargo" value="{{ $cargo->cargo_id }}" disabled class="hidden-single-data">
-                                    <input type="hidden" name="monto" value="{{ $cargo->monto_original }}" disabled class="hidden-single-data">
+                                    <!-- CAMBIO VITAL: El monto oculto ahora usa el monto_neto_estudiante como base -->
+                                    <input type="hidden" name="monto" value="{{ (isset($cargo->tiene_mora) && $cargo->tiene_mora) ? $cargo->total_con_mora : ($cargo->monto_neto_estudiante ?? $cargo->monto_original) }}" disabled class="hidden-single-data">
                                     <input type="hidden" name="concepto" value="{{ $cargo->concepto->nombre ?? 'N/A' }}" disabled class="hidden-single-data">
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-5">
-                                    <i class="fa-regular fa-face-smile fs-1 d-block mb-3 text-success"></i>
-                                    <h5 class="fw-bold">El alumno no tiene deuda pendiente.</h5>
-                                    <p class="mb-0">Todos sus cargos están liquidados o anulados.</p>
-                                </td>
+                                <td colspan="7" class="text-center py-4 text-muted">No se encontraron deudas pendientes.</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -162,7 +172,8 @@
     @endif
 </div>
 
-<!-- SCRIPT PARA CONTROLAR LOS CHECKBOXES Y EL BOTÓN -->
+
+<!-- SCRIPT PARA CONTROLAR LOS CHECKBOXES Y EL BOTÓN (CON SELECCIÓN EN CASCADA) -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const checkboxes = document.querySelectorAll('.check-deuda');
@@ -170,7 +181,34 @@
         const btnGenerar = document.getElementById('btnGenerarRecibo');
         const contador = document.getElementById('contadorSeleccionados');
 
+        // FUNCIÓN NUEVA: Bloquea los meses recientes si los antiguos no están pagados
+        function validarSecuencia() {
+            let habilitarSiguiente = true; // El primer cargo siempre estará habilitado al inicio
+
+            checkboxes.forEach(function(chk) {
+                if (!habilitarSiguiente) {
+                    // Si el mes anterior no está marcado, forzamos a desmarcar y bloquear este
+                    chk.checked = false;
+                    chk.disabled = true;
+                    chk.style.opacity = '0.4';
+                    chk.style.cursor = 'not-allowed';
+                } else {
+                    // Si el mes anterior sí está marcado, habilitamos este para que pueda seleccionarse
+                    chk.disabled = false;
+                    chk.style.opacity = '1';
+                    chk.style.cursor = 'pointer';
+                }
+
+                // La variable toma el valor de este checkbox para decidir qué hacer con el siguiente
+                habilitarSiguiente = chk.checked;
+            });
+        }
+
         function actualizarBoton() {
+            // 1. Ejecutamos la regla de cascada primero
+            validarSecuencia();
+
+            // 2. Ejecutamos tu código visual y de conteo
             let seleccionados = 0;
             checkboxes.forEach(chk => {
                 const hiddenInputs = chk.closest('tr').querySelectorAll('.hidden-single-data');
@@ -179,7 +217,7 @@
                     seleccionados++;
                     // Activamos la fila visualmente
                     chk.closest('tr').classList.add('table-primary');
-                    // Activamos los campos ocultos por si se manda uno solo
+                    // Activamos los campos ocultos
                     hiddenInputs.forEach(inp => inp.disabled = false);
                 } else {
                     chk.closest('tr').classList.remove('table-primary');
@@ -190,13 +228,15 @@
             // Actualizamos el número en el botón
             if(contador) contador.textContent = seleccionados;
 
-            // Encendemos o apagamos el botón principal y le damos el color fuerte
+            // Encendemos o apagamos el botón principal
             if (seleccionados > 0) {
                 btnGenerar.disabled = false;
                 btnGenerar.style.backgroundColor = '#dc3545'; // Rojo fuerte
+                btnGenerar.style.opacity = '1';
             } else {
                 btnGenerar.disabled = true;
-                btnGenerar.style.backgroundColor = '#dc3545'; // Rojo pálido
+                btnGenerar.style.backgroundColor = '#dc3545';
+                btnGenerar.style.opacity = '0.6'; // Rojo pálido (efecto apagado)
                 if(checkAll) checkAll.checked = false;
             }
         }
@@ -206,15 +246,20 @@
             chk.addEventListener('change', actualizarBoton);
         });
 
-        // Evento para seleccionar todas de golpe
+        // Evento para seleccionar todas de golpe (Se adapta a la cascada automáticamente)
         if(checkAll) {
             checkAll.addEventListener('change', function() {
                 checkboxes.forEach(chk => {
+                    // Nota: Solo marcamos si la casilla no está bloqueada
+                    // Pero al usar checkAll, como es de arriba hacia abajo, se irán habilitando en cadena
                     chk.checked = this.checked;
                 });
                 actualizarBoton();
             });
         }
+
+        // Ejecutar validación inicial para que los de abajo aparezcan bloqueados desde que entras
+        actualizarBoton();
     });
 </script>
 @endsection

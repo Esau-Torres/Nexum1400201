@@ -6,7 +6,7 @@
     use Illuminate\Support\Facades\DB;
     use App\Models\Estudiante\Carreras;
 
-    class registroController extends Controller
+    class RegistroController extends Controller
     {
         // constructor cosulta de datos en para el formulario de registro
         public function index()

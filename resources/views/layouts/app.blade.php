@@ -325,22 +325,23 @@
                                 </div>
                             </a>
                         </li>
+
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('adfinanciero.cargos.create') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('adfinanciero.cargos.create') ? 'active' : '' }}">
+                                <i class="fa-solid fa-file-circle-plus nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Generar Cargos</div>
+                                    <div class="nav-text-secondary">Asignar nueva cuota</div>
+                                </div>
+                            </a>
+                        </li>
+
                         <li class="nav-item mb-1">
                             <a href="{{ route('adfinanciero.promociones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('adfinanciero.promociones.*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-percent nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Promociones</div>
                                     <div class="nav-text-secondary">Descuentos especiales</div>
-                                </div>
-                            </a>
-                        </li>
-
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('adfinanciero.cargos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('record-financiero*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Record Financiero</div>
-                                    <div class="nav-text-secondary">Credenciales de pago</div>
                                 </div>
                             </a>
                         </li>

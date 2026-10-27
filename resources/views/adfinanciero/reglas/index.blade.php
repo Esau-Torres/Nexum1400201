@@ -1,4 +1,4 @@
-@extends('layouts.app') <!-- Cambia 'layouts.app' por el nombre real de tu plantilla base -->
+@extends('layouts.app')
 
 @section('content')
 <div class="container-fluid px-4 py-3">
@@ -9,10 +9,62 @@
             <h2 class="fw-bold text-dark mb-0">Reglas de cobro</h2>
             <span class="text-muted">Configuración de reglas de cobro</span>
         </div>
-        <!-- Botón con el color Rose Quartz de tu diseño -->
-        <button type="button" class="btn text-white px-4 py-2" style="background-color: #dc3545; border-radius: 6px;" data-bs-toggle="modal" data-bs-target="#modalCrearRegla">
-            <i class="fa-solid fa-plus me-2"></i> Nueva regla
-        </button>
+
+        <!-- Contenedor de los botones (Alineados a la derecha) -->
+        <div class="d-flex gap-2">
+
+            <!-- MOTOR DE AUTO-SINCRONIZACIÓN (ESTADO Y MESES DINÁMICOS) -->
+            @php
+                // 1. Buscamos el ciclo activo
+                $cicloActivo = \Illuminate\Support\Facades\DB::table('ciclo_lectivo')->where('estado', 'ACTIVO')->first();
+
+                // Variables para guardar los meses que mostraremos en las listas
+                $mesesDisponibles = [];
+
+                if ($cicloActivo) {
+                    // 2. Detectamos si es Ciclo 01 o Ciclo 02
+                    $esCiclo01 = str_contains($cicloActivo->nombre_ciclo, '01') || $cicloActivo->numero_ciclo == '01';
+
+                    // Asignamos la lista de meses para los modales según el ciclo
+                    $mesesDisponibles = $esCiclo01
+                        ? ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio']
+                        : ['Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+                    $mesInscripcion = $esCiclo01 ? 'Enero' : 'Julio';
+
+                    // 3. Encendemos todas las reglas
+                    \Illuminate\Support\Facades\DB::table('reglas_pago')->update(['estado' => 'ACTIVO']);
+
+                    // 4. AUTO-CORRECCIÓN: Forzamos la regla de Inscripción al mes correcto
+                    \Illuminate\Support\Facades\DB::table('reglas_pago')
+                        ->where('tipo', 'ILIKE', '%Inscripci%')
+                        ->orWhere('tipo', 'ILIKE', '%Matr%')
+                        ->update(['meses_aplicables' => $mesInscripcion]);
+
+                } else {
+                    // Si no hay ciclo, apagamos todo y mostramos todos los meses por defecto
+                    \Illuminate\Support\Facades\DB::table('reglas_pago')->update(['estado' => 'INACTIVO']);
+                    $mesesDisponibles = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                }
+
+                // 5. Volvemos a leer las reglas ya corregidas
+                $reglas = \App\Models\Adfinanciero\ReglaPago::with('conceptoRecargo')->get();
+            @endphp
+
+            <!-- Botón informativo del Ciclo Activo (Sin acción) -->
+            <button type="button" class="btn btn-light border px-4 py-2" style="border-radius: 6px; cursor: default;">
+                <i class="fa-regular fa-calendar-check text-success me-2"></i>
+                Reglas en ejecución para:
+                <span class="fw-bold text-dark ms-1">
+                    {{ $cicloActivo ? $cicloActivo->nombre_ciclo . '-' . $cicloActivo->anio : 'SIN CICLO ACTIVO' }}
+                </span>
+            </button>
+
+            <!-- Botón de Nueva regla -->
+            <button type="button" class="btn text-white px-4 py-2" style="background-color: #dc3545; border-radius: 6px;" data-bs-toggle="modal" data-bs-target="#modalCrearRegla">
+                <i class="fa-solid fa-plus me-2"></i> Nueva regla
+            </button>
+        </div>
     </div>
 
     <!-- Contenedor Principal -->
@@ -24,6 +76,7 @@
                     <thead class="text-muted" style="background-color: #f8f9fa;">
                         <tr>
                             <th class="fw-semibold py-3 ps-3">Tipo de cobro</th>
+                            <th class="fw-semibold py-3">Aplica a</th>
                             <th class="fw-semibold py-3">Periodo ordinario</th>
                             <th class="fw-semibold py-3">Periodo extraordinario</th>
                             <th class="fw-semibold py-3">Penalidad vinculada</th>
@@ -39,6 +92,23 @@
                                     <span class="fw-bold text-dark" style="font-size: 0.95rem;">
                                         {{ $regla->tipo }}
                                     </span>
+                                </td>
+
+                                <!-- Columna: Meses de aplicación -->
+                                <td class="py-3">
+                                    <div title="Meses en los que aplica el cobro">
+                                        <span class="badge bg-light text-dark border px-3 py-2 fw-normal" style="font-size: 0.85rem;">
+                                            {{-- Cambiamos el icono dependiendo de si son todos los meses o un mes específico --}}
+                                            @if($regla->meses_aplicables == 'Todos los meses')
+                                                <i class="fa-regular fa-calendar-check me-2 text-success"></i>
+                                            @else
+                                                <i class="fa-regular fa-calendar me-2 text-primary"></i>
+                                            @endif
+
+                                            {{-- Imprimimos directamente lo que viene de la base de datos --}}
+                                            {{ $regla->meses_aplicables ?? 'Sin definir' }}
+                                        </span>
+                                    </div>
                                 </td>
 
                                 <!-- Columna: Ordinario -->
@@ -89,7 +159,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-5">
+                                <td colspan="7" class="text-center text-muted py-5">
                                     <i class="fa-solid fa-folder-open fs-3 mb-3 d-block"></i>
                                     No hay reglas de pago configuradas en el sistema.
                                 </td>
@@ -118,10 +188,26 @@
             <form action="{{ route('reglas.store') }}" method="POST">
                 @csrf
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Tipo de cobro <span class="text-danger">*</span></label>
-                        <input type="text" name="tipo" class="form-control" placeholder="Ej. Mensualidad, Inscripción..." required>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Tipo de cobro <span class="text-danger">*</span></label>
+                            <input type="text" name="tipo" class="form-control" placeholder="Ej. Mensualidad, Inscripción..." required>
+                            <small class="text-muted">Use "Inscripción" o "Matrícula" para inicio de ciclo</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Meses aplicables <span class="text-danger">*</span></label>
+                            <select name="meses_aplicables" class="form-select" required>
+                                <option value="" disabled selected>-- Seleccione los meses --</option>
+                                <option value="Todos los meses">Todos los meses</option>
+
+                                <!-- Se llena dinámicamente según el ciclo activo -->
+                                @foreach($mesesDisponibles as $mes)
+                                    <option value="{{ $mes }}">{{ $mes }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
+
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-success">Periodo ordinario (inicio) <span class="text-danger">*</span></label>
@@ -134,11 +220,11 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold text-danger">Mora / extra (inicio)</label>
+                            <label class="form-label fw-bold text-danger">Periodo extraordinario (inicio)</label>
                             <input type="number" name="dia_inicio_extra" class="form-control" min="1" max="31">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold text-danger">Mora / extra (fin)</label>
+                            <label class="form-label fw-bold text-danger">Periodo extraordinario (fin)</label>
                             <input type="number" name="dia_fin_extra" class="form-control" min="1" max="31">
                         </div>
                     </div>
@@ -175,10 +261,27 @@
                 @csrf
                 @method('PUT')
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Tipo de cobro <span class="text-danger">*</span></label>
-                        <input type="text" name="tipo" class="form-control" value="{{ $regla->tipo }}" required>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Tipo de cobro <span class="text-danger">*</span></label>
+                            <input type="text" name="tipo" class="form-control" value="{{ $regla->tipo }}" required>
+                            <small class="text-muted"></small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Meses aplicables <span class="text-danger">*</span></label>
+                            <select name="meses_aplicables" class="form-select" required>
+                                <option value="" disabled>-- Seleccione los meses --</option>
+                                <option value="Todos los meses" {{ $regla->meses_aplicables == 'Todos los meses' ? 'selected' : '' }}>Todos los meses</option>
+
+                                <!-- Se llena dinámicamente y selecciona el que ya tiene la regla -->
+                                @foreach($mesesDisponibles as $mes)
+                                    <option value="{{ $mes }}" {{ $regla->meses_aplicables == $mes ? 'selected' : '' }}>{{ $mes }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
+
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-success">Periodo ordinario (inicio) <span class="text-danger">*</span></label>
@@ -191,11 +294,11 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold text-danger">Mora / extra (inicio)</label>
+                            <label class="form-label fw-bold text-danger">Periodo extraordinario (inicio)</label>
                             <input type="number" name="dia_inicio_extra" class="form-control" min="1" max="31" value="{{ $regla->dia_inicio_extra }}">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold text-danger">Mora / extra (fin)</label>
+                            <label class="form-label fw-bold text-danger">Periodo extraordinario (fin)</label>
                             <input type="number" name="dia_fin_extra" class="form-control" min="1" max="31" value="{{ $regla->dia_fin_extra }}">
                         </div>
                     </div>

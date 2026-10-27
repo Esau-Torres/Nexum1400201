@@ -50,7 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('docente.notas_materia', [
             'materiaId' => $materiaId
         ]);
-        
+
     })->name('docente.notas');
 
     Route::get('/asistencia/{materiaId}', function ($materiaId) {
@@ -93,8 +93,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::put('/adfinanciero/cargosestudiante/{id}/estado', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'cargosUpdateEstado'])->name('adfinanciero.cargos.updateEstado');
 
+        //nuevas rutas
+        // NUEVA RUTA: Vista para crear un cargo manual
+        Route::get('/adfinanciero/cargosestudiante/nuevo', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'cargosCreate'])->name('adfinanciero.cargos.create');
+
+        // NUEVA RUTA: Guardar el cargo y calcular el beneficio
+        Route::post('/adfinanciero/cargosestudiante/guardar', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'cargosStore'])->name('adfinanciero.cargos.store');
+
         // Gestion de pagos y reportes
-        // Dashboard Financiero y Auditoría (Solo Lectura)
+        // (Solo Lectura)
         Route::get('/adfinanciero/reportes', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'reportesIndex'])->name('adfinanciero.reportes.index');
 
         // Reglas pagos
@@ -105,6 +112,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/adfinanciero/reglas-pago/{id}', [\App\Http\Controllers\Reglaspago\ReglasController::class, 'update'])->name('reglas.update');
 
         Route::post('/adfinanciero/cargosestudiante/pagar', [\App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'procesarPagoEnLinea'])->name('adfinanciero.cargos.pagar');
+
+        Route::post('/adfinanciero/cargos/store-masivo', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'cargosStoreMasivo'])->name('adfinanciero.cargos.storeMasivo');
     });
 
 

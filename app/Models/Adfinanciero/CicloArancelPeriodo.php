@@ -30,4 +30,6 @@ class CicloArancelPeriodo extends Model
     {
         return $this->belongsTo(ConceptoPago::class, 'id_concepto_recargo_extra', 'concepto_pago_id');
     }
+
+
 }
