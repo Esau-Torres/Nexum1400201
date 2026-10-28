@@ -164,7 +164,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('docente.asistencia', 1) }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('docente.asistencia') ? 'active' : '' }}">
+                        <a href="{{ route('docente.asistencia', 10) }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('docente.asistencia') ? 'active' : '' }}">
                             <i class="fa-solid fa-calendar-check nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Asistencia</div>

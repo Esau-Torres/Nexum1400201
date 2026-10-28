@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Docente\AsistenciaMateriaController;
 use App\Http\Controllers\Docente\MateriasDocenteController;
 use App\Http\Controllers\Docente\NotasMateriaController;
 use App\Models\Users\Role;
@@ -22,6 +23,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/materias', [MateriasDocenteController::class, 'index'])
             ->name('materias'); // Nombre final: docente.materias
 
+        // ============================================
+        // RUTAS DE NOTAS
+        // ============================================
         Route::get('/notas/{seccionId}', [NotasMateriaController::class, 'index'])
             ->whereNumber('seccionId')
             ->name('notas'); // Nombre final: docente.notas
@@ -29,5 +33,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/notas/{seccionId}/guardar', [NotasMateriaController::class, 'store'])
             ->whereNumber('seccionId')
             ->name('notas.store'); // Nombre final: docente.notas.store
+
+        // ============================================
+        // RUTAS DE ASISTENCIA
+        // ============================================
+        Route::get('/asistencia/{seccionId}', [AsistenciaMateriaController::class, 'index'])
+            ->whereNumber('seccionId')
+            ->name('asistencia'); // Nombre final: docente.asistencia
+
+        Route::post('/asistencia/{seccionId}/guardar', [AsistenciaMateriaController::class, 'store'])
+            ->whereNumber('seccionId')
+            ->name('asistencia.store'); // Nombre final: docente.asistencia.store
     });
 });

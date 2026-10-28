@@ -1,38 +1,12 @@
 @extends('layouts.app')
 
-@php
-// ============================================
-// DATOS QUEMADOS (temporal)
-// ============================================
-$materia = $materia ?? [
-'nombre' => 'Programación I',
-'codigo' => 'INF-101',
-'grupo' => 'A',
-'aula' => 'Aula 12',
-'horario' => 'Lun - Mié · 07:00 - 08:30'
-];
-
-$estudiantes = $estudiantes ?? [
-['codigo' => 'STU-2024-001', 'nombre' => 'María González'],
-['codigo' => 'STU-2024-002', 'nombre' => 'Juan Ramírez'],
-['codigo' => 'STU-2024-003', 'nombre' => 'Ana López'],
-['codigo' => 'STU-2024-004', 'nombre' => 'Carlos Mendoza'],
-['codigo' => 'STU-2024-005', 'nombre' => 'Lucía Fernández'],
-['codigo' => 'STU-2024-006', 'nombre' => 'Pedro Sánchez'],
-['codigo' => 'STU-2024-007', 'nombre' => 'Isabella Castro'],
-['codigo' => 'STU-2024-008', 'nombre' => 'Diego Herrera'],
-];
-@endphp
-
 @section('title', 'Asistencia - ' . $materia['nombre'] . ' | NEXUM')
 
 @section('content')
 <div class="container-fluid p-4 p-lg-5">
-    <div class="mx-auto" style="max-width: 1500px;">
+    <div class="mx-auto" style="max-width: 1500px;" data-seccion-id="{{ $seccionId }}">
 
-        <!-- ============================================ -->
-        <!-- ENCABEZADO + ACCIONES                        -->
-        <!-- ============================================ -->
+        <!-- ENCABEZADO + ACCIONES -->
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-3 mb-4">
             <div>
                 <a href="{{ route('docente.materias') }}" class="text-decoration-none small text-danger fw-semibold mb-2 d-inline-block">
@@ -43,18 +17,18 @@ $estudiantes = $estudiantes ?? [
                     <span class="badge rounded-pill bg-danger">{{ $materia['codigo'] }}</span>
                     <span class="badge rounded-pill bg-light text-danger border">Grupo {{ $materia['grupo'] }}</span>
                     <span class="badge rounded-pill bg-light text-muted border">
-                        <i class="fa-solid fa-users me-1"></i>{{ count($estudiantes) }} estudiantes
+                        <i class="fa-solid fa-users me-1"></i>{{ $materia['total_estudiantes'] }} estudiantes
                     </span>
                 </div>
             </div>
 
-            <!-- Selector de fecha + Botones -->
+            <!-- Selector de fecha (para crear nueva sesión) + Botones -->
             <div class="d-flex gap-2 align-items-start flex-wrap">
                 <div class="input-group" style="max-width: 200px;">
                     <span class="input-group-text bg-white border-end-0">
                         <i class="fa-regular fa-calendar text-danger"></i>
                     </span>
-                    <input type="date" id="fechaAsistencia" class="form-control border-start-0" value="{{ date('Y-m-d') }}">
+                    <input type="date" id="fechaSesion" class="form-control border-start-0" value="{{ date('Y-m-d') }}">
                 </div>
                 <button type="button" id="btnEditar" class="btn btn-outline-danger rounded-3 px-4">
                     <i class="fa-solid fa-pen me-2"></i>Editar
@@ -74,16 +48,13 @@ $estudiantes = $estudiantes ?? [
                 <i class="fa-solid fa-circle-info text-danger me-3 fs-5"></i>
                 <div>
                     <strong class="text-dark">Modo edición activo.</strong>
-                    <span class="text-dark small">Registra la asistencia de todos los estudiantes. El botón "Guardar" se habilitará cuando todas las sesiones estén marcadas.</span>
+                    <span class="text-dark small">Registra la asistencia de todos los estudiantes para la sesión seleccionada.</span>
                 </div>
             </div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- TABLA DE ASISTENCIA                          -->
-        <!-- ============================================ -->
+        <!-- TABLA DE ASISTENCIA -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <!-- Header de la tabla -->
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center p-4 border-bottom gap-3">
                 <div>
                     <h5 class="fw-bold mb-1">
@@ -98,13 +69,20 @@ $estudiantes = $estudiantes ?? [
                 <div class="d-flex align-items-center gap-3">
                     <div class="text-center">
                         <div class="small text-muted mb-1">Sesiones registradas</div>
-                        <div class="fw-bold fs-5" id="progresoAsistencia">0 de 40</div>
+                        <div class="fw-bold fs-5">{{ count($sesiones) }}</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tabla con scroll horizontal -->
             <div class="table-responsive">
+                @if($sesiones->isEmpty())
+                <div class="text-center py-5">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 64px; height: 64px; background-color: #fff5f5;">
+                        <i class="fa-solid fa-calendar-xmark text-danger fs-4"></i>
+                    </div>
+                    <p class="text-muted mb-0">No hay sesiones de clase registradas para esta materia aún.</p>
+                </div>
+                @else
                 <table class="table align-middle mb-0 tabla-asistencia">
                     <thead>
                         <tr>
@@ -113,44 +91,53 @@ $estudiantes = $estudiantes ?? [
                                 <div>% Asistencia</div>
                                 <small class="text-muted fw-normal th-sub">Mínimo 80%</small>
                             </th>
-                            @for($i = 1; $i <= 40; $i++)
-                                <th class="text-center fw-semibold text-dark sesion-header" style="min-width: 90px;">
-                                <div>Sesión {{ $i }}</div>
-                                </th>
-                                @endfor
+                            @foreach($sesiones as $sesion)
+                            <th class="text-center fw-semibold text-dark" style="min-width: 90px;">
+                                <div>{{ $sesion->fecha->format('d/m') }}</div>
+                                <small class="text-muted fw-normal th-sub">Sesión</small>
+                            </th>
+                            @endforeach
                         </tr>
                     </thead>
                     <tbody id="tablaEstudiantes">
                         @foreach($estudiantes as $estudiante)
-                        <tr data-codigo="{{ $estudiante['codigo'] }}" class="fila-estudiante">
+                        <tr data-detalle-id="{{ $estudiante->detalle_inscripcion_id }}" class="fila-estudiante">
                             <td class="ps-4 sticky-col" style="left: 0; z-index: 5;">
                                 <div class="d-flex align-items-center">
                                     <div class="d-inline-flex align-items-center justify-content-center rounded-circle me-3 flex-shrink-0 avatar-asistencia">
-                                        <span class="fw-bold small">{{ strtoupper(substr($estudiante['nombre'], 0, 1)) }}</span>
+                                        <span class="fw-bold small">{{ strtoupper(substr(optional(optional($estudiante->inscripcion)->alumno)->usuario->name ?? 'U', 0, 1)) }}</span>
                                     </div>
                                     <div>
-                                        <div class="fw-medium small mb-0">{{ $estudiante['nombre'] }}</div>
-                                        <small class="text-muted">{{ $estudiante['codigo'] }}</small>
+                                        <div class="fw-medium small mb-0">{{ optional(optional($estudiante->inscripcion)->alumno)->usuario->name ?? 'Sin nombre' }}</div>
+                                        <small class="text-muted">{{ optional(optional($estudiante->inscripcion)->alumno)->codigo_estudiante ?? 'S/C' }}</small>
                                     </div>
                                 </div>
                             </td>
                             <td class="text-center sticky-col-porcentaje" style="left: 220px; z-index: 5;">
                                 <span class="fw-bold fs-5 porcentaje-display">—</span>
                             </td>
-                            @for($i = 1; $i <= 40; $i++)
-                                <td class="text-center">
-                                <select class="form-select form-select-sm asistencia-select" disabled>
+                            @foreach($sesiones as $sesion)
+                            @php
+                            $registro = $estudiante->asistencias->firstWhere('id_sesion', $sesion->clase_sesion_id);
+                            $estadoActual = $registro ? $registro->estado : '';
+                            @endphp
+                            <td class="text-center">
+                                <select class="form-select form-select-sm asistencia-select"
+                                    data-sesion-id="{{ $sesion->clase_sesion_id }}"
+                                    data-detalle-id="{{ $estudiante->detalle_inscripcion_id }}"
+                                    disabled>
                                     <option value="">—</option>
-                                    <option value="Asis">Asis</option>
-                                    <option value="Falt">Falt</option>
-                                    <option value="Per">Per</option>
+                                    <option value="Asis" {{ $estadoActual === 'Asis' ? 'selected' : '' }}>Asis</option>
+                                    <option value="Falt" {{ $estadoActual === 'Falt' ? 'selected' : '' }}>Falt</option>
+                                    <option value="Per" {{ $estadoActual === 'Per' ? 'selected' : '' }}>Per</option>
                                 </select>
-                                </td>
-                                @endfor
+                            </td>
+                            @endforeach
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
+                @endif
             </div>
 
             <!-- Footer con estadísticas -->
@@ -196,13 +183,11 @@ $estudiantes = $estudiantes ?? [
         const selectsAsistencia = document.querySelectorAll('.asistencia-select');
         const filas = document.querySelectorAll('.fila-estudiante');
         const progresoAsistencia = document.getElementById('progresoAsistencia');
+        const seccionId = document.querySelector('[data-seccion-id]').dataset.seccionId;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         let modoEdicion = false;
-        const TOTAL_SESIONES = 40;
 
-        // ============================================
-        // CÁLCULO DE PORCENTAJE POR FILA
-        // ============================================
         function calcularPorcentaje(fila) {
             const selects = fila.querySelectorAll('.asistencia-select');
             const porcentajeDisplay = fila.querySelector('.porcentaje-display');
@@ -228,7 +213,6 @@ $estudiantes = $estudiantes ?? [
             const porcentaje = Math.round((asistencias / marcadas) * 100);
             porcentajeDisplay.textContent = porcentaje + '%';
 
-            // Color según el umbral del 80%
             if (porcentaje >= 80) {
                 porcentajeDisplay.className = 'fw-bold fs-5 porcentaje-display nota-aprobada';
             } else {
@@ -238,9 +222,6 @@ $estudiantes = $estudiantes ?? [
             return porcentaje;
         }
 
-        // ============================================
-        // ESTADÍSTICAS GENERALES
-        // ============================================
         function actualizarEstadisticas() {
             let sumaPorcentajes = 0;
             let totalCalculados = 0;
@@ -277,16 +258,11 @@ $estudiantes = $estudiantes ?? [
             }
         }
 
-        // ============================================
-        // PROGRESO Y VALIDACIÓN PARA GUARDAR
-        // ============================================
         function actualizarProgreso() {
             const totalSelects = selectsAsistencia.length;
             const selectsMarcados = Array.from(selectsAsistencia).filter(s => s.value !== '').length;
-
             progresoAsistencia.textContent = `${selectsMarcados} de ${totalSelects}`;
 
-            // Habilitar botón guardar solo si TODO está completo
             if (selectsMarcados === totalSelects && modoEdicion) {
                 btnGuardar.disabled = false;
             } else {
@@ -294,14 +270,12 @@ $estudiantes = $estudiantes ?? [
             }
         }
 
-        // ============================================
-        // MODO EDICIÓN
-        // ============================================
         function activarModoEdicion() {
             modoEdicion = true;
             selectsAsistencia.forEach(s => s.disabled = false);
             btnEditar.classList.add('d-none');
             btnGuardar.classList.remove('d-none');
+            btnGuardar.disabled = false;
             btnCancelar.classList.remove('d-none');
             alertaEdicion.classList.remove('d-none');
             actualizarProgreso();
@@ -317,35 +291,80 @@ $estudiantes = $estudiantes ?? [
             btnGuardar.disabled = true;
         }
 
-        // ============================================
-        // EVENT LISTENERS
-        // ============================================
-
-        btnEditar.addEventListener('click', activarModoEdicion);
-
-        btnCancelar.addEventListener('click', function() {
-            if (confirm('¿Estás seguro de que deseas cancelar? Se perderán los cambios no guardados.')) {
-                desactivarModoEdicion();
-            }
-        });
-
-        btnGuardar.addEventListener('click', function() {
-            const datos = [];
-            filas.forEach(fila => {
-                const selects = fila.querySelectorAll('.asistencia-select');
-                const asistencias = [];
-                selects.forEach(s => asistencias.push(s.value));
-
-                datos.push({
-                    codigo_estudiante: fila.dataset.codigo,
-                    asistencias: asistencias
-                });
+        if (btnEditar) {
+            btnEditar.addEventListener('click', function() {
+                activarModoEdicion();
             });
-            console.log('Datos a guardar:', datos);
+        }
 
-            alert('✓ Asistencia guardada correctamente (simulado).\n\nEn el futuro, estos datos se enviarán a la base de datos.');
-            desactivarModoEdicion();
-        });
+        if (btnCancelar) {
+            btnCancelar.addEventListener('click', function() {
+                if (confirm('¿Estás seguro de que deseas cancelar? Se perderán los cambios no guardados.')) {
+                    location.reload();
+                }
+            });
+        }
+
+        if (btnGuardar) {
+            btnGuardar.addEventListener('click', async function() {
+                if (!confirm('¿Estás seguro de que deseas guardar la asistencia?')) {
+                    return;
+                }
+
+                const asistenciasData = [];
+                selectsAsistencia.forEach(select => {
+                    if (select.value !== '') {
+                        asistenciasData.push({
+                            id_detalle_inscripcion: parseInt(select.dataset.detalleId),
+                            estado: select.value,
+                            observacion: null
+                        });
+                    }
+                });
+
+                // Obtenemos el ID de la primera sesión (en un sistema real, esto vendría de un selector de sesión activa)
+                const primeraSesion = selectsAsistencia[0]?.dataset.sesionId;
+
+                if (!primeraSesion || asistenciasData.length === 0) {
+                    alert('⚠️ No hay datos de asistencia para guardar.');
+                    return;
+                }
+
+                btnGuardar.disabled = true;
+                btnGuardar.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Guardando...';
+
+                try {
+                    const response = await fetch(`/docente/asistencia/${seccionId}/guardar`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id_sesion: parseInt(primeraSesion),
+                            asistencias: asistenciasData
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        alert('✅ ' + data.message);
+                        location.reload();
+                    } else {
+                        alert('❌ ' + (data.message || 'Error al guardar.'));
+                        btnGuardar.disabled = false;
+                        btnGuardar.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Guardar';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('❌ Error de conexión al guardar.');
+                    btnGuardar.disabled = false;
+                    btnGuardar.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Guardar';
+                }
+            });
+        }
 
         selectsAsistencia.forEach(select => {
             select.addEventListener('change', function() {
@@ -356,12 +375,10 @@ $estudiantes = $estudiantes ?? [
             });
         });
 
-        // Inicialización
         filas.forEach(fila => calcularPorcentaje(fila));
         actualizarEstadisticas();
         actualizarProgreso();
     });
 </script>
 @endpush
-
 @endsection

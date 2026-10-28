@@ -50,7 +50,7 @@
 
                         <!-- Acciones -->
                         <div class="d-flex flex-column flex-sm-row gap-2">
-                            <a href="#" class="btn btn-outline-danger rounded-3 flex-fill materia-btn-large">
+                            <a href="{{ route('docente.asistencia', $materia->id) }}" class="btn btn-outline-danger rounded-3 flex-fill materia-btn-large">
                                 <i class="fa-solid fa-clipboard-check me-2"></i>Asistencia
                             </a>
                             <a href="{{ route('docente.notas', $materia->id) }}" class="btn btn-outline-danger rounded-3 flex-fill materia-btn-large">

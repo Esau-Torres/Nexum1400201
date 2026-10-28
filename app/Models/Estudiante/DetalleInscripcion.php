@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\CoordinadorFacultad\Seccion;
 use App\Models\Estudiante\Inscripcion;
-use App\Models\User;
-use App\Models\Asistencia\Asistencia;
+use App\Models\Users\User;                    // ✅ CORREGIDO: era App\Models\User
+use App\Models\Academico\Asistencia;          // ✅ CORREGIDO: era App\Models\Asistencia\Asistencia
 use App\Models\Academico\Calificacion;
 use App\Models\Estudiante\ExamenDiferido;
 
