@@ -13,9 +13,16 @@ class ValidarDocumentoIdentidad implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-         $tipo = TipoDocumentoIdentidad::find($this->tipoDocumentoId);
+        $tipo = TipoDocumentoIdentidad::find($this->tipoDocumentoId);
+        
+         if (!$tipo) { $fail('Tipo de documento no válido.'); return; }
 
-        if (!$tipo || !preg_match("/^(?:{$tipo->formato_regex})$/", trim($value))) {
+        $patron = $tipo->formato_regex;
+        // Quitar anclajes externos si existen
+        $patron = preg_replace('/^\^/', '', $patron);
+        $patron = preg_replace('/\$$/', '', $patron);
+
+        if (!preg_match("/^(?:{$patron})$/", trim($value))) {
             $fail('El número de documento ingresado no es válido para el formato seleccionado.');
             return;
         }

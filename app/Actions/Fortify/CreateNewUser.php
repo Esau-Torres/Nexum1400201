@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use Illuminate\Support\Facades\Log;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -39,7 +40,7 @@ class CreateNewUser implements CreatesNewUsers
             'fecha_nacimiento'    => ['required', 'date', 'before:-17 years'],
             'genero'              => ['required', 'in:M,F'],
             'id_carrera'          => ['required', 'exists:carreras,carrera_id'],
-            'titulo_bachillerato' => ['required', 'file', 'mimes:pdf,jpg,png', 'max:2048'],
+            'titulo_bachillerato' => ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:2048'],
             'partida_nacimiento'  => ['required', 'file', 'mimes:pdf,jpg,png', 'max:2048'],
             'fotografia_personal' => ['required', 'file', 'mimes:jpg,png', 'max:2048'],
             'constancia_paes'     => ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:2048'],
@@ -52,11 +53,12 @@ class CreateNewUser implements CreatesNewUsers
                 $alumno = $this->createStudentAction->execute($user, $input['id_carrera']);
                 $this->uploadDocsAction->execute($alumno, request());
 
+                \Log::info('Usuario enviando solicitud deregistro para crear cuenta de estudiante');
                 return $user;
 
             } catch (\Exception $e) {
                 throw ValidationException::withMessages([
-                    'error_general' => 'Ocurrió un error de integridad al procesar el expediente. Contacte a soporte técnico.'
+                    'error_general' => 'Ocurrió un error al procesar el expediente. Contacte a soporte.'
                 ]);
             }
         });

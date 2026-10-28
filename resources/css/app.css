@@ -1,7 +1,6 @@
 @import "bootstrap/dist/css/bootstrap.min.css";
+@import 'bootstrap-icons/font/bootstrap-icons.css';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
 
 @theme {
     --font-sans:
@@ -389,6 +388,112 @@ body {
     display: inline-block;
 }
 
+/* ==========================================================================
+   DISEÑO GLOBAL DATATABLES + BOOTSTRAP 5
+   ========================================================================== */
+
+/* 1. CONTENEDOR Y LUPA DEL BUSCADOR */
+/* Selectores directos sin depender de .dataTables_wrapper */
+.dataTables_filter,
+.dt-search {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    margin-bottom: 0 !important;
+}
+
+/* El label no debe usar contents para no romper el flujo de la lupa */
+.dataTables_filter label,
+.dt-search label {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    margin-bottom: 0 !important;
+    width: auto !important;
+}
+
+/* Lupa SVG fijada al inicio del input */
+.dataTables_filter::before,
+.dt-search::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 16px !important;
+    height: 16px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236c757d'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'/%3E%3C/svg%3E") !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    pointer-events: none !important;
+    z-index: 10 !important;
+}
+
+/* Estilo del input generado automáticamente por DataTables */
+.dataTables_filter input[type="search"],
+.dt-search input[type="search"],
+.dataTables_filter input.form-control,
+.dt-search input.form-control {
+    padding-left: 36px !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 6px !important;
+    height: 38px !important;
+    font-size: 0.9rem !important;
+    width: 220px !important;
+    background-color: #ffffff !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+/* Estado Focus del input */
+.dataTables_filter input:focus,
+.dt-search input:focus {
+    border-color: var(--color-accent, #4A90E2) !important;
+    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25) !important;
+    outline: none !important;
+}
+
+
+/* 2. PAGINACIÓN (BOOTSTRAP 5) */
+ul.pagination {
+    margin-bottom: 0 !important;
+    gap: 4px !important;
+}
+
+/* Botones base */
+ul.pagination .page-link {
+    padding: 5px 12px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    border: 1px solid #dee2e6 !important;
+    color: var(--color-rose-quartz, #000000) !important;
+    background-color: #ffffff !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Hover */
+ul.pagination .page-link:hover {
+    background-color: #f8f9fa !important;
+    border-color: var(--color-accent, #4A90E2) !important;
+    color: var(--color-accent, #4A90E2) !important;
+}
+
+/* Botón activo (Página actual) */
+ul.pagination .page-item.active .page-link {
+    background-color: var(--color-accent, #4A90E2) !important;
+    border-color: var(--color-accent, #4A90E2) !important;
+    color: #ffffff !important;
+}
+
+/* Botones deshabilitados */
+ul.pagination .page-item.disabled .page-link {
+    opacity: 0.5 !important;
+    background-color: transparent !important;
+    border-color: #dee2e6 !important;
+    color: #000000 !important;
+}
+
 /* ========== MATERIAS DOCENTE STYLES ========== */
 
 /* Tarjetas grandes de materias */
@@ -689,3 +794,88 @@ body {
 .nota-reprobada {
     color: #dc3545 !important;
 }
+
+/* ========== NAV PILLS PERSONALIZADOS ========== */
+.custom-pills {
+    /* Matamos las variables por defecto de Bootstrap (azul) */
+    --bs-nav-pills-link-active-bg: #ffffff;
+    --bs-nav-pills-link-active-color: var(--color-accent);
+    --bs-nav-pills-border-radius: 0.5rem;
+    --bs-nav-link-color: #6c757d;
+    --bs-nav-link-hover-color: var(--color-accent);
+
+    background-color: #fafbfc;
+    padding: 6px;
+    border: 1px solid #eef0f2;
+    border-radius: 12px;
+}
+
+/* Estado base del link (no activo) */
+.custom-pills .nav-link {
+    color: #6c757d;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 1rem;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+/* Hover en link NO activo */
+.custom-pills .nav-link:not(.active):hover {
+    color: var(--color-accent);
+    background-color: var(--color-hover-bg);
+}
+
+/* ======================================
+   ESTADO ACTIVO
+   ====================================== */
+.custom-pills .nav-link.active,
+.custom-pills .nav-link.show {
+    background-color: #ffffff !important;
+    color: var(--color-accent) !important;
+    border: 1px solid var(--color-accent) !important;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.12) !important;
+}
+
+/* Hover sobre el link ACTIVO: no debe cambiar */
+.custom-pills .nav-link.active:hover,
+.custom-pills .nav-link.show:hover {
+    background-color: #ffffff !important;
+    color: var(--color-accent) !important;
+    border-color: var(--color-accent) !important;
+}
+
+/* ======================================
+   KILL SWITCH del focus azul de Bootstrap
+   ====================================== */
+.custom-pills .nav-link:focus,
+.custom-pills .nav-link:focus-visible,
+.custom-pills .nav-link.active:focus,
+.custom-pills .nav-link.active:focus-visible {
+    outline: none !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15) !important;
+    border-color: var(--color-accent) !important;
+}
+
+/* Quitamos cualquier color azul residual del reset de Bootstrap */
+.custom-pills .nav-link:active {
+    background-color: #ffffff;
+    color: var(--color-accent);
+}
+
+/*-- Estilos CSS personalizados para la interacción de las pestañas --*/
+
+.nav-tabs .nav-link {
+        color: #6c757d; 
+    }
+    .nav-tabs .nav-link:hover {
+        color: #dc3545;
+        background-color: #f8f9fa;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #dc3545 !important;
+        background-color: #ffffff !important;
+        border-bottom: 3px solid #dc3545 !important;
+        box-shadow: 0 -2px 6px rgba(0,0,0,0.03);
+    }

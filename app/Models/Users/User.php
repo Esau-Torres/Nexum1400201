@@ -58,15 +58,30 @@ class User extends Authenticatable
     {
         $roles = is_array($roles) ? $roles : [$roles];
 
-        return $this->roles()->whereIn('nombre', $roles)->exists();
+        return $this->roles()->where('roles.estado', true)->whereIn('nombre', $roles)->exists();
     }
-    // verifica si un usuario tiene un orl por id
+    // verifica si un usuario tiene un rol por id
     public function hasRoleId(int|array $ids): bool
     {
         $ids = is_array($ids) ? $ids : [$ids];
 
         return $this->roles()->whereIn('rol_id', $ids)->exists();
     }
+    // filtra los estados de los roles estan activos 
+    public function rolesActivos()
+    {
+        return $this->roles()->where('roles.estado', true);
+    }
+    // roles inactivos
+    public function inactiveRoleIds(): array
+    {
+        return $this->roles()
+            ->where('roles.estado', false)
+            ->pluck('roles.rol_id')
+            ->map(fn($id) => (int) $id)
+            ->toArray();
+    }
+
 
     public function alumno(): HasOne {
         return $this->hasOne(Alumnos::class, 'id_usuario', 'id');

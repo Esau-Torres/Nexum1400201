@@ -4,7 +4,7 @@ namespace App\Models\Users;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne; 
-Use App\Models\Users\Users;
+Use App\Models\Users\User;
 
 class RegionalActivo extends Model 
 {

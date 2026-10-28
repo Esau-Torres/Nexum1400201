@@ -20,6 +20,8 @@ use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Contracts\RegisterResponse;
 use Laravel\Fortify\Contracts\VerifyEmailResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -57,14 +59,14 @@ class FortifyServiceProvider extends ServiceProvider
         $this->app->singleton(RegisterResponse::class, function () {
             return new class implements RegisterResponse
             {
-                public function toResponse($request)
+                public function toResponse($request): RedirectResponse
                 {
-                    return redirect()
-                        ->route('login')
-                        ->with(
-                            'info',
-                            'Solicitud recibida. Tu expediente está en revisión por Administración Académica.'
-                        );
+                    // 1. Fuerza el cierre de cualquier sesión residual (por seguridad) no encontre el bug 
+                    auth()->guard()->logout(); 
+                    session()->invalidate();
+                    session()->regenerateToken();
+                    \Log::info('RegisterResponse ejecutado correctamente, redirigiendo a login.');
+                    return redirect()->route('login')->with('info', 'Solicitud recibida. Tu expediente está en revisión por Administración Académica.');
                 }
             };
         });
@@ -82,14 +84,15 @@ class FortifyServiceProvider extends ServiceProvider
             // Usuario no existe o contraseña incorrecta
             if (!$user || !Hash::check($request->password, $user->password)) {
 
+                Log::warning('NEXUM_AUTH_FAILED', [
+                    'ip' => $request->ip(),
+                    'email' => $request->email,
+                    'reason' => $user ? 'invalid_password' : 'user_not_found',
+                ]);
+
                 session()->flash(
                     'error',
                     'Credenciales inválidas. Verifique su correo institucional y contraseña.'
-                );
-
-                session()->flash(
-                    'error_title',
-                    'Acceso Denegado'
                 );
 
                 throw ValidationException::withMessages([
@@ -115,6 +118,19 @@ class FortifyServiceProvider extends ServiceProvider
                     Fortify::username() => [
                         'Su cuenta aún no está habilitada.'
                     ],
+                ]);
+            }
+
+               // 3. Usuario activo pero SIN roles activos asignados
+            if (!$user->roles()->where('roles.estado', true)->exists()) {
+                session()->flash(
+                    'warning',
+                    'Su cuenta está activa, pero no posee ningún permiso asignado. Contacte a Administración Académica para habilitar su acceso al sistema.'
+                );
+                session()->flash('error_title', 'Sin permisos asignados');
+
+                throw ValidationException::withMessages([
+                    Fortify::username() => ['Su cuenta no tiene roles activos asignados.'],
                 ]);
             }
 

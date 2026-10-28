@@ -20,7 +20,7 @@
 
     <!-- Styles / Scripts Vite -->
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css','resources/css/toast.css' , 'resources/js/app.js'])
     @endif
 </head>
 
@@ -85,6 +85,7 @@
 
                         <div class="d-flex justify-content-between mt-4">
                             <a href="{{ route('password.request') }}" class="text-decoration-none small text-danger">¿Olvidaste tu contraseña?</a>
+                            <a href="{{ route('register') }}" class="text-decoration-none small" style="color: var(--color-accent);">Registrarse</a>
                         </div>
                     </div>
                 </div>
@@ -97,6 +98,7 @@
         <small class="text-muted">&copy; {{ date('Y') }} {{ config('app.name', 'NEXUM') }}. Todos los derechos reservados.</small>
     </footer>
 
+    <x-toast-container />
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 

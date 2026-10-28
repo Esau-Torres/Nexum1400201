@@ -15,7 +15,7 @@ class CreateUserAccountAction
             'email'               => $input['email'],
             'password'            => Hash::make(Str::random(16)),
             'id_tipo_documento'   => $input['id_tipo_documento'],
-            'id_regional_activo'  => $input['id_regional_activo'],
+            'id_regional_activo'  => $input['id_regional_activo'] ?? null,
             'documento_identidad' => $input['documento_identidad'],
             'fecha_nacimiento'    => $input['fecha_nacimiento'],
             'genero'              => $input['genero'],
