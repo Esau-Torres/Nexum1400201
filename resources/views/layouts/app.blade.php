@@ -19,6 +19,7 @@
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css','resources/css/toast.css' , 'resources/js/app.js'])
     @endif
+    @stack('styles') 
 </head>
 
 <body class="bg-light">
@@ -187,7 +188,7 @@
                     {{-- ============================================================ --}}
                     @if(auth()->user()->hasRole('ESTUDIANTE'))
                         <li class="nav-item mb-1">
-                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('pensum*') ? 'active' : '' }}">
+                            <a href="{{ route('student.pensum.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('pensum.index*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-book-open nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Pensum</div>
