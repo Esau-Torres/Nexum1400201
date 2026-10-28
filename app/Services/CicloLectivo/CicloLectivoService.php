@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\CicloLectivo;
 
 use App\Models\Academico\CicloLectivo;
 use App\Enums\EstadoCiclo;

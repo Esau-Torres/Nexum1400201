@@ -36,7 +36,7 @@
                 </div>
 
                 <!-- Nuevo Botón para ir a Pagar -->
-                <button type="submit" id="btnEmitirRecibo" class="btn text-white fw-bold shadow-sm px-4" style="background-color: #ff7575; border-radius: 8px;" disabled>
+                <button type="submit" id="btnEmitirRecibo" class="btn text-white fw-bold shadow-sm px-4" style="background-color: #dc3545; border-radius: 8px;" disabled>
                     <i class="fa-solid fa-file-invoice-dollar me-2"></i> Generar recibo
                     <span class="badge bg-white text-danger ms-1" id="contadorSeleccionados">0</span>
                 </button>

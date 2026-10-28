@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Cajero;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Adfinanciero\CargoEstudiante; 
+use App\Models\Adfinanciero\CargoEstudiante;
 use App\Models\Adfinanciero\ConceptoPago;
 use Illuminate\Support\Facades\DB; // Para actualizar el estado y guardar el pago
+use App\Mail\ReciboPagoMail;
 use Illuminate\Support\Facades\Mail; // Para el correo
 use Illuminate\Support\Facades\Auth; // Para saber qué cajero cobró
 
@@ -19,31 +20,72 @@ class CajeroController extends Controller
         $cargos = collect();
 
         if ($request->filled('id_alumno')) {
-
-            // 1. SANITIZAR EL INPUT (Ahora forzamos MINÚSCULAS)
             $request->merge([
                 'id_alumno' => strtoupper(trim($request->id_alumno))
             ]);
 
-            // 2. VALIDACIÓN
             $request->validate([
                 'id_alumno' => 'required|string|exists:alumnos,codigo_estudiante'
             ], [
                 'id_alumno.exists' => 'Error: El código ingresado no corresponde a ningún alumno registrado.'
             ]);
 
-            // 3. OBTENER EL ID NUMÉRICO
-            $alumno = DB::table('alumnos')
+            $alumno = \Illuminate\Support\Facades\DB::table('alumnos')
                         ->where('codigo_estudiante', $request->id_alumno)
                         ->first();
 
-
-            // 4. BÚSQUEDA DE CARGOS
             $cargos = CargoEstudiante::with('concepto')
                 ->where('id_alumno', $alumno->alumno_id)
                 ->where('estado_cargo', 'PENDIENTE')
                 ->orderBy('fecha_vencimiento', 'asc')
                 ->get();
+
+            // ==========================================
+            // NUEVO: APLICACIÓN DE REGLAS DE MORA
+            // ==========================================
+            $hoy = now()->startOfDay();
+
+            // 1. Unimos reglas_pago con concepto_pago para obtener los $5 o $10 dinámicamente
+            $reglasActivas = \Illuminate\Support\Facades\DB::table('reglas_pago')
+                ->join('concepto_pago', 'reglas_pago.id_concepto_recargo', '=', 'concepto_pago.concepto_pago_id')
+                ->select('reglas_pago.tipo', 'concepto_pago.monto_base', 'concepto_pago.nombre as nombre_recargo')
+                ->where('reglas_pago.estado', 'ACTIVO')
+                ->get();
+
+            $reglaMensualidad = $reglasActivas->firstWhere('tipo', 'Mensualidad');
+            $reglaInscripcion = $reglasActivas->firstWhere('tipo', 'Inscripción');
+
+            // 2. Evaluamos cargo por cargo si ya está vencido
+            foreach ($cargos as $cargo) {
+                // Valores base (por si el cargo no está vencido)
+                $cargo->tiene_mora = false;
+                $cargo->monto_mora = 0;
+                $cargo->total_con_mora = $cargo->monto_neto_estudiante ?? $cargo->monto_original;
+
+                $fechaVencimiento = \Carbon\Carbon::parse($cargo->fecha_vencimiento)->startOfDay();
+
+                // Si hoy es mayor a la fecha de vencimiento (está en rojo)
+                if ($hoy->gt($fechaVencimiento)) {
+                    $nombreCargo = strtoupper($cargo->concepto->nombre);
+                    $reglaAplicable = null;
+
+                    // Asignar regla según el texto del concepto
+                    if (str_contains($nombreCargo, 'MENSUAL')) {
+                        $reglaAplicable = $reglaMensualidad;
+                    } elseif (str_contains($nombreCargo, 'MATRICULA') || str_contains($nombreCargo, 'INSCRIPCI')) {
+                        $reglaAplicable = $reglaInscripcion;
+                    }
+
+                    // Si se encontró una regla válida, inyectamos la mora al objeto
+                    if ($reglaAplicable) {
+                        $cargo->tiene_mora = true;
+                        $cargo->monto_mora = $reglaAplicable->monto_base;
+                        $cargo->nombre_mora = $reglaAplicable->nombre_recargo;
+                        // Se suma la mora al monto con beneficio
+                        $cargo->total_con_mora = ($cargo->monto_neto_estudiante ?? $cargo->monto_original) + $reglaAplicable->monto_base;
+                    }
+                }
+            }
         }
 
         return view('cajero.deuda.index', compact('cargos'));
@@ -87,6 +129,7 @@ class CajeroController extends Controller
         return view('cajero.ventanilla.index', compact('conceptos'));
     }
 
+    //Logica de las promociones
     public function promociones()
     {
         // Traemos solo las promociones activas (Ajusta 'estado', 1 si tu BD usa booleanos, o 'ACTIVO' si usa texto)
@@ -95,6 +138,7 @@ class CajeroController extends Controller
         return view('cajero.promociones.index', compact('promociones'));
     }
 
+    //funciona en la ventanilla para las deudas
     public function crearPago(Request $request)
     {
         // 1. OBTENEMOS LAS PROMOCIONES VIGENTES EL DÍA DE HOY
@@ -109,7 +153,7 @@ class CajeroController extends Controller
         $metodoPagoEscogido = $request->input('metodo_pago', 'efectivo');
         $esPagoDeuda = false; // Bandera para saber si ocultar el input de Carnet en la vista
 
-        // --- VARIABLE NUEVA PARA LA VISTA ---
+        // VARIABLE NUEVA PARA LA VISTA
         $alumno = null;
 
         // ==========================================
@@ -136,32 +180,79 @@ class CajeroController extends Controller
                 if($alumnoBD) {
                     $usuarioRelacionado = DB::table('users')->where('id', $alumnoBD->id_usuario)->first();
 
+                    $tipoBeneficio = DB::table('beneficios_estudiante')
+                        ->where('id_alumno', $alumnoBD->alumno_id)
+                        ->value('tipo_beneficio');
+
                     // Armamos un objeto limpio para la vista
                     $alumno = (object)[
                         'nombres' => $usuarioRelacionado ? $usuarioRelacionado->name : 'Estudiante',
                         'apellidos' => '',
-                        'carnet' => $alumnoBD->codigo_estudiante
+                        'carnet' => $alumnoBD->codigo_estudiante,
+                        'carrera' => DB::table('carreras')->where('carrera_id', $alumnoBD->id_carrera)->value('nombre') ?? 'Sin carrera',
+                        'beneficio' => $tipoBeneficio ? ucwords(strtolower(str_replace('_', ' ', $tipoBeneficio))) : 'Sin beneficio'
                     ];
                 }
             }
 
-            foreach ($cargos as $cargo) {
-                $descuentoDinero = 0;
+            // ==========================================
+            // NUEVO: LÓGICA DE REGLAS DE MORA
+            // ==========================================
+            $fechaHoyStart = now()->startOfDay();
+            $reglasActivas = DB::table('reglas_pago')
+                ->join('concepto_pago', 'reglas_pago.id_concepto_recargo', '=', 'concepto_pago.concepto_pago_id')
+                ->select('reglas_pago.tipo', 'concepto_pago.monto_base', 'concepto_pago.nombre as nombre_recargo')
+                ->where('reglas_pago.estado', 'ACTIVO')
+                ->get();
 
-                // Buscar promos aplicables
+            $reglaMensualidad = $reglasActivas->firstWhere('tipo', 'Mensualidad');
+            $reglaInscripcion = $reglasActivas->firstWhere('tipo', 'Inscripción');
+
+            // Recorremos los cargos aplicando descuentos y moras
+            foreach ($cargos as $cargo) {
+                // 1. APLICAMOS LA MORA SI EL CARGO ESTÁ VENCIDO
+                $cargo->tiene_mora = false;
+                $cargo->monto_mora = 0;
+                $montoBaseCargo = $cargo->monto_neto_estudiante ?? $cargo->monto_original;
+                $cargo->total_con_mora = $montoBaseCargo;
+
+                if ($cargo->fecha_vencimiento) {
+                    $fechaVencimiento = \Carbon\Carbon::parse($cargo->fecha_vencimiento)->startOfDay();
+
+                    if ($fechaHoyStart->gt($fechaVencimiento)) {
+                        $nombreCargo = strtoupper($cargo->nombre_concepto);
+                        $reglaAplicable = null;
+
+                        if (str_contains($nombreCargo, 'MENSUAL')) {
+                            $reglaAplicable = $reglaMensualidad;
+                        } elseif (str_contains($nombreCargo, 'MATRICULA') || str_contains($nombreCargo, 'INSCRIPCI')) {
+                            $reglaAplicable = $reglaInscripcion;
+                        }
+
+                        if ($reglaAplicable) {
+                            $cargo->tiene_mora = true;
+                            $cargo->monto_mora = $reglaAplicable->monto_base;
+                            $cargo->total_con_mora = $montoBaseCargo + $reglaAplicable->monto_base;
+                        }
+                    }
+                }
+
+                // 2. APLICAMOS PROMOCIONES AL MONTO ORIGINAL
+                $descuentoDinero = 0;
                 $promoEspecifica = $promocionesVigentes->where('id_concepto_aplicable', $cargo->id_concepto)->first();
                 $promoGlobal = $promocionesVigentes->whereNull('id_concepto_aplicable')->first();
 
-                // Regla del Mayor Beneficio
                 $porcentajeEspecifico = $promoEspecifica ? $promoEspecifica->porcentaje_descuento : 0;
                 $porcentajeGlobal = $promoGlobal ? $promoGlobal->porcentaje_descuento : 0;
                 $mejorPorcentaje = max($porcentajeEspecifico, $porcentajeGlobal);
 
                 if ($mejorPorcentaje > 0) {
-                    $descuentoDinero = ($cargo->monto_original * $mejorPorcentaje) / 100;
+                    // El descuento se calcula sobre el monto original, sin incluir la mora
+                    $descuentoDinero = ($montoBaseCargo * $mejorPorcentaje) / 100;
                 }
 
-                $subtotalFinal = $cargo->monto_original - $descuentoDinero;
+                // El subtotal es el Total con Mora menos el Descuento
+                $subtotalFinal = $cargo->total_con_mora - $descuentoDinero;
                 $totalLiquidar += $subtotalFinal;
 
                 // Formateamos el nombre agregando el Mes y Año (Ej. 10/2026)
@@ -171,11 +262,15 @@ class CajeroController extends Controller
                 $arancelesACobrar->push((object)[
                     'concepto_pago_id' => $cargo->id_concepto,
                     'id_cargo' => $cargo->cargo_id, // Vital para saber qué deuda marcar como PAGADA
-                    'nombre' => $nombreCompleto,
-                    'monto_base' => $cargo->monto_original,
-                    'monto_final' => $subtotalFinal,
-                    'porcentaje_descuento' => $mejorPorcentaje,
-                    'descuento_dinero' => $descuentoDinero
+                    'nombre' => $nombreCompleto, //
+                    'monto_base' => $montoBaseCargo,
+                    'monto_final' => $subtotalFinal, //
+                    'porcentaje_descuento' => $mejorPorcentaje, //
+                    'descuento_dinero' => $descuentoDinero, //
+
+                    // Pasamos a la vista los datos de la mora
+                    'tiene_mora' => $cargo->tiene_mora,
+                    'monto_mora' => $cargo->monto_mora
                 ]);
             }
         }
@@ -196,10 +291,17 @@ class CajeroController extends Controller
 
                 if($alumnoBD) {
                     $usuarioRelacionado = DB::table('users')->where('id', $alumnoBD->id_usuario)->first();
+
+                    $tipoBeneficio = DB::table('beneficios_estudiante')
+                        ->where('id_alumno', $alumnoBD->alumno_id)
+                        ->value('tipo_beneficio');
+
                     $alumno = (object)[
                         'nombres' => $usuarioRelacionado ? $usuarioRelacionado->name : 'Estudiante',
                         'apellidos' => '',
-                        'carnet' => $alumnoBD->codigo_estudiante
+                        'carnet' => $alumnoBD->codigo_estudiante,
+                        'carrera' => DB::table('carreras')->where('carrera_id', $alumnoBD->id_carrera)->value('nombre') ?? 'Sin carrera',
+                        'beneficio' => $tipoBeneficio ? ucwords(strtolower(str_replace('_', ' ', $tipoBeneficio))) : 'Sin beneficio'
                     ];
                 }
             }
@@ -232,7 +334,11 @@ class CajeroController extends Controller
                     'monto_base' => $arancel->monto_base,
                     'monto_final' => $subtotalFinal,
                     'porcentaje_descuento' => $mejorPorcentaje,
-                    'descuento_dinero' => $descuentoDinero
+                    'descuento_dinero' => $descuentoDinero,
+
+                    // La venta directa no tiene moras
+                    'tiene_mora' => false,
+                    'monto_mora' => 0
                 ]);
             }
         } else {
@@ -244,23 +350,33 @@ class CajeroController extends Controller
         return view('cajero.pagos.create', compact('arancelesACobrar', 'totalLiquidar', 'metodoPagoEscogido', 'esPagoDeuda', 'alumno'));
     }
 
-
+    //guarda el pago ya sea del mes o cualquiero arancel
     public function guardarPago(Request $request)
     {
+
         // 1. Armamos las reglas básicas dinámicas
         $reglas = [
             'total_liquidado' => 'required|numeric|gt:0',
         ];
 
-        $canalPago = strtoupper($request->input('canal', 'efectivo'));
+        // CORRECCIÓN CLAVE: Buscamos ambos nombres de input posibles para garantizar que detecte 'tarjeta'
+        $canalPago = strtolower($request->input('metodo_pago', $request->input('canal', 'efectivo')));
+
+        // Limpiamos los espacios visuales de la tarjeta antes de que Laravel la valide
+        if ($canalPago === 'tarjeta' && $request->has('numero_tarjeta')) {
+            $request->merge([
+                'numero_tarjeta' => str_replace(' ', '', $request->numero_tarjeta)
+            ]);
+        }
 
         // Si es Efectivo, validamos que el dinero alcance
         if ($canalPago === 'efectivo') {
             $reglas['monto_recibido'] = 'required|numeric|min:' . $request->input('total_liquidado', 0);
         }
-        // Si es Tarjeta, validamos los 4 dígitos y la fecha MM/AA
+        // Si es Tarjeta, validamos número exacto, CVV y la fecha lógicamente
         else if ($canalPago === 'tarjeta') {
-            $reglas['numero_tarjeta'] = 'required|digits:4';
+            $reglas['numero_tarjeta'] = 'required|digits:16';
+            $reglas['cvv'] = 'required|digits_between:3,4';
             $reglas['fecha_vencimiento'] = [
                 'required',
                 'regex:/^(0[1-9]|1[0-2])\/\d{2}$/',
@@ -273,23 +389,26 @@ class CajeroController extends Controller
                         $mesActual = (int) date('m');
                         $anioActual = (int) date('Y');
 
+                        // Si el año es menor, o si es el mismo año pero el mes ya pasó
                         if ($anioVencimiento < $anioActual || ($anioVencimiento == $anioActual && $mesVencimiento < $mesActual)) {
-                            $fail('No se puede procesar el pago. La tarjeta ingresada se encuentra vencida.');
+                            $fail('Operación rechazada: La tarjeta ingresada se encuentra vencida.');
                         }
                     }
                 }
             ];
         }
 
-        // Ejecutamos la validación con mensajes en español
+        // Ejecutamos la validación
         $request->validate($reglas, [
             'total_liquidado.gt' => 'El total del recibo debe ser mayor a $0.00.',
             'monto_recibido.min' => 'El efectivo recibido no alcanza para cubrir el total.',
             'monto_recibido.required' => 'Debe ingresar el monto de efectivo recibido.',
-            'numero_tarjeta.required' => 'Debe ingresar la terminación de la tarjeta.',
-            'numero_tarjeta.digits' => 'El número de tarjeta debe contener exactamente 4 dígitos (Ej. 4091).',
+            'numero_tarjeta.required' => 'Debe ingresar el número completo de la tarjeta.',
+            'numero_tarjeta.digits' => 'El número de tarjeta debe contener exactamente 16 dígitos numéricos.',
+            'cvv.required' => 'Debe ingresar el código de seguridad (CVV).',
+            'cvv.digits_between' => 'El código de seguridad (CVV) debe contener 3 o 4 dígitos.',
             'fecha_vencimiento.required' => 'Debe ingresar la fecha de vencimiento.',
-            'fecha_vencimiento.regex' => 'La fecha de vencimiento es inválida. Use el formato MM/AA (Ej. 12/28).'
+            'fecha_vencimiento.regex' => 'La fecha de vencimiento es inválida. Use el formato MM/AA.'
         ]);
 
         DB::beginTransaction();
@@ -323,7 +442,18 @@ class CajeroController extends Controller
 
                 if ($cargos->isEmpty()) throw new \Exception('No se encontraron las deudas en el sistema.');
 
-                // Tomamos el alumno del primer cargo (todas las deudas son del mismo)
+                // --- NUEVO: TRAEMOS LAS REGLAS DE MORA ANTES DEL BUCLE ---
+                $fechaHoyStart = now()->startOfDay();
+                $reglasActivas = DB::table('reglas_pago')
+                    ->join('concepto_pago', 'reglas_pago.id_concepto_recargo', '=', 'concepto_pago.concepto_pago_id')
+                    ->select('reglas_pago.tipo', 'concepto_pago.monto_base', 'concepto_pago.nombre as nombre_recargo')
+                    ->where('reglas_pago.estado', 'ACTIVO')
+                    ->get();
+
+                $reglaMensualidad = $reglasActivas->firstWhere('tipo', 'Mensualidad');
+                $reglaInscripcion = $reglasActivas->firstWhere('tipo', 'Inscripción');
+                // ---------------------------------------------------------
+
                 $idAlumno = $cargos->first()->id_alumno;
 
                 $idPago = DB::table('pago')->insertGetId([
@@ -343,32 +473,70 @@ class CajeroController extends Controller
                 $sumaTotalCalculada = 0;
 
                 foreach ($cargos as $cargo) {
+
+                    // 1. LEEMOS EL BENEFICIO (Igual que en la pantalla)
+                    $montoBaseCargo = $cargo->monto_neto_estudiante ?? $cargo->monto_original;
+
+                    // --- NUEVO: CÁLCULO DE LA MORA PARA ESTE CARGO ---
+                    $montoMora = 0;
+                    if ($cargo->fecha_vencimiento) {
+                        $fechaVencimiento = \Carbon\Carbon::parse($cargo->fecha_vencimiento)->startOfDay();
+                        if ($fechaHoyStart->gt($fechaVencimiento)) {
+                            $nombreCargo = strtoupper($cargo->nombre_concepto);
+                            $reglaAplicable = null;
+                            if (str_contains($nombreCargo, 'MENSUAL')) {
+                                $reglaAplicable = $reglaMensualidad;
+                            } elseif (str_contains($nombreCargo, 'MATRICULA') || str_contains($nombreCargo, 'INSCRIPCI')) {
+                                $reglaAplicable = $reglaInscripcion;
+                            }
+                            if ($reglaAplicable) {
+                                $montoMora = $reglaAplicable->monto_base;
+                            }
+                        }
+                    }
+                    // ------------------------------------------------
+
+                    // Promociones
                     $descuentoDinero = 0;
                     $promoEspecifica = $promocionesVigentes->where('id_concepto_aplicable', $cargo->id_concepto)->first();
                     $promoGlobal = $promocionesVigentes->whereNull('id_concepto_aplicable')->first();
                     $mejorPorcentaje = max($promoEspecifica ? $promoEspecifica->porcentaje_descuento : 0, $promoGlobal ? $promoGlobal->porcentaje_descuento : 0);
 
                     if ($mejorPorcentaje > 0) {
-                        $descuentoDinero = ($cargo->monto_original * $mejorPorcentaje) / 100;
+                        // El descuento aplica a la cuota base
+                        $descuentoDinero = ($montoBaseCargo * $mejorPorcentaje) / 100;
                     }
 
-                    $subtotalFinal = $cargo->monto_original - $descuentoDinero;
+                    // --- CAMBIO CLAVE: Sumamos la mora al subtotal ---
+                    $subtotalFinal = ($montoBaseCargo + $montoMora) - $descuentoDinero;
                     $sumaTotalCalculada += $subtotalFinal;
 
                     $detallesInsertar[] = [
                         'id_pago' => $idPago,
                         'id_cargo' => $cargo->cargo_id,
                         'id_concepto' => $cargo->id_concepto,
-                        'monto_base' => $cargo->monto_original,
+                        'monto_base' => $montoBaseCargo,
                         'descuento_aplicado' => $descuentoDinero,
-                        'recargo_aplicado' => 0.00,
+                        'recargo_aplicado' => $montoMora, // AHORA SÍ SE GUARDA LA MORA EN CONTABILIDAD
                         'cantidad' => 1,
                         'subtotal' => $subtotalFinal
                     ];
 
                     $mes = str_pad($cargo->mes_arancel, 2, '0', STR_PAD_LEFT);
+
+                    // --- NUEVO: DIBUJAMOS EL TEXTO FINAL PARA EL RECIBO ---
+                    $textoRecibo = $cargo->nombre_concepto . " ($mes/$cargo->anio_arancel)";
+
+                    // Si hubo mora, se lo pegamos al nombre para que aparezca en la descripción del recibo
+                    if ($montoMora > 0) {
+                        $textoRecibo .= " (+ $" . number_format($montoMora, 2) . " MORA)";
+                    }
+                    if ($mejorPorcentaje > 0) {
+                        $textoRecibo .= " (Desc. $mejorPorcentaje%)";
+                    }
+
                     $detallesParaCorreo[] = [
-                        'nombre' => $cargo->nombre_concepto . " ($mes/$cargo->anio_arancel)" . ($mejorPorcentaje > 0 ? " (Desc. $mejorPorcentaje%)" : ""),
+                        'nombre' => $textoRecibo,
                         'monto' => $subtotalFinal
                     ];
                 }
@@ -421,7 +589,7 @@ class CajeroController extends Controller
                         'id_concepto' => $arancel->concepto_pago_id,
                         'monto_base' => $arancel->monto_base,
                         'descuento_aplicado' => $descuentoDinero,
-                        'recargo_aplicado' => 0.00,
+                        'recargo_aplicado' => 0.00, // Venta directa no tiene mora
                         'cantidad' => 1,
                         'subtotal' => $subtotalFinal
                     ];
@@ -442,17 +610,11 @@ class CajeroController extends Controller
 
             // --- LÓGICA DE CORREO (Se mantiene igual a lo que ya tenías) ---
             try {
-                // 1. Obtenemos el ID del alumno directo del pago recién creado
                 $idAlumnoPagador = DB::table('pago')->where('pago_id', $idPago)->value('id_alumno');
-
-                // 2. Buscamos toda la información del alumno
                 $alumnoMail = DB::table('alumnos')->where('alumno_id', $idAlumnoPagador)->first();
-
-                // 3. Extraemos correos y el carnet
                 $correoDestino = ($alumnoMail && !empty($alumnoMail->correo_institucional)) ? $alumnoMail->correo_institucional : 'amelara583@gmail.com';
                 $codigoEstudianteMail = $alumnoMail ? $alumnoMail->codigo_estudiante : 'N/A';
 
-                // 4. Obtenemos el nombre real desde la tabla users
                 $nombreEstudiante = 'Estudiante UMA';
                 if ($alumnoMail && $alumnoMail->id_usuario) {
                     $usuarioEstudiante = DB::table('users')->where('id', $alumnoMail->id_usuario)->first();
@@ -464,7 +626,6 @@ class CajeroController extends Controller
                 $nombreCajero = Auth::user()->name ?? 'Cajero UMA';
                 $fechaFormateada = now()->format('d/m/Y h:i A');
 
-                // 5. Enviamos TODOS los parámetros al Mailable, incluyendo el carnet al final
                 \Illuminate\Support\Facades\Mail::to($correoDestino)->send(new \App\Mail\ReciboPagoMail(
                         $reciboNuevo,
                         $totalRealFacturado,
@@ -480,13 +641,62 @@ class CajeroController extends Controller
                 \Illuminate\Support\Facades\Log::error('Fallo correo: ' . $mailError->getMessage());
             }
 
-            // Redirección de éxito
             return redirect()->route('cajero.ventanilla.index')
                              ->with('success', 'Cobro realizado con éxito. Recibo emitido: ' . $reciboNuevo);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Ocurrió un error al procesar el pago: ' . $e->getMessage());
+        }
+    }
+
+    //deuda pendiente ver la caja con el nombre y el carnet
+    public function verificarAlumnoAPI($carnet)
+    {
+        try {
+            $alumno = \Illuminate\Support\Facades\DB::table('alumnos')
+                ->join('users', 'alumnos.id_usuario', '=', 'users.id')
+                // Hacemos LEFT JOIN con carreras por si el estudiante no tiene carrera asignada
+                ->leftJoin('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id')
+                // Hacemos LEFT JOIN con beneficios por si no tiene beneficio asignado
+                ->leftJoin('beneficios_estudiante', 'alumnos.alumno_id', '=', 'beneficios_estudiante.id_alumno')
+                ->select(
+                    'alumnos.codigo_estudiante as carnet',
+                    'users.name as nombres',
+                    'carreras.nombre as carrera',
+                    'beneficios_estudiante.tipo_beneficio as beneficio_crudo'
+                )
+                ->where('alumnos.codigo_estudiante', strtoupper(trim($carnet)))
+                ->first();
+
+            if ($alumno) {
+                // Limpiamos y formateamos el beneficio (ej. de BECA_PARCIAL a Beca Parcial)
+                $beneficioFormateado = 'Sin beneficio';
+                if (!empty($alumno->beneficio_crudo)) {
+                    $beneficioFormateado = ucwords(strtolower(str_replace('_', ' ', $alumno->beneficio_crudo)));
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'alumno' => [
+                        'nombres' => $alumno->nombres,
+                        'carnet'  => $alumno->carnet,
+                        'carrera' => $alumno->carrera ?? 'Sin carrera',
+                        'beneficio' => $beneficioFormateado
+                    ]
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'El carnet ingresado no corresponde a ningún alumno registrado.'
+            ], 404);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error del servidor: ' . $e->getMessage()
+            ], 500);
         }
     }
 
