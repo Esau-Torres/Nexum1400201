@@ -13,7 +13,7 @@
                 <i class="bi bi-cash-coin fs-4 text-danger"></i>
             </div>
             <div class="px-3">
-                <h1 class="h4 fw-bold mb-0">Modificar Beneficios</h1>
+                <h1 class="h4 fw-bold mb-0">MODIFICAR BENEFICIOS</h1>
                 <p class="text-muted mb-0 small">Gestión de becas, franjas y cuotas especiales activas</p>
             </div>
         </div>

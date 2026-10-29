@@ -197,11 +197,11 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('enlaces*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-link nav-icon fs-5 me-3 text-muted"></i>
+                            <a href="{{ route('student.inscripcion.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('inscripcion.index*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-pen-to-square nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
-                                    <div class="fw-medium">Enlaces</div>
-                                    <div class="nav-text-secondary">Cursos virtuales</div>
+                                    <div class="fw-medium">Inscripción</div>
+                                    <div class="nav-text-secondary">En línea</div>
                                 </div>
                             </a>
                         </li>
@@ -211,15 +211,6 @@
                                 <div>
                                     <div class="fw-medium">Record Académico</div>
                                     <div class="nav-text-secondary">Notas ciclo</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('inscripcion*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-pen-to-square nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Inscripción</div>
-                                    <div class="nav-text-secondary">En línea</div>
                                 </div>
                             </a>
                         </li>

@@ -95,6 +95,5 @@
                 Route::post('/pensum-materia/{pensumMateria}/prerequisito', [PensumController::class, 'addPrerequisito'])->name('addPrerequisito');
                 Route::delete('/prerequisito/{prerequisito}',               [PensumController::class, 'removePrerequisito'])->name('removePrerequisito');
             });
-            
         });
     });

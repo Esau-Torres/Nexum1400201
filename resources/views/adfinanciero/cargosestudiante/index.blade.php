@@ -30,7 +30,11 @@
                 <span class="fw-bold text-dark">{{ Auth::user()->name ?? 'Estudiante' }}</span> | {{ Auth::user()->alumno->carrera->nombre ?? 'Carrera no definida' }} <br>
 
                 @php
-                    $cicloActual = $ciclos->where('estado', 'ACTIVO')->first();
+                    // Buscamos el ciclo directamente en la BD con los 3 estados operativos (a prueba de ENUM)
+                    $cicloActual = \Illuminate\Support\Facades\DB::table('ciclo_lectivo')
+                        ->whereRaw("estado::text IN ('CONFIGURACION', 'MATRICULA_ABIERTA', 'ACTIVO')")
+                        ->orderBy('ciclo_lectivo_id', 'desc')
+                        ->first();
 
                     // Buscamos si el estudiante actual tiene un beneficio activo en la BD
                     $beneficioActivo = \Illuminate\Support\Facades\DB::table('beneficios_estudiante')
@@ -51,7 +55,7 @@
                 @endphp
 
                 <span class="badge text-white mt-2 me-2" style="background-color: #dc3545;">
-                    Ciclo Activo: {{ isset($cicloActivo) ? $cicloActivo->nombre_ciclo . '-' . $cicloActivo->anio : 'No definido' }}
+                    Ciclo Actual: {{ $cicloActual ? $cicloActual->nombre_ciclo . ' (' . ucwords(strtolower(str_replace('_', ' ', $cicloActual->estado))) . ')' : 'No definido' }}
                 </span>
 
                 @if($beneficioActivo)
@@ -417,7 +421,7 @@
             </div>
         </div>
 
-        <!-- SCRIPT DIRECTO CON LÓGICA DE MODAL Y TARJETA -->
+                <!-- SCRIPT DIRECTO CON LÓGICA DE MODAL Y TARJETA -->
         <script>
             let modalPagoObj = null;
 

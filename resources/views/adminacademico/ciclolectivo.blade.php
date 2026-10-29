@@ -18,7 +18,7 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
             <h1 class="h3 fw-bold text-dark mb-1">
-                <i class="bi bi-calendar3 text-danger me-2"></i>Gestión de Ciclos Lectivos
+                <i class="bi bi-calendar3 text-danger me-2"></i>GESTION DE CICLOS LECTIVOS
             </h1>
             <p class="text-muted mb-0 small">Administración de los periodos académicos de la UMA.</p>
         </div>

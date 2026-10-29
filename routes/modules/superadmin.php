@@ -5,6 +5,7 @@
     use App\Http\Controllers\Users\CreateUserController;
     use App\Http\Controllers\Users\ModifyUserController;
     use App\Http\Controllers\Users\RoleManagementController;
+    use App\Http\Controllers\SuperAdmin\ConfiguracionAcademicaController;
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('role:'.Role::SUPER_ADMIN)->group(function () {
@@ -32,6 +33,12 @@
             // panel administrativo de usuarios del sistema
             Route::get('/panel-administrativo', [ModifyUserController::class, 'index'])->name('panel-administrativo');
             Route::put('/usuarios/{id}', [ModifyUserController::class, 'update'])->name('users.update');
+
+            // reglas del sistema 
+            Route::get('/manage-ruler', [ConfiguracionAcademicaController::class, 'index'])->name('manage-ruler');
+            Route::post('/configuracion', [ConfiguracionAcademicaController::class, 'store'])->name('configuracion.store');
+            Route::put('/academico/configuracion/{idCarrera}', [ConfiguracionAcademicaController::class, 'update'])->whereNumber('idCarrera')->name('configuracion.update');
+            Route::post('/academico/ciclo/{id}/cerrar', [ConfiguracionAcademicaController::class, 'cerrar'])->whereNumber('id')->name('academico.ciclo.cerrar');
         });
    
     });

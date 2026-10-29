@@ -6,7 +6,7 @@
     <!-- Encabezado de la página -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold text-dark mb-0">Reglas de cobro</h2>
+            <h2 class="fw-bold text-dark mb-0">REGLA DE COBRO</h2>
             <span class="text-muted">Configuración de reglas de cobro</span>
         </div>
 
