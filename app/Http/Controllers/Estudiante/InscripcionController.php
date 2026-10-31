@@ -11,6 +11,7 @@ use App\Models\Academico\CicloLectivo;
 use App\Models\CoordinadorFacultad\Seccion;
 use App\Rules\Student\CumplePrerequisitosRule;
 use App\Rules\Student\MaxReprobacionesRule;
+use App\Enums\EstadoCiclo;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -24,34 +25,54 @@ class InscripcionController extends Controller
         $alumno = $request->user()->alumno;
         abort_if(!$alumno, 403);
 
-        $ciclo = CicloLectivo::where('estado', 'MATRICULA_ABIERTA')
+        $ciclo = CicloLectivo::where('estado', EstadoCiclo::MATRICULA_ABIERTA->value)
             ->orderByDesc('fecha_inicio')
             ->first();
 
-        abort_if(!$ciclo, 404, 'No hay un ciclo lectivo con matrícula abierta.');
+        // ─────────────────────────────────────────────────────
+        // Si NO hay ciclo en matrícula abierta → modal bloqueante
+        // ─────────────────────────────────────────────────────
+        if (!$ciclo) {
+            $cicloReciente = CicloLectivo::orderByDesc('fecha_inicio')->first();
 
+            return view('student.inscripcion', [
+                'alumno'              => $alumno,
+                'ciclo'               => $cicloReciente,
+                'seccionesPorCiclo'   => collect(),
+                'validacionGlobal'    => [
+                    'solvente'           => true,
+                    'motivos'            => [],
+                    'limite_materias'    => 0,
+                    'materias_inscritas' => 0,
+                ],
+                'matriculaCerrada'    => true,
+            ]);
+        }
+
+        // ─────────────────────────────────────────────────────
+        // Flujo normal
+        // ─────────────────────────────────────────────────────
         $seccionesPorCiclo = $seccionesAction->execute($alumno, $ciclo->ciclo_lectivo_id);
 
-        // Validación global (para mostrar en cabecera)
         $solvencia = app(ValidarSolvenciaAction::class)
             ->execute($alumno, $ciclo->ciclo_lectivo_id);
 
-        // Calcular límite de materias usando la misma lógica de la Action
         $validacionDummy = $validarAction->obtenerLimiteMaterias($alumno, $ciclo->ciclo_lectivo_id);
 
         $validacionGlobal = [
-            'solvente'            => $solvencia['solvente'],
-            'motivos'             => $solvencia['motivos'],
-            'limite_materias'     => $validacionDummy['limite'],
-            'materias_inscritas'  => $validacionDummy['inscritas'],
+            'solvente'           => $solvencia['solvente'],
+            'motivos'            => $solvencia['motivos'],
+            'limite_materias'    => $validacionDummy['limite'],
+            'materias_inscritas' => $validacionDummy['inscritas'],
         ];
 
-        return view('student.inscripcion', compact(
-            'alumno',
-            'ciclo',
-            'seccionesPorCiclo',
-            'validacionGlobal'
-        ));
+        return view('student.inscripcion', [
+            'alumno'              => $alumno,
+            'ciclo'               => $ciclo,
+            'seccionesPorCiclo'   => $seccionesPorCiclo,
+            'validacionGlobal'    => $validacionGlobal,
+            'matriculaCerrada'    => false,
+        ]);
     }
 
     public function inscribir(

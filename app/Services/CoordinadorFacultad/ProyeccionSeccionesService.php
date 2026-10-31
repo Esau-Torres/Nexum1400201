@@ -3,54 +3,33 @@
 namespace App\Services\CoordinadorFacultad;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProyeccionSeccionesService
 {
-    /**
-     * Proyecta las secciones necesarias para el siguiente ciclo lectivo.
-     *
-     * @param  int   $idCarrera      Carrera a analizar
-     * @param  int   $idCicloActual  Ciclo lectivo de referencia (el que está en curso)
-     * @param  bool  $incluirRecursantes Si true, incluye materias con estado RECURSANDO
-     * @return array{
-     *     resumen: array{
-     *         alumnos_activos: int,
-     *         alumnos_avanzan: int,
-     *         alumnos_egresan: int,
-     *     },
-     *     proyeccion: array<int, array{
-     *         ciclo: int,
-     *         materias: array<int, array{
-     *             id_materia: int,
-     *             codigo: string,
-     *             nombre: string,
-     *             alumnos: int,
-     *             secciones_sugeridas: int,
-     *         }>,
-     *     }>,
-     * }
-     */
     public function execute(int $idCarrera, int $idCicloActual, bool $incluirRecursantes = false): array
     {
-        // 1. Obtener el pensum ACTIVO de la carrera
+        \Log::info('=== Dashboard debug ===', [
+            'id_carrera' => $idCarrera,
+            'id_ciclo'   => $idCicloActual,
+            'incluir_recursantes' => $incluirRecursantes,
+        ]);
+
+        // 1. Pensum activo de la carrera
         $pensum = DB::table('pensum')
             ->where('id_carrera', $idCarrera)
             ->where('estado', 'ACTIVO')
             ->first();
 
         if (!$pensum) {
+            \Log::warning('No hay pensum activo para carrera ' . $idCarrera);
             return [
                 'resumen'    => $this->resumenVacio(),
                 'proyeccion' => [],
             ];
         }
 
-        if (empty($alumnos)) {
-            return [
-                'resumen'    => $this->resumenVacio(),
-                'proyeccion' => [],
-            ];
-        }
+        \Log::info('Pensum encontrado', ['pensum_id' => $pensum->pensum_id]);
 
         // 2. Alumnos activos de la carrera
         $alumnos = DB::table('alumnos')
@@ -59,14 +38,20 @@ class ProyeccionSeccionesService
             ->pluck('alumno_id')
             ->toArray();
 
+        \Log::info('Alumnos activos', [
+            'total' => count($alumnos),
+            'ids'   => $alumnos,
+        ]);
+
         if (empty($alumnos)) {
+            \Log::warning('No hay alumnos activos para carrera ' . $idCarrera);
             return [
-                'resumen'    => ['alumnos_activos' => 0, 'alumnos_avanzan' => 0, 'alumnos_egresan' => 0],
+                'resumen'    => $this->resumenVacio(),
                 'proyeccion' => [],
             ];
         }
 
-        // 3. Determinar ciclo actual de cada alumno
+        // 3. Ciclo actual de cada alumno
         $estadosValidos = ['CURSANDO', 'APROBADA'];
         if ($incluirRecursantes) {
             $estadosValidos[] = 'RECURSANDO';
@@ -85,7 +70,9 @@ class ProyeccionSeccionesService
             ->pluck('ciclo_actual', 'id_alumno')
             ->toArray();
 
-        // 4. Proyectar ciclo destino por alumno
+        \Log::info('Ciclos por alumno', $ciclosPorAlumno);
+
+        // 4. Proyección de ciclo destino
         $cicloMaxPensum = DB::table('pensum_materia')
             ->where('id_pensum', $pensum->pensum_id)
             ->max('ciclo_sugerido');
@@ -94,12 +81,9 @@ class ProyeccionSeccionesService
         $alumnosEgresan = 0;
 
         foreach ($alumnos as $idAlumno) {
-            $cicloActual = $ciclosPorAlumno[$idAlumno] ?? 0;
-
-            // Si no tiene materias cursadas → recién ingresa al ciclo 1
+            $cicloActual     = $ciclosPorAlumno[$idAlumno] ?? 0;
             $cicloProyectado = $cicloActual === 0 ? 1 : $cicloActual + 1;
 
-            // Si supera el máximo del pensum → egresa
             if ($cicloProyectado > $cicloMaxPensum) {
                 $alumnosEgresan++;
                 continue;
@@ -108,7 +92,12 @@ class ProyeccionSeccionesService
             $alumnosPorCicloProyectado[$cicloProyectado][] = $idAlumno;
         }
 
-        // 5. Traer las materias del pensum por ciclo proyectado
+        \Log::info('Proyección por ciclo', [
+            'por_ciclo' => $alumnosPorCicloProyectado,
+            'egresan'   => $alumnosEgresan,
+        ]);
+
+        // 5. Materias del pensum por ciclo proyectado
         $materiasPorCiclo = DB::table('pensum_materia as pm')
             ->join('materias as m', 'm.materia_id', '=', 'pm.id_materia')
             ->where('pm.id_pensum', $pensum->pensum_id)
@@ -120,17 +109,24 @@ class ProyeccionSeccionesService
             ->get()
             ->groupBy('ciclo_sugerido');
 
-        // 6. Armar la proyección final
-        $proyeccion = [];
-        $totalSecciones = 0;
-        $capacidadMaximaAula = DB::table('aula')->where('activo', true)->where('tipo', 'AULA')->max('capacidad');
+        // 6. Capacidad máxima de aula
+        $capacidadMaximaAula = DB::table('aula')
+            ->where('activo', true)
+            ->where('tipo', 'AULA')
+            ->max('capacidad');
 
         if (!$capacidadMaximaAula) {
-            $capacidadMaximaAula = DB::table('aula')->where('activo', true)->max('capacidad') ?? 40;
+            $capacidadMaximaAula = DB::table('aula')
+                ->where('activo', true)
+                ->max('capacidad') ?? 40;
         }
 
+        // 7. Armar proyección final
+        $proyeccion = [];
+        $totalSecciones = 0;
+
         foreach ($alumnosPorCicloProyectado as $ciclo => $alumnosCiclo) {
-            $cantAlumnos = count($alumnosCiclo);
+            $cantAlumnos   = count($alumnosCiclo);
             $materiasCiclo = [];
 
             foreach ($materiasPorCiclo[$ciclo] ?? [] as $materia) {
@@ -138,11 +134,11 @@ class ProyeccionSeccionesService
                 $totalSecciones += $seccionesSugeridas;
 
                 $materiasCiclo[] = [
-                    'id_materia'           => $materia->materia_id,
-                    'codigo'               => $materia->codigo_materia,
-                    'nombre'               => $materia->nombre,
-                    'alumnos'              => $cantAlumnos,
-                    'secciones_sugeridas'  => $seccionesSugeridas,
+                    'id_materia'          => $materia->materia_id,
+                    'codigo'              => $materia->codigo_materia,
+                    'nombre'              => $materia->nombre,
+                    'alumnos'             => $cantAlumnos,
+                    'secciones_sugeridas' => $seccionesSugeridas,
                 ];
             }
 
@@ -154,24 +150,27 @@ class ProyeccionSeccionesService
             }
         }
 
+        // 8. Return FINAL con la estructura correcta
         return [
-            $resumen = [
-                'alumnos_activos'    => count($alumnos),
-                'alumnos_avanzan'    => count($alumnos) - $alumnosEgresan,
-                'alumnos_egresan'    => $alumnosEgresan,
-                'secciones_totales'  => $totalSecciones,
+            'resumen' => [
+                'alumnos_activos'       => count($alumnos),
+                'alumnos_avanzan'       => count($alumnos) - $alumnosEgresan,
+                'alumnos_egresan'       => $alumnosEgresan,
+                'secciones_totales'     => $totalSecciones,
                 'capacidad_aula_maxima' => $capacidadMaximaAula,
             ],
             'proyeccion' => $proyeccion,
         ];
     }
+
     private function resumenVacio(): array
     {
         return [
-            'alumnos_activos'    => 0,
-            'alumnos_avanzan'    => 0,
-            'alumnos_egresan'    => 0,
-            'secciones_totales'  => 0,
+            'alumnos_activos'       => 0,
+            'alumnos_avanzan'       => 0,
+            'alumnos_egresan'       => 0,
+            'secciones_totales'     => 0,
+            'capacidad_aula_maxima' => 0,
         ];
     }
 }

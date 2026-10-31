@@ -32,7 +32,7 @@
             <div class="pensum-legend">
                 <div class="legend-item">
                     <span class="legend-box legend-actual"></span>
-                    <span>Actuales</span>
+                    <span>Cursando</span>
                 </div>
 
                 <div class="legend-item">
@@ -90,7 +90,7 @@
                                     };
 
                                     $estadoTexto = match($estado) {
-                                        'ACTUAL' => 'Actual',
+                                        'ACTUAL' => 'Cursando',
                                         'APROBADA' => 'Aprobada',
                                         'REPROBADA' => 'Reprobada',
                                         'RETIRADA' => 'Retirada',

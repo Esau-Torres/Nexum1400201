@@ -172,7 +172,7 @@ class AdminfinancieroController extends Controller
         }
 
         if ($request->filled('estado_filter')) {
-            $query->where('estado', $request->estado_filter === 'activos' ? true : false);
+            $query->where('estado', $request->estado_filter === 'ACTIVO' ? true : false);
         }
 
         $query->orderBy('fecha_fin', 'desc');
@@ -739,7 +739,7 @@ class AdminfinancieroController extends Controller
                 'users.name',
                 'users.documento_identidad'
             )
-            ->where('alumnos.estado_carrera', 'Activo');
+            ->where('alumnos.estado_carrera', 'ACTIVO');
 
         // ==========================================================
         // CANDADO DE SEGURIDAD Y FILTROS FINANCIEROS
@@ -1052,7 +1052,7 @@ class AdminfinancieroController extends Controller
             $alumnos = \Illuminate\Support\Facades\DB::table('alumnos')
                 ->join('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id')
                 ->select('alumnos.*', 'carreras.nombre as nombre_carrera')
-                ->where('alumnos.estado_carrera', 'Activo')
+                ->where('alumnos.estado_carrera', 'ACTIVO')
 
                 // REGLA 1: Que no tengan ya cargos en este ciclo
                 ->whereNotExists(function($q) use ($cicloActivo) {

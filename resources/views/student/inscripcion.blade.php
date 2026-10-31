@@ -2,12 +2,22 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4 fw-bold mb-0">INSCRIPCIÓN: {{ $ciclo->nombre_ciclo }}</h2>
-        <span class="badge bg-danger">
-            Máx. {{ $validacionGlobal['limite_materias'] ?? 4 }} materias
-            ({{ $validacionGlobal['materias_inscritas'] ?? 0 }} inscritas)
-        </span>
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between gap-3 p-3 mb-4 rounded-4 card">
+        <div class="d-flex align-items-center">
+            <div class="px-3 py-2 rounded-3 bg-danger bg-opacity-10" style="width:48px;height:48px;">
+                <i class="bi bi-journal-bookmark-fill fs-4 text-danger"></i>
+            </div>
+            <div class="px-3">
+                <h2 class="h4 fw-bold mb-0">INSCRIPCIÓN DE ASIGNATURAS</h2>
+                <p class="text-muted mb-0 small">Inscripción de asignaturas acadecimas del  <span class="bg-danger bg-opacity-10 border-danger p-2 mb-2 rounded border  bg-light border-light"> {{ $ciclo->nombre_ciclo }}</span></p>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <span class="badge bg-danger">
+                Máx. {{ $validacionGlobal['limite_materias'] ?? 4 }} materias
+                ({{ $validacionGlobal['materias_inscritas'] ?? 0 }} inscritas)
+            </span>
+        </div>
     </div>
 
     {{-- Aviso de solvencia --}}
@@ -146,12 +156,75 @@
     @endif
 </div>
 
+@if($matriculaCerrada)
+    <div class="modal fade"
+         id="modalMatriculaCerrada"
+         tabindex="-1"
+         data-bs-backdrop="static"
+         data-bs-keyboard="false"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white border-0">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-lock-fill me-1"></i>
+                        Periodo de inscripciones cerrado
+                    </h5>
+                </div>
+
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-10"
+                              style="width: 80px; height: 80px;">
+                            <i class="bi bi-calendar-x-fill fs-1 text-danger"></i>
+                        </span>
+                    </div>
+
+                    <h5 class="fw-bold mb-2">No puedes inscribir materias en este momento</h5>
+                    <p class="text-muted mb-3">
+                        El periodo de inscripciones ha finalizado. Deberás esperar al siguiente ciclo académico
+                        para realizar tu inscripción de asignaturas.
+                    </p>
+
+                    @if($ciclo)
+                        <div class="alert alert-light border small mb-0 text-start">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <i class="bi bi-info-circle-fill text-danger"></i>
+                                <strong>Ciclo: {{ $ciclo->nombre_ciclo }}</strong>
+                            </div>
+                            <div class="text-muted" style="font-size: 0.82rem;">
+                                Estado actual: <span class="badge bg-secondary">{{ $ciclo->estado->label() }}</span>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="modal-footer border-0 justify-content-center">
+                    <a href="{{ route('home') }}" class="btn btn-danger px-4">
+                        <i class="bi bi-house-door-fill me-1"></i>
+                        Volver al inicio
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
+
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('[data-bs-toggle="tooltip"]')
-        .forEach(el => new bootstrap.Tooltip(el));
-});
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+            .forEach(el => new bootstrap.Tooltip(el));
+
+        const modalCerrada = document.getElementById('modalMatriculaCerrada');
+        if (modalCerrada) {
+            const modal = new bootstrap.Modal(modalCerrada, {
+                backdrop: 'static',
+                keyboard: false
+            });
+            modal.show();
+        }
+    });
 </script>
 @endpush
 @endsection

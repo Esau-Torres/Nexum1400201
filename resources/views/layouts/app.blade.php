@@ -148,6 +148,15 @@
                                 </div>
                             </a>
                         </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('admin-academico.situaciones.gestion') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.situaciones.gestion') ? 'active' : '' }}">
+                                <i class="fa-solid fa-inbox nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Sugerencias</div>
+                                    <div class="nav-text-secondary">Gestionar quejas, observaciones y sujerencias</div>
+                                </div>
+                            </a>
+                        </li>
                     @endif
 
                     {{-- ============================================================ --}}
@@ -206,11 +215,11 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('record-academico*') ? 'active' : '' }}">
+                            <a href="{{ route('student.record.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('student.record.index*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-graduation-cap nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Record Académico</div>
-                                    <div class="nav-text-secondary">Notas ciclo</div>
+                                    <div class="nav-text-secondary">Historial academico</div>
                                 </div>
                             </a>
                         </li>
@@ -233,7 +242,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('buzon*') ? 'active' : '' }}">
+                            <a href="{{ route('student.situaciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('situaciones.index*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-envelope nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Buzón</div>
@@ -242,7 +251,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('recursos*') ? 'active' : '' }}">
+                            <a href="{{ route('student.recursos.bibliograficos') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('student.recursos.bibliograficos*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-folder-open nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Recursos</div>

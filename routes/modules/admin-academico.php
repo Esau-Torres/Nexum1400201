@@ -10,6 +10,7 @@
     use App\Http\Controllers\AdminAcademico\MateriaController;
     use App\Http\Controllers\AdminAcademico\PensumController;
     use App\Http\Controllers\AdminAcademico\FacultadCarreraController;
+    use App\Http\Controllers\AdminAcademico\SituacionGestionController;
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('role:'.Role::ADMIN_ACADEMICO)->group(function () {
@@ -95,5 +96,9 @@
                 Route::post('/pensum-materia/{pensumMateria}/prerequisito', [PensumController::class, 'addPrerequisito'])->name('addPrerequisito');
                 Route::delete('/prerequisito/{prerequisito}',               [PensumController::class, 'removePrerequisito'])->name('removePrerequisito');
             });
+
+            // gestionar quejas, sujerencia y observaciones de alumnos
+            Route::get('/situaciones', [SituacionGestionController::class, 'index'])->name('situaciones.gestion');
+            Route::patch('/situaciones/{id}/estado', [SituacionGestionController::class, 'cambiarEstado'])->whereNumber('id')->name('situaciones.gestion.cambiar-estado');
         });
     });
