@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid p-4 p-lg-5">
 
     {{-- HEADER --}}
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between gap-3 p-3 mb-4 rounded-4 card">
@@ -52,23 +52,31 @@
                                 </small>
                                 <span class="badge bg-primary mb-3">Cursando</span>
 
+                                @php
+                                    $valRetiro = $validacionesRetiro[$detalle->detalle_inscripcion_id] ?? null;
+                                @endphp
                                 <button type="button"
                                         class="btn btn-sm btn-outline-danger w-100"
                                         data-bs-toggle="modal"
                                         data-bs-target="#modalDetalle"
+                                        data-detalle-id="{{ $detalle->detalle_inscripcion_id }}"
                                         data-codigo="{{ $detalle->codigo_materia }}"
                                         data-nombre="{{ $detalle->materia_nombre }}"
                                         data-uv="{{ $detalle->unidades_valorativas }}"
                                         data-ciclo="{{ $detalle->nombre_ciclo }}"
                                         data-periodo="{{ \Carbon\Carbon::parse($detalle->fecha_inicio)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($detalle->fecha_fin)->format('d/m/Y') }}"
                                         data-estado="Cursando"
+                                        data-estado-value="CURSANDO"
                                         data-estado-badge="bg-primary"
                                         data-docente="{{ $detalle->docente_nombre ?? 'Sin asignar' }}"
                                         data-grupo="{{ $detalle->nombre_grupo }}"
                                         data-nota="{{ $detalle->promedio_final ?? 'Sin nota' }}"
                                         data-horarios='@json($detalle->horarios)'
                                         data-matricula="{{ $detalle->numero_matricula }}"
-                                        data-sobrecupo="{{ $detalle->es_sobrecupo ? 'Sí' : 'No' }}">
+                                        data-sobrecupo="{{ $detalle->es_sobrecupo ? 'Sí' : 'No' }}"
+                                        data-puede-retirar="{{ $valRetiro && $valRetiro['puede'] ? '1' : '0' }}"
+                                        data-retiros-disponibles="{{ $valRetiro['retiros_disponibles'] ?? 0 }}"
+                                        data-bloqueadores='@json($valRetiro['bloqueadores'] ?? [])'>
                                     <i class="bi bi-eye"></i> Ver detalles
                                 </button>
                             </div>
@@ -95,8 +103,8 @@
             </div>
         @else
             <div class="card border-0 shadow-sm">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                <div class="text-medium">
+                    <table class="table table-hover align-middle mb-0" id="recod_academico_table">
                         <thead class="table-light">
                             <tr>
                                 <th>Código</th>
@@ -131,6 +139,7 @@
                                         {{ $detalle->promedio_final ?? '—' }}
                                     </td>
                                     <td class="text-end">
+                                        
                                         <button type="button"
                                                 class="btn btn-sm btn-outline-danger"
                                                 data-bs-toggle="modal"
@@ -147,6 +156,9 @@
                                                 data-nota="{{ $detalle->promedio_final ?? 'Sin nota' }}"
                                                 data-horarios='@json($detalle->horarios)'
                                                 data-matricula="{{ $detalle->numero_matricula }}"
+                                                data-estado="{{ $estadoLabel }}"
+                                                data-estado-value="{{ $estado }}"
+                                                data-estado-badge="{{ $estadoBadge }}"
                                                 data-sobrecupo="{{ $detalle->es_sobrecupo ? 'Sí' : 'No' }}">
                                             <i class="bi bi-eye"></i> Ver
                                         </button>
@@ -227,6 +239,38 @@
                 {{-- Horarios --}}
                 <h6 class="fw-bold text-uppercase small text-muted mb-2">Horarios y aula</h6>
                 <div id="mHorarios" class="d-flex flex-column gap-2"></div>
+
+                {{-- Botón de retiro (solo para materias CURSANDO) --}}
+                <div class="mt-3" id="wrapperRetiro">
+                    <hr>
+                    <h6 class="fw-bold text-uppercase small text-muted mb-2">Acciones</h6>
+
+                    {{-- Alerta de bloqueo (si no puede retirar) --}}
+                    <div id="bloqueoRetiro" class="alert alert-warning border-0 small d-none mb-2">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                            <div>
+                                <strong class="d-block mb-1">No puedes retirar esta materia</strong>
+                                <ul class="mb-0 ps-3" id="listaBloqueadoresRetiro"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Info de retiros disponibles --}}
+                    <div id="infoRetiros" class="alert alert-info border-0 small d-none mb-2">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Tienes <strong><span id="retirosDisponibles"></span></strong> retiro(s) disponible(s) para este ciclo.
+                    </div>
+
+                    <button type="button"
+                            id="btnRetirar"
+                            class="btn btn-outline-danger w-100"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalRetirar">
+                        <i class="bi bi-box-arrow-right me-1"></i>
+                        Darse de baja de la materia
+                    </button>
+                </div>
             </div>
 
             <div class="modal-footer border-0">
@@ -236,50 +280,113 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalRetirar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <form method="POST"
+              id="formRetirar"
+              class="modal-content border-0 shadow">
+            @csrf
+
+            <div class="modal-header bg-danger text-white border-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    Confirmar retiro de materia
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="alert alert-danger border-0 mb-3">
+                    <h6 class="fw-bold mb-2">Estás a punto de retirar:</h6>
+                    <p class="mb-0" id="retirarMateriaNombre"></p>
+                </div>
+
+                <p class="small mb-2">Al confirmar el retiro:</p>
+                <ul class="small text-muted ps-3 mb-3">
+                    <li>La materia quedará marcada como <strong>RETIRADA</strong>.</li>
+                    <li><strong>No podrás volver a cursarla</strong> en el ciclo lectivo actual.</li>
+                    <li>Se consumirá <strong>1 arancel de retiro</strong> (TRA-011) ya pagado.</li>
+                    <li>El promedio final quedará <strong>sin calificación</strong> (no afectará tu CUM).</li>
+                </ul>
+
+                <div class="alert alert-warning border-0 small mb-3">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Esta acción no se puede deshacer. Si tienes dudas, contacta a Administración Académica.
+                </div>
+
+                <div class="mb-3">
+                    <label for="motivoRetiro" class="form-label small fw-semibold">
+                        Motivo del retiro (opcional)
+                    </label>
+                    <textarea name="motivo" id="motivoRetiro" rows="2"
+                              class="form-control" maxlength="500"
+                              placeholder="Describe brevemente el motivo..."></textarea>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="confirmarRetiro">
+                    <label class="form-check-label small" for="confirmarRetiro">
+                        Entiendo las consecuencias y confirmo el retiro de esta materia.
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-danger" id="btnConfirmarRetiro" disabled>
+                    <i class="bi bi-box-arrow-right me-1"></i> Sí, retirar materia
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const modal = document.getElementById('modalDetalle');
 
-    modal.addEventListener('show.bs.modal', function (event) {
+    const modalDetalle = document.getElementById('modalDetalle');
+    const modalRetirar = document.getElementById('modalRetirar');
+    const formRetirar  = document.getElementById('formRetirar');
+    const btnConfirmar = document.getElementById('btnConfirmarRetiro');
+    const checkbox     = document.getElementById('confirmarRetiro');
+    const wrapperRetiro= document.getElementById('wrapperRetiro');
+    const bloqueo      = document.getElementById('bloqueoRetiro');
+    const infoRetiros  = document.getElementById('infoRetiros');
+
+    let currentDetalleId = null;
+
+    // ─────────────────────────────────────────
+    // MODAL DETALLE
+    // ─────────────────────────────────────────
+    modalDetalle.addEventListener('show.bs.modal', function (event) {
         const btn = event.relatedTarget;
         if (!btn) return;
 
-        const codigo     = btn.getAttribute('data-codigo');
-        const nombre     = btn.getAttribute('data-nombre');
-        const uv         = btn.getAttribute('data-uv');
-        const ciclo      = btn.getAttribute('data-ciclo');
-        const periodo    = btn.getAttribute('data-periodo');
-        const estado     = btn.getAttribute('data-estado');
-        const estadoBadge= btn.getAttribute('data-estado-badge');
-        const docente    = btn.getAttribute('data-docente');
-        const grupo      = btn.getAttribute('data-grupo');
-        const nota       = btn.getAttribute('data-nota');
-        const matricula  = btn.getAttribute('data-matricula');
-        const sobrecupo  = btn.getAttribute('data-sobrecupo');
-        const horarios   = JSON.parse(btn.getAttribute('data-horarios') || '[]');
+        currentDetalleId = btn.getAttribute('data-detalle-id');
 
-        document.getElementById('mCodigo').textContent     = codigo;
-        document.getElementById('mNombre').textContent     = nombre;
-        document.getElementById('mUv').textContent         = uv + ' UV';
-        document.getElementById('mCiclo').textContent      = ciclo;
-        document.getElementById('mPeriodo').textContent    = periodo;
-        document.getElementById('mDocente').textContent    = docente;
-        document.getElementById('mGrupo').textContent      = grupo;
-        document.getElementById('mNota').textContent       = nota;
-        document.getElementById('mMatricula').textContent  = matricula;
-        document.getElementById('mSobrecupo').textContent  = sobrecupo;
+        // Datos básicos
+        document.getElementById('mCodigo').textContent     = btn.getAttribute('data-codigo');
+        document.getElementById('mNombre').textContent     = btn.getAttribute('data-nombre');
+        document.getElementById('mUv').textContent         = btn.getAttribute('data-uv') + ' UV';
+        document.getElementById('mCiclo').textContent      = btn.getAttribute('data-ciclo');
+        document.getElementById('mPeriodo').textContent    = btn.getAttribute('data-periodo');
+        document.getElementById('mDocente').textContent    = btn.getAttribute('data-docente');
+        document.getElementById('mGrupo').textContent      = btn.getAttribute('data-grupo');
+        document.getElementById('mNota').textContent       = btn.getAttribute('data-nota');
+        document.getElementById('mMatricula').textContent  = btn.getAttribute('data-matricula');
+        document.getElementById('mSobrecupo').textContent  = btn.getAttribute('data-sobrecupo');
 
         const badge = document.getElementById('mEstadoBadge');
-        badge.className   = 'badge ' + estadoBadge;
-        badge.textContent = estado;
+        badge.className   = 'badge ' + btn.getAttribute('data-estado-badge');
+        badge.textContent = btn.getAttribute('data-estado');
 
-        // Render de horarios
-        const horariosWrapper = document.getElementById('mHorarios');
-        horariosWrapper.innerHTML = '';
-
-        if (!horarios || horarios.length === 0) {
-            horariosWrapper.innerHTML = '<p class="text-muted small mb-0">Sin horarios registrados.</p>';
+        // Horarios
+        const horarios = JSON.parse(btn.getAttribute('data-horarios') || '[]');
+        const hw = document.getElementById('mHorarios');
+        hw.innerHTML = '';
+        if (!horarios.length) {
+            hw.innerHTML = '<p class="text-muted small mb-0">Sin horarios registrados.</p>';
         } else {
             horarios.forEach(function (h) {
                 const row = document.createElement('div');
@@ -287,16 +394,71 @@ document.addEventListener('DOMContentLoaded', function () {
                 row.innerHTML =
                     '<div>' +
                         '<div class="fw-semibold small">' + h.dia + '</div>' +
-                        '<div class="text-muted" style="font-size: 0.75rem;">' +
-                            h.ini + ' - ' + h.fin +
-                        '</div>' +
+                        '<div class="text-muted" style="font-size: 0.75rem;">' + h.ini + ' - ' + h.fin + '</div>' +
                     '</div>' +
-                    '<span class="badge bg-secondary">' +
-                        '<i class="bi bi-geo-alt-fill me-1"></i>' + h.aula +
-                    '</span>';
-                horariosWrapper.appendChild(row);
+                    '<span class="badge bg-secondary"><i class="bi bi-geo-alt-fill me-1"></i>' + h.aula + '</span>';
+                hw.appendChild(row);
             });
         }
+
+        // ─────────────────────────────────────
+        // Lógica de retiro
+        // ─────────────────────────────────────
+        const puedeRetirar = btn.getAttribute('data-puede-retirar') === '1';
+        const bloqueadores = JSON.parse(btn.getAttribute('data-bloqueadores') || '[]');
+        const disponibles  = btn.getAttribute('data-retiros-disponibles') || '0';
+        const estadoValue  = btn.getAttribute('data-estado-value') || '';
+
+        const listaBloq = document.getElementById('listaBloqueadoresRetiro');
+        listaBloq.innerHTML = '';
+
+        // Ocultar bloque completo si no es CURSANDO
+        if (estadoValue !== 'CURSANDO') {
+            wrapperRetiro.classList.add('d-none');
+        } else {
+            wrapperRetiro.classList.remove('d-none');
+
+            if (puedeRetirar) {
+                bloqueo.classList.add('d-none');
+                infoRetiros.classList.remove('d-none');
+                document.getElementById('retirosDisponibles').textContent = disponibles;
+            } else {
+                bloqueo.classList.remove('d-none');
+                infoRetiros.classList.add('d-none');
+                bloqueadores.forEach(function (b) {
+                    const li = document.createElement('li');
+                    li.textContent = b;
+                    listaBloq.appendChild(li);
+                });
+            }
+        }
+    });
+
+    // ─────────────────────────────────────────
+    // MODAL RETIRAR
+    // ─────────────────────────────────────────
+    modalRetirar.addEventListener('show.bs.modal', function () {
+        const nombreMateria = document.getElementById('mNombre').textContent;
+        document.getElementById('retirarMateriaNombre').textContent = nombreMateria;
+
+        // Reset
+        checkbox.checked     = false;
+        btnConfirmar.disabled = true;
+        document.getElementById('motivoRetiro').value = '';
+
+        // URL del form
+        if (currentDetalleId) {
+            formRetirar.action = '/student/alumno/materias/' + currentDetalleId + '/retirar';
+        }
+    });
+
+    checkbox.addEventListener('change', function () {
+        btnConfirmar.disabled = !this.checked;
+    });
+
+    formRetirar.addEventListener('submit', function () {
+        btnConfirmar.disabled = true;
+        btnConfirmar.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Procesando...';
     });
 });
 </script>

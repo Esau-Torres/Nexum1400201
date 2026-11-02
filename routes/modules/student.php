@@ -6,6 +6,8 @@
     use App\Http\Controllers\Estudiante\InscripcionController;
     use App\Http\Controllers\Estudiante\SituacionController;
     use App\Http\Controllers\Estudiante\RecordAcademicoController;
+    use App\Http\Controllers\Estudiante\RetirarMateriaController;
+    use App\Http\Controllers\Estudiante\DesempenoDocenteController;
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('role:'.Role::ESTUDIANTE)->group(function () {
@@ -65,5 +67,10 @@
 
             // Record academico de un estudiante
             Route::get('/alumno/record-academico', [RecordAcademicoController::class, 'index'])->name('record.index');
+            // retiro de materia
+            Route::post('/alumno/materias/{detalleId}/retirar', [RetirarMateriaController::class, 'retirar'])->whereNumber('detalleId')->name('materias.retirar');
+
+            // desempeño docente
+            Route::get('/desempeno-docente', [DesempenoDocenteController::class, 'index'])->name('desempeno-docente.index');
         });
     });

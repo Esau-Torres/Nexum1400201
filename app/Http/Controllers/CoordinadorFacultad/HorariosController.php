@@ -24,11 +24,19 @@ use Throwable;
 
 class HorariosController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $ciclosLectivos = CicloLectivo::orderByDesc('fecha_inicio')->get();
 
-        $horarios = Horarios::query()
+        // Filtro por ciclo (nullable si "Todos")
+        $idCicloFiltro = $request->filled('id_ciclo_lectivo')
+            ? (int) $request->input('id_ciclo_lectivo')
+            : null;
+
+        // ============================================================
+        // HORARIOS
+        // ============================================================
+        $horariosQuery = Horarios::query()
             ->with(['cicloLectivo'])
             ->orderBy('id_ciclo_lectivo', 'desc')
             ->orderByRaw("CASE dia
@@ -39,24 +47,55 @@ class HorariosController extends Controller
                 WHEN 'VIERNES' THEN 5
                 WHEN 'SABADO' THEN 6
                 ELSE 7 END")
-            ->orderBy('hora_inicio')
-            ->get();
+            ->orderBy('hora_inicio');
 
-        $grupos = Grupo::query()
+        if ($idCicloFiltro) {
+            $horariosQuery->where('id_ciclo_lectivo', $idCicloFiltro);
+        }
+
+        $horarios = $horariosQuery->get();
+
+        // ============================================================
+        // GRUPOS
+        // ============================================================
+        $gruposQuery = Grupo::query()
             ->with(['cicloLectivo', 'horarios', 'secciones'])
             ->orderByDesc('id_ciclo_lectivo')
-            ->orderBy('nombre')
-            ->get();
+            ->orderBy('nombre');
 
-        $horariosPorCiclo = $horarios->groupBy('id_ciclo_lectivo');
+        if ($idCicloFiltro) {
+            $gruposQuery->where('id_ciclo_lectivo', $idCicloFiltro);
+        }
+
+        $grupos = $gruposQuery->get();
+
+        // Para el filtro de horarios disponibles en el modal de crear grupo
+        // (solo los del ciclo seleccionado si hay filtro)
+        $horariosParaModal = $idCicloFiltro
+            ? $horarios
+            : Horarios::query()
+                ->orderBy('id_ciclo_lectivo', 'desc')
+                ->orderByRaw("CASE dia
+                    WHEN 'LUNES' THEN 1
+                    WHEN 'MARTES' THEN 2
+                    WHEN 'MIERCOLES' THEN 3
+                    WHEN 'JUEVES' THEN 4
+                    WHEN 'VIERNES' THEN 5
+                    WHEN 'SABADO' THEN 6
+                    ELSE 7 END")
+                ->orderBy('hora_inicio')
+                ->get();
+
+        $horariosPorCiclo = $horariosParaModal->groupBy('id_ciclo_lectivo');
 
         return view('coordinador-facultad.horarios-grupohorario', [
-            'ciclosLectivos' => $ciclosLectivos,
-            'horarios'       => $horarios,
+            'ciclosLectivos'   => $ciclosLectivos,
+            'horarios'         => $horarios,
             'grupos'           => $grupos,
             'horariosPorCiclo' => $horariosPorCiclo,
-            'dias'           => DiaSemana::ordenados(),
-            'jornadas'       => TipoJornada::cases(),
+            'dias'             => DiaSemana::ordenados(),
+            'jornadas'         => TipoJornada::cases(),
+            'idCicloFiltro'    => $idCicloFiltro,
         ]);
     }
 

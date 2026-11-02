@@ -52,10 +52,13 @@ class ProyeccionSeccionesService
         }
 
         // 3. Ciclo actual de cada alumno
-        $estadosValidos = ['CURSANDO', 'APROBADA'];
-        if ($incluirRecursantes) {
-            $estadosValidos[] = 'RECURSANDO';
-        }
+        $estadosRelevantes = [
+            'CURSANDO',
+            'APROBADA',
+            'REPROBADA',
+            'RECURSANDO',
+            'RETIRADA',
+        ];
 
         $ciclosPorAlumno = DB::table('detalle_inscripcion as di')
             ->join('inscripciones as i', 'i.inscripcion_id', '=', 'di.id_inscripcion')
@@ -64,7 +67,7 @@ class ProyeccionSeccionesService
             ->where('pm.id_pensum', $pensum->pensum_id)
             ->whereIn('i.id_alumno', $alumnos)
             ->where('i.id_ciclo_lectivo', $idCicloActual)
-            ->whereIn('di.estado_materia', $estadosValidos)
+            ->whereIn('di.estado_materia', $estadosRelevantes)
             ->selectRaw('i.id_alumno, MAX(pm.ciclo_sugerido) as ciclo_actual')
             ->groupBy('i.id_alumno')
             ->pluck('ciclo_actual', 'id_alumno')

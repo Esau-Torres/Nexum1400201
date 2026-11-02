@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Asistencia\Asistencia;
 use App\Models\Academico\Calificacion;
 use App\Models\Estudiante\ExamenDiferido;
+use App\Models\Academico\EvaluacionDocente;
 
 class DetalleInscripcion extends Model
 {
@@ -111,5 +112,15 @@ class DetalleInscripcion extends Model
             'id_detalle_inscripcion',
             'detalle_inscripcion_id'
         );
+    }
+
+    // En DetalleInscripcion
+    public function evaluacionDocente(): BelongsTo
+    {
+        return $this->belongsTo(
+            EvaluacionDocente::class,
+            'id_seccion',
+            'id_seccion'
+        )->where('id_ciclo_lectivo', $this->inscripcion?->id_ciclo_lectivo);
     }
 }

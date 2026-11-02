@@ -28,6 +28,10 @@ body {
     min-height: 100vh;
 }
 
+.text-medium {
+    font-size: 1.1rem;
+}
+
 /* ========== SIDEBAR LAYOUT ========== */
 .sidebar {
     width: 260px;

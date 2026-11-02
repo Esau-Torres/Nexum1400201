@@ -157,6 +157,15 @@
                                 </div>
                             </a>
                         </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('admin-academico.evaluaciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('evaluacion*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-clipboard-check nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Evaluación del Desempeño</div>
+                                    <div class="nav-text-secondary">Docente</div>
+                                </div>
+                            </a>
+                        </li>
                     @endif
 
                     {{-- ============================================================ --}}
@@ -223,8 +232,17 @@
                                 </div>
                             </a>
                         </li>
+                         <li class="nav-item mb-1">
+                            <a href="{{ route('docentes.prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('docentes.prueba.notas*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-file-pen nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Prueba de Notas</div>
+                                    <div class="nav-text-secondary">Evaluaciones y calificaciones</div>
+                                </div>
+                            </a>
+                        </li>
                         <li class="nav-item mb-1">
-                            <a href="#" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('evaluacion*') ? 'active' : '' }}">
+                            <a href="{{ route('student.desempeno-docente.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('evaluacion*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-clipboard-check nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Evaluación del Desempeño</div>
