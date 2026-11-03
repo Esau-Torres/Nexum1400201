@@ -9,13 +9,13 @@
                 <i class="bi bi-inboxes-fill fs-4 text-danger"></i>
             </div>
             <div class="px-3">
-                <h2 class="h4 fw-bold mb-0">Gestión de Situaciones</h2>
-                <p class="text-muted mb-0 small">
+                <h2 class="h4 fw-bold mb-0">GESTIÓN DE SITUACIONES</h2>
+                <p class="text-muted mb-0 text-medium">
                     Buzón de observaciones reportadas por los estudiantes.
                 </p>
             </div>
         </div>
-        <span class="badge bg-danger">
+        <span class="badge bg-danger text-medium">
             {{ $situaciones->total() }} situación(es)
         </span>
     </div>

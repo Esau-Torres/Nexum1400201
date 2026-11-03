@@ -1,0 +1,232 @@
+/* ============================================================
+   CARNET VIRTUAL UNIVERSITARIO
+   Solo se carga en la vista de perfil del estudiante.
+   ============================================================ */
+
+.carnet-card {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-radius: 20px;
+    padding: 24px;
+    color: #fff;
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+.carnet-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(220, 53, 69, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.carnet-card::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -20%;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(255, 193, 7, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.carnet-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.carnet-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(220, 53, 69, 0.9);
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+
+.carnet-logo i {
+    font-size: 1.3rem;
+}
+
+.carnet-header-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+}
+
+.carnet-header-text strong {
+    font-size: 0.78rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #e0e0e0;
+}
+
+.carnet-header-text small {
+    font-size: 0.7rem;
+    color: #a0a0a0;
+}
+
+.carnet-body {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.carnet-foto {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.carnet-foto-img {
+    width: 110px;
+    height: 130px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: block;
+}
+
+.carnet-foto-placeholder {
+    width: 110px;
+    height: 130px;
+    border-radius: 12px;
+    border: 3px dashed rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 3rem;
+}
+
+.carnet-foto-badge {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.badge-validada {
+    background: #10b981;
+    color: white;
+}
+
+.badge-pendiente {
+    background: #f59e0b;
+    color: white;
+}
+
+.carnet-datos {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.carnet-datos-nombre {
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+}
+
+.carnet-datos-carrera {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #ffc107;
+    margin-bottom: 2px;
+}
+
+.carnet-datos-facultad small {
+    font-size: 0.90rem;
+    color: #a0a0a0;
+}
+
+.carnet-datos-grid {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.carnet-label {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #a0a0a0;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.carnet-value {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #fff;
+    word-break: break-all;
+}
+
+.carnet-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.carnet-qr-placeholder {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 576px) {
+    .carnet-body {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .carnet-datos-grid {
+        text-align: left;
+    }
+
+    .carnet-datos-nombre {
+        font-size: 1rem;
+    }
+}

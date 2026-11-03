@@ -5,6 +5,8 @@ use App\Http\Controllers\Estudiante\registroController;
 use App\Http\Controllers\Users\homeController;
 use App\Http\Controllers\Adfinanciero\AdminfinancieroController;
 use App\Http\Controllers\Cajero\CajeroController;
+use App\Http\Controllers\Estudiante\CarnetController;
+use App\Http\Controllers\Estudiante\FotoPerfilController;
 
 Route::view('/about', 'about')->name('about');
 
@@ -22,9 +24,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/home', [homeController::class, 'index'])->name('home');
 
-    Route::get('/profile', function () {
-        return view('profile');
-    })->name('profile');
+    // estudiante 
+    Route::get('/profile', function () { $user = auth()->user();
+        if ($user->alumno) {
+            $user->alumno->load('documentos', 'carrera.facultad');
+        }
+        return view('profile'); })->name('profile');
+    Route::get('/mi-foto', [FotoPerfilController::class, 'show'])->name('estudiante.foto');
+    Route::post('/profile/carnet', [CarnetController::class, 'store'])->name('estudiante.carnet.store');
 
     // Ruta de prueba para ver el layout
     Route::get('/dashboard', function () {

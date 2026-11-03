@@ -23,7 +23,7 @@ class RetirarMateriaAction
         User $usuario,
         ?string $motivo = null
     ): DetalleInscripcion {
-        // 1. Revalidar TODO en backend (defensa en profundidad)
+        // 1. Revalidar TODO en backend
         $validacion = $this->validarAction->execute($alumno, $detalle);
 
         if (!$validacion['puede']) {
@@ -32,14 +32,13 @@ class RetirarMateriaAction
             ]);
         }
 
-        return DB::transaction(function () use ($detalle, $alumno, $usuario, $motivo) {
-            // 2. Actualizar el detalle
+        // 2. Persistir el retiro
+        $detalle = DB::transaction(function () use ($detalle, $alumno, $usuario, $motivo) {
             $detalle->estado_materia = 'RETIRADA';
             $detalle->fecha_retiro   = now();
-            $detalle->promedio_final = null; // ← NULL, no 0.00
+            $detalle->promedio_final = null;
             $detalle->save();
 
-            // 3. Registrar en historial de retiros (opcional)
             try {
                 DB::table('retiros_materia')->insert([
                     'id_detalle_inscripcion' => $detalle->detalle_inscripcion_id,
@@ -58,12 +57,13 @@ class RetirarMateriaAction
             return $detalle->fresh();
         });
 
+        // 3. Enviar el correo (fuera de la transacción)
         $this->enviarCorreo($alumno, $detalle, $usuario, $motivo);
 
         return $detalle;
     }
     
-     private function enviarCorreo(
+    private function enviarCorreo(
         Alumnos $alumno,
         DetalleInscripcion $detalle,
         User $usuario,
@@ -94,7 +94,7 @@ class RetirarMateriaAction
                     'dia'  => $sh->horario?->dia?->value ?? (string) $sh->horario?->dia,
                     'ini'  => substr((string) $sh->horario?->hora_inicio, 0, 5),
                     'fin'  => substr((string) $sh->horario?->hora_fin, 0, 5),
-                    'aula' => $sh->aula?->nombre ?? 'Sin aula',
+                    'aula' => $sh->aula?->nombre_aula ?? 'Sin aula',
                 ])
                 ->filter()
                 ->values()

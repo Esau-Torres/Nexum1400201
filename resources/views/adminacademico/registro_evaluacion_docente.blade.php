@@ -14,8 +14,8 @@
                 <i class="bi bi-clipboard2-data fs-4 text-danger"></i>
             </div>
             <div class="px-3">
-                <h1 class="h4 fw-bold mb-0">Evaluaciones Docentes</h1>
-                <p class="text-muted mb-0 small">
+                <h1 class="h4 fw-bold mb-0">EVALUACIONES DOCENTES</h1>
+                <p class="text-muted mb-0 text-medium">
                     Gestión de enlaces de encuestas por sección y ciclo
                 </p>
             </div>

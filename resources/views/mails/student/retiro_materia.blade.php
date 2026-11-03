@@ -156,7 +156,7 @@
                     @foreach($horarios as $h)
                         <div class="info-row">
                             <strong>{{ $h['dia'] }}</strong>
-                            <span>{{ $h['ini'] }} - {{ $h['fin'] }} · 📍 {{ $h['aula'] }}</span>
+                            <span>{{ $h['ini'] }} - {{ $h['fin'] }} ·  {{ $h['aula'] }}</span>
                         </div>
                     @endforeach
                 </div>

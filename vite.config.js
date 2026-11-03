@@ -8,6 +8,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/pensum.css',
+                'resources/css/profile.css',
                 'resources/css/toast.css',
                 'resources/js/app.js'
             ],

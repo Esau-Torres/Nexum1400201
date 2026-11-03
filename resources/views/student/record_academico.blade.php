@@ -10,7 +10,7 @@
                 <i class="bi bi-mortarboard-fill fs-4 text-danger"></i>
             </div>
             <div class="px-3">
-                <h2 class="h4 fw-bold mb-0">Récord Académico</h2>
+                <h2 class="h4 fw-bold mb-0">RÉCORD ACADÉMICO</h2>
                 <p class="text-muted mb-0 small">
                     Historial completo de materias cursadas y en curso.
                 </p>
