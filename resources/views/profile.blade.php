@@ -7,7 +7,7 @@
 @endpush
 
 @section('content')
-<div class="container-fluid p-4 p-lg-5">
+<div class="profile-wrapper">
 
     @php
         $user   = auth()->user();
@@ -677,6 +677,7 @@
             </div>
         </div>
 
+    </div>
 </div>
 
 <!-- ==========================================================================
@@ -917,29 +918,29 @@
 
 {{-- Logout automático después de cambio de contraseña --}}
 @if (session('auto_logout'))
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            let secondsLeft = 5;
-            const interval = setInterval(() => {
-                secondsLeft--;
-                if (secondsLeft <= 0) {
-                    clearInterval(interval);
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let secondsLeft = 5;
+        const interval = setInterval(() => {
+            secondsLeft--;
+            if (secondsLeft <= 0) {
+                clearInterval(interval);
 
                     const logoutForm = document.createElement('form');
                     logoutForm.method = 'POST';
                     logoutForm.action = "{{ route('logout') }}";
 
-                    const csrfToken = document.createElement('input');
-                    csrfToken.type = 'hidden';
-                    csrfToken.name = '_token';
-                    csrfToken.value = "{{ csrf_token() }}";
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = "{{ csrf_token() }}";
 
-                    logoutForm.appendChild(csrfToken);
-                    document.body.appendChild(logoutForm);
-                    logoutForm.submit();
-                }
-            }, 1000);
-        });
-    </script>
+                logoutForm.appendChild(csrfToken);
+                document.body.appendChild(logoutForm);
+                logoutForm.submit();
+            }
+        }, 1000);
+    });
+</script>
 @endif
 @endpush

@@ -15,14 +15,14 @@ class HomeController extends Controller
 
         // Redirección según el rol del usuario
         if ($usuario->hasRole('DOCENTE')) {
-            return redirect()->route('home.docente');
+            return redirect()->route('docente.home');
         }
         $relations = ['roles', 'regionalactivo'];
 
         if ($usuario->hasRole('ESTUDIANTE')) {
             $relations[] = 'alumno.carrera.facultad';
             $relations[] = 'alumno.documentos';
-            $relations[] = 'alumno.beneficioCicloActual.cicloLectivo'; 
+            $relations[] = 'alumno.beneficioCicloActual.cicloLectivo';
         }
 
         if ($usuario->hasRole('DOCENTE')) {
@@ -34,4 +34,3 @@ class HomeController extends Controller
         return view('home', compact('usuario'));
     }
 }
-

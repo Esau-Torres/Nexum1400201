@@ -14,10 +14,11 @@
 
     <!-- Font Awesome 6 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Styles / Scripts Vite -->
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css','resources/css/toast.css' , 'resources/js/app.js'])
+    @vite(['resources/css/app.css','resources/css/toast.css' , 'resources/js/app.js'])
     @endif
     @stack('styles') 
 </head>
@@ -27,11 +28,11 @@
     <!-- Barra de cabecera fija solo en móvil/tablet -->
     <div class="d-lg-none bg-white border-bottom p-2 px-3 d-flex align-items-center justify-content-between sticky-top shadow-sm" style="z-index: 1010;">
         <button class="btn btn-outline-secondary border-0 p-2"
-                type="button"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#sidebarMenu"
-                aria-controls="sidebarMenu"
-                aria-label="Abrir Menú">
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#sidebarMenu"
+            aria-controls="sidebarMenu"
+            aria-label="Abrir Menú">
             <i class="fa-solid fa-bars fs-5 text-dark"></i>
         </button>
         <span class="fw-bold small text-dark">@yield('titulo_navbar', 'NEXUM')</span>
@@ -41,10 +42,10 @@
     <div class="layout-wrapper">
         <!-- Sidebar Responsivo -->
         <aside class="sidebar offcanvas-lg offcanvas-start bg-white border-end d-flex flex-column"
-               tabindex="-1"
-               id="sidebarMenu"
-               aria-labelledby="sidebarMenuLabel"
-               data-bs-scroll="true">
+            tabindex="-1"
+            id="sidebarMenu"
+            aria-labelledby="sidebarMenuLabel"
+            data-bs-scroll="true">
 
             <!-- Logo -->
             <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
@@ -75,42 +76,42 @@
                     {{-- ADMIN_ACADEMICO --}}
                     {{-- ============================================================ --}}
                     @if(auth()->user()->hasRole('ADMIN_ACADEMICO'))
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('admin-academico.create-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.create-student') ? 'active' : '' }}">
-                                <i class="fa-solid fa-user-plus nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Nuevo Alumno</div>
-                                    <div class="nav-text-secondary">Crear usuarios alumnos</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('admin-academico.admin.academico.solicitudes.approve-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.admin.academico.solicitudes.approve-student') ? 'active' : '' }}">
-                                <i class="fa-solid fa-user-check nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Aceptar Alumno</div>
-                                    <div class="nav-text-secondary">Alumnos en espera</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('admin-academico.alumnos.modify-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.modify-student') ? 'active' : '' }}">
-                                <i class="fa-solid fa-chart-pie nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Gestionar Alumno</div>
-                                    <div class="nav-text-secondary">Dar de baja a estudiantes</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('admin-academico.admin-academico.beneficios.modify-benefit-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.modify-benefit-student') ? 'active' : '' }}">
-                                <i class="fa-solid fa-graduation-cap nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Gestionar becas</div>
-                                    <div class="nav-text-secondary">Beneficios de estudiantes</div>
-                                </div>
-                            </a>
-                        </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('admin-academico.create-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.create-student') ? 'active' : '' }}">
+                            <i class="fa-solid fa-user-plus nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Nuevo Alumno</div>
+                                <div class="nav-text-secondary">Crear usuarios alumnos</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('admin-academico.admin.academico.solicitudes.approve-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.admin.academico.solicitudes.approve-student') ? 'active' : '' }}">
+                            <i class="fa-solid fa-user-check nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Aceptar Alumno</div>
+                                <div class="nav-text-secondary">Alumnos en espera</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('admin-academico.alumnos.modify-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.modify-student') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-pie nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Gestionar Alumno</div>
+                                <div class="nav-text-secondary">Dar de baja a estudiantes</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('admin-academico.admin-academico.beneficios.modify-benefit-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.modify-benefit-student') ? 'active' : '' }}">
+                            <i class="fa-solid fa-graduation-cap nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Gestionar becas</div>
+                                <div class="nav-text-secondary">Beneficios de estudiantes</div>
+                            </div>
+                        </a>
+                    </li>
 
                         <li class="nav-item mb-1">
                             <a href="{{ route('admin-academico.pensum.pensum') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.pensum.pensum') ? 'active' : '' }}">
@@ -172,33 +173,33 @@
                     {{-- DOCENTE (un solo bloque) --}}
                     {{-- ============================================================ --}}
                     @if(auth()->user()->hasRole('DOCENTE'))
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('docente.materias') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('docente.materias') ? 'active' : '' }}">
-                                <i class="fa-solid fa-chalkboard-user nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Materias</div>
-                                    <div class="nav-text-secondary">Cursos asignados</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('docente.asistencia', 1) }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('docente.asistencia') ? 'active' : '' }}">
-                                <i class="fa-solid fa-calendar-check nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Asistencia</div>
-                                    <div class="nav-text-secondary">Control de clases</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('docentes.prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('docentes.prueba.notas') ? 'active' : '' }}">
-                                <i class="fa-solid fa-file-pen nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Prueba de Notas</div>
-                                    <div class="nav-text-secondary">Evaluaciones y calificaciones</div>
-                                </div>
-                            </a>
-                        </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('docente.materias') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('docente.materias') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chalkboard-user nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Materias</div>
+                                <div class="nav-text-secondary">Cursos asignados</div>
+                            </div>
+                        </a>
+                    </li>
+                    <!--<li class="nav-item mb-1">
+                        <a href="{{ route('docente.asistencia', 10) }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('docente.asistencia') ? 'active' : '' }}">
+                            <i class="fa-solid fa-calendar-check nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Asistencia</div>
+                                <div class="nav-text-secondary">Control de clases</div>
+                            </div>
+                        </a>
+                    </li> -->
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('docente.prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('prueba.notas') ? 'active' : '' }}">
+                            <i class="fa-solid fa-file-pen nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Prueba de Notas</div>
+                                <div class="nav-text-secondary">Evaluaciones y calificaciones</div>
+                            </div>
+                        </a>
+                    </li>
                     @endif
 
                     {{-- ============================================================ --}}
@@ -283,42 +284,42 @@
                     {{-- SUPER_ADMIN --}}
                     {{-- ============================================================ --}}
                     @if(auth()->user()->hasRole('SUPER_ADMIN'))
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('superadmin.createuser') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/createuser*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-user nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Crear</div>
-                                    <div class="nav-text-secondary">Ingreso de usuarios</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('superadmin.panel-administrativo') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/panel-administrativo*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-gauge nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Panel Administrativo</div>
-                                    <div class="nav-text-secondary">Administrar usuarios</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('superadmin.roles.manageroles') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/roles.manageroles*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-sliders nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Gestión</div>
-                                    <div class="nav-text-secondary">Administrar roles de usuario</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('superadmin.manage-ruler') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/manage-ruler*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-gavel nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Gestionar reglas</div>
-                                    <div class="nav-text-secondary">Reglas académicas</div>
-                                </div>
-                            </a>
-                        </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('superadmin.createuser') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/createuser*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-user nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Crear</div>
+                                <div class="nav-text-secondary">Ingreso de usuarios</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('superadmin.panel-administrativo') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/panel-administrativo*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-gauge nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Panel Administrativo</div>
+                                <div class="nav-text-secondary">Administrar usuarios</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('superadmin.roles.manageroles') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/roles.manageroles*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-sliders nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Gestión</div>
+                                <div class="nav-text-secondary">Administrar roles de usuario</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('superadmin.manage-ruler') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/manage-ruler*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-gavel nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Gestionar reglas</div>
+                                <div class="nav-text-secondary">Reglas académicas</div>
+                            </div>
+                        </a>
+                    </li>
                     @endif
 
                     {{-- ============================================================ --}}
@@ -370,81 +371,81 @@
                     {{-- CAJERO --}}
                     {{-- ============================================================ --}}
                     @if(auth()->user()->hasRole('CAJERO'))
-                        <p class="p-1 text-muted small ">VISTAS DE CAJERO <i class="fa-solid fa-arrow-down nav-icon  me-3 text-muted small"></i></p>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('cajero.deuda.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('cajero/deuda*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Deuda Pendiente</div>
-                                    <div class="nav-text-secondary">Liquidar cargos del alumno</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('cajero.ventanilla.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('*ventanilla*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-cash-register nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Consultas en ventanilla</div>
-                                    <div class="nav-text-secondary">Consulta de aranceles directos</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('cajero.promociones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('*promociones*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-tags nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Promociones</div>
-                                    <div class="nav-text-secondary">Consulta de beneficios activos</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('cajero.pagos.create') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('*pagos*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Cobrar</div>
-                                    <div class="nav-text-secondary">Registro de pagos y transacciones</div>
-                                </div>
-                            </a>
-                        </li>
+                    <p class="p-1 text-muted small ">VISTAS DE CAJERO <i class="fa-solid fa-arrow-down nav-icon  me-3 text-muted small"></i></p>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('cajero.deuda.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('cajero/deuda*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Deuda Pendiente</div>
+                                <div class="nav-text-secondary">Liquidar cargos del alumno</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('cajero.ventanilla.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('*ventanilla*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-cash-register nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Consultas en ventanilla</div>
+                                <div class="nav-text-secondary">Consulta de aranceles directos</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('cajero.promociones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('*promociones*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-tags nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Promociones</div>
+                                <div class="nav-text-secondary">Consulta de beneficios activos</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('cajero.pagos.create') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('*pagos*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Cobrar</div>
+                                <div class="nav-text-secondary">Registro de pagos y transacciones</div>
+                            </div>
+                        </a>
+                    </li>
                     @endif
                     @if(auth()->user()->hasRole('COORDINADOR_FACULTAD'))
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('coordinador-facultad.infraestructura-horarios.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/infraestructura-horarios.index*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-industry nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Infraestructura</div>
-                                    <div class="nav-text-secondary">Administrar edificios y aulas</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('coordinador-facultad.horarios-grupohorario.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/horarios-grupohorario.index*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-calendar nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Horarios</div>
-                                    <div class="nav-text-secondary">Administrar horarios y grupos de un ciclo</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('coordinador-facultad.secciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/secciones.index*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-people-group nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Secciones</div>
-                                    <div class="nav-text-secondary">gestion secciones de clase</div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="nav-item mb-1">
-                            <a href="{{ route('coordinador-facultad.dashboard') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/dashboard*') ? 'active' : '' }}">
-                                <i class="fa-solid fa-chart-line nav-icon fs-5 me-3 text-muted"></i>
-                                <div>
-                                    <div class="fw-medium">Dasboard</div>
-                                    <div class="nav-text-secondary">Proyección de secciones</div>
-                                </div>
-                            </a>
-                        </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('coordinador-facultad.infraestructura-horarios.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/infraestructura-horarios.index*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-industry nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Infraestructura</div>
+                                <div class="nav-text-secondary">Administrar edificios y aulas</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('coordinador-facultad.horarios-grupohorario.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/horarios-grupohorario.index*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-calendar nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Horarios</div>
+                                <div class="nav-text-secondary">Administrar horarios y grupos de un ciclo</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('coordinador-facultad.secciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/secciones.index*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-people-group nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Secciones</div>
+                                <div class="nav-text-secondary">gestion secciones de clase</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ route('coordinador-facultad.dashboard') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/dashboard*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-line nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Dasboard</div>
+                                <div class="nav-text-secondary">Proyección de secciones</div>
+                            </div>
+                        </a>
+                    </li>
                     @endif
 
                 </ul>
@@ -467,8 +468,8 @@
 
                     {{-- Ajustes --}}
                     <a href="{{ route('profile') }}"
-                       class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('profile') ? 'active' : '' }}"
-                       title="Ajustes">
+                        class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('profile') ? 'active' : '' }}"
+                        title="Ajustes">
                         <i class="fa-solid fa-gear nav-icon fs-5 text-muted"></i>
                     </a>
 
@@ -487,12 +488,12 @@
 
     <!-- Script del Sidebar Mobile (Bootstrap 5.3 maneja el offcanvas) -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const sidebarClose = document.getElementById('sidebarClose');
             const sidebarMenu = document.getElementById('sidebarMenu');
 
             if (sidebarClose && sidebarMenu) {
-                sidebarClose.addEventListener('click', function () {
+                sidebarClose.addEventListener('click', function() {
                     const offcanvas = bootstrap.Offcanvas.getInstance(sidebarMenu);
                     if (offcanvas) offcanvas.hide();
                 });
