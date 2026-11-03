@@ -163,7 +163,7 @@
                             </div>
                         </a>
                     </li>
-                    <li class="nav-item mb-1">
+                    <!--<li class="nav-item mb-1">
                         <a href="{{ route('docente.asistencia', 10) }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('docente.asistencia') ? 'active' : '' }}">
                             <i class="fa-solid fa-calendar-check nav-icon fs-5 me-3 text-muted"></i>
                             <div>
@@ -171,7 +171,7 @@
                                 <div class="nav-text-secondary">Control de clases</div>
                             </div>
                         </a>
-                    </li>
+                    </li> -->
                     <li class="nav-item mb-1">
                         <a href="{{ route('docente.prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('prueba.notas') ? 'active' : '' }}">
                             <i class="fa-solid fa-file-pen nav-icon fs-5 me-3 text-muted"></i>

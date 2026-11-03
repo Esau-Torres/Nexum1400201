@@ -3,6 +3,7 @@
 use App\Http\Controllers\Docente\AsistenciaMateriaController;
 use App\Http\Controllers\Docente\MateriasDocenteController;
 use App\Http\Controllers\Docente\NotasMateriaController;
+use App\Http\Controllers\Docente\DashboardDocenteController;
 use App\Models\Users\Role;
 use Illuminate\Support\Facades\Route;
 
@@ -16,9 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return view('docente.prueba-notas');
         })->name('prueba.notas'); // Nombre final: docente.prueba.notas
 
-        Route::get('/home', function () {
-            return view('docente.home_docente');
-        })->name('home'); // Nombre final: docente.home
+        Route::get('/home', [DashboardDocenteController::class, 'index'])->name('home');
 
         Route::get('/materias', [MateriasDocenteController::class, 'index'])
             ->name('materias'); // Nombre final: docente.materias
