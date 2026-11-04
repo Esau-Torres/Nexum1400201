@@ -3,6 +3,10 @@
    Solo se carga en la vista de perfil del estudiante.
    ============================================================ */
 
+.profile-wrapper {
+     background-color: #e5e7eb;
+     min-height: calc(100vh - 0px);
+}
 .carnet-card {
     position: relative;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);

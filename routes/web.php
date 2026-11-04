@@ -27,7 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Rutas comunes
     Route::get('/home', [homeController::class, 'index'])->name('home');
 
-  // estudiante 
+    // estudiante 
     Route::get('/profile', function () { $user = auth()->user();
         if ($user->alumno) {
             $user->alumno->load('documentos', 'carrera.facultad');

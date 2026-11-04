@@ -167,6 +167,15 @@
                                 </div>
                             </a>
                         </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('admin-academico.reglas-beneficio.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('admin-academico.reglas-beneficio.index*') ? 'active' : '' }}">
+                                <i class="fa-solid fa-gavel nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Reglas Beneficio</div>
+                                    <div class="nav-text-secondary">Gestión de reglas de beneficio estudiantil</div>
+                                </div>
+                            </a>
+                        </li>
                     @endif
 
                     {{-- ============================================================ --}}
@@ -192,7 +201,7 @@
                         </a>
                     </li> -->
                     <li class="nav-item mb-1">
-                        <a href="{{ route('docente.prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('prueba.notas') ? 'active' : '' }}">
+                        <a href="{{ route('docente.prueba.notas.docentes') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('docente.prueba.notas.docentes') ? 'active' : '' }}">
                             <i class="fa-solid fa-file-pen nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Prueba de Notas</div>
@@ -234,7 +243,7 @@
                             </a>
                         </li>
                          <li class="nav-item mb-1">
-                            <a href="{{ route('docentes.prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('docentes.prueba.notas*') ? 'active' : '' }}">
+                            <a href="{{ route('docente.prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('docente.prueba.notas*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-file-pen nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Prueba de Notas</div>

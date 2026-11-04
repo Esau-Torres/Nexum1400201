@@ -123,7 +123,7 @@
                                         </span>
                                     </span>
 
-                                    <span class="materia-nombre">
+                                    <span class="materia-nombre-pensum">
                                         {{ $materia->nombre_materia }}
                                     </span>
 

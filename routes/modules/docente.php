@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:' . Role::DOCENTE)->group(function () {
 
-        Route::get('/prueba-notas', function () {
+        Route::get('/prueba-notas-docentes', function () {
             return view('docente.prueba-notas');
-        })->name('prueba.notas'); // Nombre final: docente.prueba.notas
+        })->name('prueba.notas.docentes'); // Nombre final: docente.prueba.notas
 
         Route::get('/home', [DashboardDocenteController::class, 'index'])->name('home');
 
@@ -43,5 +43,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/asistencia/{seccionId}/guardar', [AsistenciaMateriaController::class, 'store'])
             ->whereNumber('seccionId')
             ->name('asistencia.store'); // Nombre final: docente.asistencia.store
+    });
+    
+    Route::middleware('role:'.Role::ESTUDIANTE)->group(function () {
+        Route::get('/prueba-notas', function () { return view('docente.prueba-notas'); })->name('prueba.notas');
     });
 });

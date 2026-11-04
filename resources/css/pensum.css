@@ -450,7 +450,7 @@
 
 /* Nombre */
 
-.materia-nombre {
+.materia-nombre-pensum {
     display: block;
     width: 100%;
     min-width: 0;
@@ -749,7 +749,7 @@
         padding: 10px 9px 9px 12px;
     }
 
-    .materia-nombre {
+    .materia-nombre-pensum {
         font-size: 0.78rem;
     }
 }
@@ -838,7 +838,7 @@
         padding: 11px 11px 10px 13px;
     }
 
-    .materia-nombre {
+    .materia-nombre-pensum {
         font-size: 0.82rem;
     }
 
