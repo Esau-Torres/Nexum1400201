@@ -11,7 +11,7 @@
                     <i class="fa-solid fa-file-invoice-dollar fs-4"></i>
                 </div>
                 <div>
-                    <h3 class="fw-bolder text-dark mb-0">Gestión de Cargos Estudiantiles</h3>
+                    <h3 class="fw-bolder text-dark mb-0">GESTIÓN DE CARGOS ESTUDIANTILES</h3>
                     <p class="text-muted mb-0">Generación de matrículas y cuotas por ciclo lectivo</p>
                 </div>
             </div>

@@ -50,7 +50,7 @@
             <div class="col-12 col-lg-5">
                 <div class="card border-0 shadow rounded-4">
                     <div class="card-body p-4 p-lg-5">
-                        <h3 class="fw-bold mb-2">Iniciar Sesión</h3>
+                        <h3 class="fw-bold mb-2">INICIAR SESIÓN</h3>
                         <p class="text-muted small mb-4">Acceso al Sistema</p>
 
                         @if ($errors->any())

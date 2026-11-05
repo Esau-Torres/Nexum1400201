@@ -13,6 +13,7 @@ use App\Models\CoordinadorFacultad\Grupo;
 use App\Models\CoordinadorFacultad\SeccionHorario;
 use App\Models\CoordinadorFacultad\ClaseSesion;
 use App\Models\Estudiante\DetalleInscripcion;
+use App\Models\Academico\EvaluacionDocente;
 
 class Seccion extends Model
 {
@@ -80,6 +81,11 @@ class Seccion extends Model
     {
         return $query->where('estado', EstadoSeccion::ACTIVA->value);
     }
+    
+    public function getFaseCicloAttribute(): ?string
+    {
+        return $this->cicloLectivo?->estado?->value;
+    }
 
     /** Cupo total disponible (base + extra si permite sobrecupo) */
     public function getCupoTotalAttribute(): int
@@ -88,16 +94,79 @@ class Seccion extends Model
     }
 
     /** Inscritos activos actuales */
+    
     public function getInscritosCountAttribute(): int
     {
+        if (!in_array($this->fase_ciclo, ['MATRICULA_ABIERTA', 'ACTIVO'], true)) {
+            return 0;
+        }
+
         return $this->detallesInscripcion()
-            ->whereIn('estado_materia', ['CURSANDO', 'APROBADA'])
+            ->where('estado_materia', 'CURSANDO')
             ->count();
     }
 
-    /** Cupo disponible restante */
+    /**
+     * Total de inscritos (histórico, sin importar el estado).
+     * Útil para reportes de ciclos cerrados.
+     */
+   public function getInscritosHistoricosCountAttribute(): int
+    {
+        return $this->detallesInscripcion()->count();
+    }
+
+    /**
+     * Desglose por estado de materia (siempre disponible).
+     */
+    public function getInscritosPorEstadoAttribute(): array
+    {
+        return $this->detallesInscripcion()
+            ->selectRaw('estado_materia, COUNT(*) as total')
+            ->groupBy('estado_materia')
+            ->pluck('total', 'estado_materia')
+            ->toArray();
+    }
+
+    /** Aprobados (siempre disponible) */
+    public function getAprobadosCountAttribute(): int
+    {
+        return $this->detallesInscripcion()
+            ->where('estado_materia', 'APROBADA')
+            ->count();
+    }
+
+    /** Reprobados (siempre disponible) */
+    public function getReprobadosCountAttribute(): int
+    {
+        return $this->detallesInscripcion()
+            ->where('estado_materia', 'REPROBADA')
+            ->count();
+    }
+
+    /** Retirados (siempre disponible) */
+    public function getRetiradosCountAttribute(): int
+    {
+        return $this->detallesInscripcion()
+            ->where('estado_materia', 'RETIRADA')
+            ->count();
+    }
+
+    /** Cupo disponible (solo en fases donde se puede inscribir) */
     public function getCupoDisponibleAttribute(): int
     {
+        if (!in_array($this->fase_ciclo, ['MATRICULA_ABIERTA', 'ACTIVO'], true)) {
+            return 0;
+        }
+
         return max(0, $this->cupo_total - $this->inscritos_count);
+    }
+    
+    public function evaluacionesDocente(): HasMany
+    {
+        return $this->hasMany(
+            EvaluacionDocente::class,
+            'id_seccion',
+            'seccion_id'
+        );
     }
 }

@@ -14,7 +14,7 @@ class HomeController extends Controller
 
         // Redirecciones según el rol del usuario
         if ($usuario->hasRole('DOCENTE')) {
-            return redirect()->route('home.docente');
+            return redirect()->route('docente.home');
         }
 
         // ==========================================

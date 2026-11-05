@@ -10,6 +10,9 @@
     use App\Http\Controllers\AdminAcademico\MateriaController;
     use App\Http\Controllers\AdminAcademico\PensumController;
     use App\Http\Controllers\AdminAcademico\FacultadCarreraController;
+    use App\Http\Controllers\AdminAcademico\SituacionGestionController;
+    use App\Http\Controllers\AdminAcademico\EvaluacionDocenteController;
+    use App\Http\Controllers\AdminAcademico\ReglaBeneficioController;
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('role:'.Role::ADMIN_ACADEMICO)->group(function () {
@@ -95,6 +98,23 @@
                 Route::post('/pensum-materia/{pensumMateria}/prerequisito', [PensumController::class, 'addPrerequisito'])->name('addPrerequisito');
                 Route::delete('/prerequisito/{prerequisito}',               [PensumController::class, 'removePrerequisito'])->name('removePrerequisito');
             });
-            
+
+            // gestionar quejas, sujerencia y observaciones de alumnos
+            Route::get('/situaciones', [SituacionGestionController::class, 'index'])->name('situaciones.gestion');
+            Route::patch('/situaciones/{id}/estado', [SituacionGestionController::class, 'cambiarEstado'])->whereNumber('id')->name('situaciones.gestion.cambiar-estado');
+
+            // desempeño docente
+            Route::prefix('admin-academico/evaluaciones-docente') ->name('evaluaciones.')->group(function () {
+                Route::get('/desempeno', [EvaluacionDocenteController::class, 'index'])->name('index');
+                Route::post('/store', [EvaluacionDocenteController::class, 'store'])->name('store');
+                Route::put('/{evaluacion}', [EvaluacionDocenteController::class, 'update'])->name('update');
+                Route::delete('/{evaluacion}', [EvaluacionDocenteController::class, 'destroy'])->name('destroy');
+            });
+
+            // reglas de beneficio estudiante 
+            Route::prefix('reglas-beneficio')->name('reglas-beneficio.')->group(function () {
+                Route::get('/', [ReglaBeneficioController::class, 'index'])->name('index');
+                Route::put('/{regla}', [ReglaBeneficioController::class, 'update'])->name('update');
+            });
         });
     });

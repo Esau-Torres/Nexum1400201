@@ -207,7 +207,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
-            <form id="formUpdateRoleStatus" method="POST" action="" data-route="{{ route('superadmin.roles.update-status') }}">
+            <form id="formUpdateRoleStatus"
+                method="POST"
+                action="{{ url('/superadmin/roles/status') }}">
                 @csrf
                 @method('PUT')
 
@@ -294,10 +296,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
-            <form id="formUpdateUserRoles" method="POST" action="" data-route="{{ route('superadmin.users.assign-roles', ['userId' => '__USER_ID__']) }}">
+            <form id="formUpdateUserRoles"
+                method="POST"
+                action="{{ url('/superadmin/users') }}"
+                data-route-prefix="{{ url('/superadmin/users') }}">
                 @csrf
                 @method('PUT')
-
+        
+                    
                 <input type="hidden" id="userIdHiddenInput" name="user_id" value="">
 
                 <div class="modal-body p-4">

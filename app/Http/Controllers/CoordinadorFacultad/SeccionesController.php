@@ -18,15 +18,31 @@ use App\Rules\CoordinadorFacultad\StoreSeccionRules;
 use App\Enums\EstadoSeccion;
 use App\Models\Academico\PensumMateria;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Throwable;
 
 class SeccionesController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $secciones = Seccion::query()
+        $cicloActual = CicloLectivo::query()
+        ->orderByRaw("
+            CASE estado
+                WHEN 'MATRICULA_ABIERTA' THEN 1
+                WHEN 'ACTIVO' THEN 2
+                WHEN 'CONFIGURACION' THEN 3
+                WHEN 'CERRADO' THEN 4
+                ELSE 5
+            END
+        ")
+        ->orderByDesc('fecha_inicio')
+        ->first();
+
+        $idCicloFiltro = $request->filled('id_ciclo_lectivo') ? (int) $request->input('id_ciclo_lectivo') : $cicloActual?->ciclo_lectivo_id;
+
+         $seccionesQuery = Seccion::query()
             ->with([
                 'materia',
                 'cicloLectivo',
@@ -37,8 +53,13 @@ class SeccionesController extends Controller
             ])
             ->orderByDesc('id_ciclo_lectivo')
             ->orderBy('nombre_grupo')
-            ->orderBy('id_materia')
-            ->get();
+            ->orderBy('id_materia');
+
+        if ($idCicloFiltro) {
+            $seccionesQuery->where('id_ciclo_lectivo', $idCicloFiltro);
+        }
+
+        $secciones = $seccionesQuery->get();
 
         $ciclosLectivos     = CicloLectivo::orderByDesc('fecha_inicio')->get();
         $materias           = Materias::query()->where('estado', 'ACTIVO')->with(['pensumMaterias.pensum.carrera.facultad'])->orderBy('nombre')->get();
@@ -75,6 +96,7 @@ class SeccionesController extends Controller
             'horarios'         => $horarios,
             'horariosPorCiclo' => $horariosPorCiclo,
             'estados'          => EstadoSeccion::cases(),
+            'idCicloFiltro'      => $idCicloFiltro,
         ]);
     }
 

@@ -7,6 +7,7 @@ use App\Models\Academico\CicloLectivo;
 use App\Models\Estudiante\Carreras;
 use App\Services\CoordinadorFacultad\ProyeccionSeccionesService;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -35,5 +36,30 @@ class DashboardController extends Controller
             'incluirRecursantes',
             'proyeccion'
         ));
+    }
+    public function pdf(Request $request, ProyeccionSeccionesService $service)
+    {
+        $idCarrera     = (int) $request->input('id_carrera');
+        $idCicloActual = (int) $request->input('id_ciclo_lectivo');
+
+        $carrera = Carreras::find($idCarrera);
+        $ciclo   = CicloLectivo::find($idCicloActual);
+
+        if (!$carrera || !$ciclo) {
+            abort(404, 'Carrera o ciclo no encontrado.');
+        }
+
+        $proyeccion = $service->execute($idCarrera, $idCicloActual);
+
+        $pdf = Pdf::loadView('coordinador-facultad.dashboard-pdf', [
+            'carrera'    => $carrera,
+            'ciclo'      => $ciclo,
+            'proyeccion' => $proyeccion,
+            'fecha'      => now()->format('d/m/Y H:i'),
+        ])->setPaper('a4', 'portrait');
+
+        $nombre = 'proyeccion-' . \Str::slug($carrera->nombre) . '-' . \Str::slug($ciclo->nombre_ciclo) . '.pdf';
+
+        return $pdf->download($nombre);
     }
 }

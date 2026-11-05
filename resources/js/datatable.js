@@ -94,7 +94,10 @@ document.addEventListener('DOMContentLoaded', function () {
     initTable('#facultadesTable', { columnDefs: [{ orderable: false, targets: 2 }] });
     initTable('#carrerasTable', { columnDefs: [{ orderable: false, targets: 5 }] });
     initTable('#aulatable', { columnDefs: [{ orderable: false, targets: 6}] });
-    initTable('#grupohorariotable', { columnDefs: [{ orderable: false, targets: 4}] });
+    initTable('#grupohorariotable', { columnDefs: [{ orderable: false, targets: 5}] });
     initTable('#horariotable', { columnDefs: [{ orderable: false, targets: 6}] });
     initTable('#tabla-seccion', { columnDefs: [{ orderable: false, targets: 6}] });
+    initTable('#reglas-table', { columnDefs: [{ orderable: false, targets: 6}] });
+    initTable('#recod_academico_table', { columnDefs: [{ orderable: false, targets: 6}] });
+    initTable('#tabla-evaluaciones', { columnDefs: [{ orderable: false, targets: 6}] });
 });

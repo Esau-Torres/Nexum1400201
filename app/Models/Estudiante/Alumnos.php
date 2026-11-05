@@ -23,8 +23,17 @@ class Alumnos extends Model
 
     protected $fillable = [
         'id_usuario', 'id_carrera', 'codigo_estudiante',
-        'correo_institucional', 'estado_carrera'
+        'correo_institucional', 'estado_carrera',
+        'foto_carnet', 'foto_carnet_validada_at', 
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'foto_carnet_validada_at' => 'datetime',
+            'estado_carrera'          => 'string',
+        ];
+    }
 
     // relaciones
     public function documentos(): HasOne {
@@ -76,5 +85,42 @@ class Alumnos extends Model
     public function beneficioActivo(): ?BeneficioEstudiante
     {
         return $this->beneficios->firstWhere('estado', EstadoBeneficio::ACTIVO);
+    }
+    // ========================================================
+    // para profile carnet
+    // ========================================================
+    /** URL de la foto del carnet (subida específicamente) */
+    public function getFotoCarnetUrlAttribute(): ?string
+    {
+        return $this->foto_carnet
+            ? route('estudiante.foto', absolute: false)  // ← ruta relativa
+            : null;
+    }
+
+    public function getFotoExpedienteUrlAttribute(): ?string
+    {
+        if (!$this->documentos?->fotografia_personal) {
+            return null;
+        }
+
+        return route('estudiante.foto', absolute: false);
+    }
+
+    /** URL final de la foto a mostrar en el carnet */
+    public function getFotoCarnetMostrarAttribute(): ?string
+    {
+        return $this->foto_carnet_url ?? $this->foto_expediente_url;
+    }
+
+    /** Indica si la foto mostrada es la del carnet (subida específicamente) */
+    public function getFotoCarnetEsSubidaAttribute(): bool
+    {
+        return $this->foto_carnet_url !== null;
+    }
+    
+        /** Año de vigencia del carnet (año actual) */
+    public function getAnioVigenciaCarnetAttribute(): int
+    {
+        return now()->year;
     }
 }
