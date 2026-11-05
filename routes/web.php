@@ -5,6 +5,7 @@ use App\Http\Controllers\Estudiante\registroController;
 use App\Http\Controllers\Users\homeController;
 use App\Http\Controllers\Adfinanciero\AdminfinancieroController;
 use App\Http\Controllers\Cajero\CajeroController;
+use App\Http\Controllers\Directivo\DirectivoController;
 
 Route::view('/about', 'about')->name('about');
 
@@ -31,7 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('dashboard');
     })->name('dashboard');
 
-// Rutas de Docente
+    // Rutas de Docente
     Route::get('/home-docente', function () {
         return view('docente.home_docente');
     })->name('home.docente');
@@ -61,6 +62,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
     })->name('docente.asistencia');
 
+
+    //Modulo adminfinanciero
     Route::prefix('adfinanciero')->group(function () {
 
         // URL: nexum.test/adfinanciero/conceptospagos
@@ -116,7 +119,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/adfinanciero/cargos/store-masivo', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'cargosStoreMasivo'])->name('adfinanciero.cargos.storeMasivo');
     });
 
-
+    // MODULO CAJERO
     Route::prefix('cajero')->group(function () {
 
         Route::get('/deuda', [App\Http\Controllers\Cajero\CajeroController::class, 'deudaIndex'])->name('cajero.deuda.index');
@@ -137,5 +140,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/api/verificar-alumno/{carnet}', [App\Http\Controllers\Cajero\CajeroController::class, 'verificarAlumnoAPI'])->name('cajero.api.verificar');
     });
 
-
+    require __DIR__.'/modules/directivo.php';
 });

@@ -172,7 +172,7 @@ class AdminfinancieroController extends Controller
         }
 
         if ($request->filled('estado_filter')) {
-            $query->where('estado', $request->estado_filter === 'activos' ? true : false);
+            $query->where('estado', $request->estado_filter === 'ACTIVO' ? true : false);
         }
 
         $query->orderBy('fecha_fin', 'desc');
@@ -720,7 +720,11 @@ class AdminfinancieroController extends Controller
     //para generar las mensualidades
     public function cargosCreate(Request $request)
     {
-        $cicloActivo = \Illuminate\Support\Facades\DB::table('ciclo_lectivo')->where('estado', 'ACTIVO')->first();
+        $cicloActivo = \Illuminate\Support\Facades\DB::table('ciclo_lectivo')
+            ->whereRaw("estado::text IN ('CONFIGURACION', 'MATRICULA_ABIERTA', 'ACTIVO')")
+            ->orderBy('ciclo_lectivo_id', 'desc')
+            ->first();
+
         $search = $request->input('search');
 
         $query = \Illuminate\Support\Facades\DB::table('alumnos')
@@ -735,7 +739,7 @@ class AdminfinancieroController extends Controller
                 'users.name',
                 'users.documento_identidad'
             )
-            ->where('alumnos.estado_carrera', 'Activo');
+            ->where('alumnos.estado_carrera', 'ACTIVO');
 
         // ==========================================================
         // CANDADO DE SEGURIDAD Y FILTROS FINANCIEROS
@@ -790,7 +794,7 @@ class AdminfinancieroController extends Controller
                         ->where('alumno_id', $request->alumno_id)
                         ->first();
 
-            $cicloActivo = DB::table('ciclo_lectivo')->where('estado', 'ACTIVO')->first();
+            $cicloActivo = DB::table('ciclo_lectivo')->where('estado', 'CONFIGURACION')->first();
 
             if (!$alumno || !$cicloActivo) {
                 return redirect()->back()->with('error', 'Error: No se encontró al estudiante o no hay un ciclo activo.');
@@ -1038,7 +1042,7 @@ class AdminfinancieroController extends Controller
     public function cargosStoreMasivo(Request $request)
     {
         try {
-            $cicloActivo = \Illuminate\Support\Facades\DB::table('ciclo_lectivo')->where('estado', 'ACTIVO')->first();
+            $cicloActivo = \Illuminate\Support\Facades\DB::table('ciclo_lectivo')->where('estado', 'CONFIGURACION')->first();
 
             if (!$cicloActivo) {
                 return redirect()->back()->with('error', 'Error: No hay ciclo activo.');
@@ -1048,7 +1052,7 @@ class AdminfinancieroController extends Controller
             $alumnos = \Illuminate\Support\Facades\DB::table('alumnos')
                 ->join('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id')
                 ->select('alumnos.*', 'carreras.nombre as nombre_carrera')
-                ->where('alumnos.estado_carrera', 'Activo')
+                ->where('alumnos.estado_carrera', 'ACTIVO')
 
                 // REGLA 1: Que no tengan ya cargos en este ciclo
                 ->whereNotExists(function($q) use ($cicloActivo) {

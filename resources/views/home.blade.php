@@ -94,7 +94,7 @@
             {{-- ESTUDIANTE --}}
             @if($usuario->hasRole('ESTUDIANTE') && $usuario->alumno)
 
-                {{-- 1. LÓGICA DE VALIDACIÓN DE SOLVENCIA ESTRICTA --}}
+            {{-- 1. LÓGICA DE VALIDACIÓN DE SOLVENCIA ESTRICTA --}}
                 @php
                     $bloquearAcceso = false;
                     $mensajeBloqueo = '';

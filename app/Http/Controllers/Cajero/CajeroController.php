@@ -417,9 +417,25 @@ class CajeroController extends Controller
             $totalLiquidarRecibido = $request->input('total_liquidado');
             $metodoPago = strtoupper($canalPago);
 
-            $ultimoRecibo = DB::table('pago')->orderBy('pago_id', 'desc')->first();
-            $numeroCorrelativo = $ultimoRecibo ? intval(str_replace('REC-2026-', '', $ultimoRecibo->numero_recibo)) + 1 : 1;
-            $reciboNuevo = 'REC-2026-' . str_pad($numeroCorrelativo, 4, '0', STR_PAD_LEFT);
+            // ==========================================
+            // CORRECCIÓN: LECTURA DINÁMICA DEL ÚLTIMO RECIBO
+            // ==========================================
+            $anioActual = date('Y');
+
+            $ultimoRecibo = DB::table('pago')
+                ->where('numero_recibo', 'like', "REC-{$anioActual}-%")
+                ->orderBy('pago_id', 'desc')
+                ->first();
+
+            if ($ultimoRecibo) {
+                $partes = explode('-', $ultimoRecibo->numero_recibo);
+                $numeroCorrelativo = intval(end($partes)) + 1;
+            } else {
+                $numeroCorrelativo = 1;
+            }
+
+            $reciboNuevo = "REC-{$anioActual}-" . str_pad($numeroCorrelativo, 4, '0', STR_PAD_LEFT);
+            // ==========================================
 
             $idPago = null;
             $detallesParaCorreo = [];

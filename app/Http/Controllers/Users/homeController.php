@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
@@ -13,16 +12,24 @@ class HomeController extends Controller
     {
         $usuario = auth()->user();
 
-        // Redirección según el rol del usuario
+        // Redirecciones según el rol del usuario
         if ($usuario->hasRole('DOCENTE')) {
             return redirect()->route('home.docente');
         }
+
+        // ==========================================
+        // REDIRECCIÓN HACIA EL NUEVO MÓDULO DIRECTIVO
+        // ==========================================
+        if ($usuario->hasRole('DIRECTIVO')) {
+            return redirect()->route('directivo.dashboard.index');
+        }
+
         $relations = ['roles', 'regionalactivo'];
 
         if ($usuario->hasRole('ESTUDIANTE')) {
             $relations[] = 'alumno.carrera.facultad';
             $relations[] = 'alumno.documentos';
-            $relations[] = 'alumno.beneficioCicloActual.cicloLectivo'; 
+            $relations[] = 'alumno.beneficioCicloActual.cicloLectivo';
         }
 
         if ($usuario->hasRole('DOCENTE')) {
@@ -31,7 +38,7 @@ class HomeController extends Controller
         }
 
         $usuario->load($relations);
+
         return view('home', compact('usuario'));
     }
 }
-
