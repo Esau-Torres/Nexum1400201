@@ -436,12 +436,22 @@
                         </h5>
                     </div>
 
-                    {{-- Ajustes --}}
-                    <a href="{{ route('profile') }}"
-                        class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('profile') ? 'active' : '' }}"
-                        title="Ajustes">
-                        <i class="fa-solid fa-gear nav-icon fs-5 text-muted"></i>
-                    </a>
+                    {{-- Ajustes + Cerrar Sesión --}}
+                    <div class="d-flex align-items-center gap-1">
+                        <a href="{{ route('profile') }}"
+                            class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('profile') ? 'active' : '' }}"
+                            title="Ajustes">
+                            <i class="fa-solid fa-gear nav-icon fs-5 text-muted"></i>
+                        </a>
+
+                        <button type="button"
+                            class="nav-item-custom d-flex align-items-center text-decoration-none text-dark border-0 bg-transparent p-0"
+                            data-bs-toggle="modal"
+                            data-bs-target="#confirmLogoutLayoutModal"
+                            title="Cerrar Sesión">
+                            <i class="fa-solid fa-right-from-bracket nav-icon fs-5 text-muted"></i>
+                        </button>
+                    </div>
 
                 </div>
             </div>
@@ -451,6 +461,34 @@
         <main class="main-content flex-grow-1">
             @yield('content')
         </main>
+    </div>
+
+    <!-- Modal de confirmación de cierre de sesión (global del layout) -->
+    <div class="modal fade" id="confirmLogoutLayoutModal" tabindex="-1" aria-labelledby="confirmLogoutLayoutLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-3">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark" id="confirmLogoutLayoutLabel">
+                        <i class="fa-solid fa-right-from-bracket me-2 text-danger"></i>Cerrar Sesión Activa
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body py-3">
+                    <p class="text-secondary mb-0">
+                        ¿Estás seguro de que deseas salir de la plataforma NEXUM? Toda transacción o formulario no guardado se perderá al invalidar la sesión.
+                    </p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Permanecer</button>
+                    <form method="POST" action="{{ route('logout') }}" class="m-0">
+                        @csrf
+                        <button type="submit" class="btn btn-danger px-4 fw-semibold">
+                            Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <x-toast-container />
