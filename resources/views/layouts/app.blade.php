@@ -95,7 +95,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('admin-academico.alumnos.modify-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.modify-student') ? 'active' : '' }}">
+                        <a href="{{ route('admin-academico.alumnos.modify-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.alumnos.modify-student') ? 'active' : '' }}">
                             <i class="fa-solid fa-chart-pie nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Gestionar Alumno</div>
@@ -104,7 +104,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('admin-academico.admin-academico.beneficios.modify-benefit-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.modify-benefit-student') ? 'active' : '' }}">
+                        <a href="{{ route('admin-academico.admin-academico.beneficios.modify-benefit-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.admin-academico.beneficios.modify-benefit-student') ? 'active' : '' }}">
                             <i class="fa-solid fa-graduation-cap nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Gestionar becas</div>
@@ -159,7 +159,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('admin-academico.evaluaciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('evaluacion*') ? 'active' : '' }}">
+                            <a href="{{ route('admin-academico.evaluaciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.evaluaciones.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-clipboard-check nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Evaluación del Desempeño</div>
@@ -168,7 +168,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('admin-academico.reglas-beneficio.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('admin-academico.reglas-beneficio.index*') ? 'active' : '' }}">
+                            <a href="{{ route('admin-academico.reglas-beneficio.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.reglas-beneficio.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-gavel nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Reglas Beneficio</div>
@@ -216,7 +216,7 @@
                     {{-- ============================================================ --}}
                     @if(auth()->user()->hasRole('ESTUDIANTE'))
                         <li class="nav-item mb-1">
-                            <a href="{{ route('student.pensum.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('pensum.index*') ? 'active' : '' }}">
+                            <a href="{{ route('student.pensum.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('student.pensum.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-book-open nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Pensum</div>
@@ -225,7 +225,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('student.inscripcion.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('inscripcion.index*') ? 'active' : '' }}">
+                            <a href="{{ route('student.inscripcion.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('student.inscripcion.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-pen-to-square nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Inscripción</div>
@@ -234,7 +234,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('student.record.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('student.record.index*') ? 'active' : '' }}">
+                            <a href="{{ route('student.record.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('student.record.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-graduation-cap nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Record Académico</div>
@@ -243,7 +243,7 @@
                             </a>
                         </li>
                          <li class="nav-item mb-1">
-                            <a href="{{ route('docente.prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('docente.prueba.notas*') ? 'active' : '' }}">
+                            <a href="{{ route('docente.prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('docente.prueba.notas') ? 'active' : '' }}">
                                 <i class="fa-solid fa-file-pen nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Prueba de Notas</div>
@@ -252,7 +252,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('student.desempeno-docente.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('evaluacion*') ? 'active' : '' }}">
+                            <a href="{{ route('student.desempeno-docente.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('student.desempeno-docente.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-clipboard-check nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Evaluación del Desempeño</div>
@@ -261,7 +261,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('adfinanciero.cargos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('record-financiero*') ? 'active' : '' }}">
+                            <a href="{{ route('adfinanciero.cargos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('adfinanciero.cargos.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Record Financiero</div>
@@ -270,7 +270,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('student.situaciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('situaciones.index*') ? 'active' : '' }}">
+                            <a href="{{ route('student.situaciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('student.situaciones.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-envelope nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Buzón</div>
@@ -279,7 +279,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('student.recursos.bibliograficos') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('student.recursos.bibliograficos*') ? 'active' : '' }}">
+                            <a href="{{ route('student.recursos.bibliograficos') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('student.recursos.bibliograficos') ? 'active' : '' }}">
                                 <i class="fa-solid fa-folder-open nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Recursos</div>
@@ -312,7 +312,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('superadmin.roles.manageroles') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/roles.manageroles*') ? 'active' : '' }}">
+                        <a href="{{ route('superadmin.roles.manageroles') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('superadmin.roles.manageroles') ? 'active' : '' }}">
                             <i class="fa-solid fa-sliders nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Gestión</div>
@@ -400,7 +400,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('cajero.promociones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('*promociones*') ? 'active' : '' }}">
+                        <a href="{{ route('cajero.promociones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('cajero.promociones.index') ? 'active' : '' }}">
                             <i class="fa-solid fa-tags nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Promociones</div>
@@ -409,7 +409,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('cajero.pagos.create') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('*pagos*') ? 'active' : '' }}">
+                        <a href="{{ route('cajero.pagos.create') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('cajero.pagos.create') ? 'active' : '' }}">
                             <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Cobrar</div>
@@ -420,7 +420,7 @@
                     @endif
                     @if(auth()->user()->hasRole('COORDINADOR_FACULTAD'))
                     <li class="nav-item mb-1">
-                        <a href="{{ route('coordinador-facultad.infraestructura-horarios.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/infraestructura-horarios.index*') ? 'active' : '' }}">
+                        <a href="{{ route('coordinador-facultad.infraestructura-horarios.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('ccoordinador-facultad.infraestructura-horarios.index') ? 'active' : '' }}">
                             <i class="fa-solid fa-industry nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Infraestructura</div>
@@ -429,7 +429,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('coordinador-facultad.horarios-grupohorario.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/horarios-grupohorario.index*') ? 'active' : '' }}">
+                        <a href="{{ route('coordinador-facultad.horarios-grupohorario.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('coordinador-facultad.horarios-grupohorario.index') ? 'active' : '' }}">
                             <i class="fa-solid fa-calendar nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Horarios</div>
@@ -438,7 +438,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('coordinador-facultad.secciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/secciones.index*') ? 'active' : '' }}">
+                        <a href="{{ route('coordinador-facultad.secciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('coordinador-facultad.secciones.index') ? 'active' : '' }}">
                             <i class="fa-solid fa-people-group nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Secciones</div>
@@ -447,7 +447,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('coordinador-facultad.dashboard') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/dashboard*') ? 'active' : '' }}">
+                        <a href="{{ route('coordinador-facultad.dashboard') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('coordinador-facultad.dashboard') ? 'active' : '' }}">
                             <i class="fa-solid fa-chart-line nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Dasboard</div>

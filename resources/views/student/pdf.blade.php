@@ -239,11 +239,11 @@
     <table class="header-table">
         <tr>
             <td>
-                <div class="title-h1">Malla Curricular / Pensum Académico</div>
+                <div class="title-h1">UNIVERSIDAD MODULAR ABIERTA SANTA ANA</div>
                 <div class="carrera-txt">Carrera: {{ $alumno->carrera->nombre ?? 'N/A' }}</div>
             </td>
             <td class="student-box">
-                <div class="student-name">{{ $alumno->usuario?->name ?? 'Nombre no disponible' }}</div>
+                <div class="student-name">Pensum Académico / {{ $alumno->usuario?->name ?? 'Nombre no disponible' }}</div>
                 <div class="student-code">Código: <strong>{{ $alumno->codigo_estudiante }}</strong></div>
             </td>
         </tr>
