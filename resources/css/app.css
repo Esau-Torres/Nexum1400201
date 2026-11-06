@@ -294,8 +294,9 @@ body {
 }
 
 .stat-card-primary {
-    background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
-    box-shadow: 0 4px 16px rgba(220, 53, 69, 0.3);
+    background: #dc3545 !important;
+    background-image: none !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
 }
 
 .stat-card-primary:hover {
@@ -913,16 +914,16 @@ ul.pagination .page-item.disabled .page-link {
 
 /* Glassmorphism para iconos sobre fondos de color */
 .icon-glass-white {
-    background-color: rgba(255, 255, 255, 0.25);
+    background-color: rgba(255, 255, 255, 0.22);
     color: #ffffff;
-    backdrop-filter: blur(8px);
+    backdrop-filter: none;
     border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .icon-glass-dark {
     background-color: rgba(255, 255, 255, 0.45);
     color: #1f2937;
-    backdrop-filter: blur(8px);
+    backdrop-filter: none;
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
@@ -994,35 +995,41 @@ a.text-decoration-none.d-block {
 
 /* ====== VARIANTE: ESTUDIANTES (Roja) ====== */
 .card-estudiantes {
-    background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
-    box-shadow: 0 6px 16px rgba(220, 53, 69, 0.3);
+    background: #dc3545 !important;
+    background-image: none !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
 }
 
 .card-estudiantes:hover {
-    box-shadow: 0 16px 32px rgba(220, 53, 69, 0.45) !important;
-    background: linear-gradient(135deg, #e35d6a 0%, #dc3545 100%);
+    background: #e35d6a !important;
+    background-image: none !important;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16) !important;
 }
 
 /* ====== VARIANTE: CLASES (TEAL ELEGANTE) ====== */
 .card-clases {
-    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-    box-shadow: 0 6px 16px rgba(13, 148, 136, 0.3);
+    background: #0d9488 !important;
+    background-image: none !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
 }
 
 .card-clases:hover {
-    box-shadow: 0 16px 32px rgba(13, 148, 136, 0.45) !important;
-    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+    background: #14b8a6 !important;
+    background-image: none !important;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16) !important;
 }
 
 /* ====== VARIANTE: EVALUACIONES (AMBER CÁLIDO) ====== */
 .card-evaluaciones {
-    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-    box-shadow: 0 6px 16px rgba(217, 119, 6, 0.28);
+    background: #d97706 !important;
+    background-image: none !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
 }
 
 .card-evaluaciones:hover {
-    box-shadow: 0 16px 32px rgba(217, 119, 6, 0.4) !important;
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: #f59e0b !important;
+    background-image: none !important;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16) !important;
 }
 
 /* ====== RESPONSIVE ====== */
@@ -1049,4 +1056,311 @@ a.text-decoration-none.d-block {
 /* ========== TARJETAS GENERALES (otras vistas) ========== */
 .card {
     background-color: #ffffff;
+}
+
+/* ==========================================================================
+   DASHBOARD DOCENTE — NUEVO DISEÑO (tarjetas compactas + calendario + pizarrón)
+   ========================================================================== */
+
+/* ---- Tarjetas compactas en una sola fila ---- */
+.stat-mini-card {
+    min-height: 180px;
+    transition:
+        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    background-clip: border-box;
+}
+
+.stat-mini-card:hover {
+    transform: translateY(-4px);
+}
+
+.icon-square-mini {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
+}
+
+.stat-mini-card:hover .icon-square-mini {
+    transform: scale(1.08) rotate(-5deg);
+}
+
+.stat-mini-number {
+    font-size: 3.8rem;
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -2px;
+    margin: 0;
+}
+
+.stat-mini-label {
+    font-size: 1.15rem;
+    line-height: 1.25;
+}
+
+.stat-mini-sub {
+    font-size: 0.95rem;
+    line-height: 1.2;
+}
+
+/* Variantes de color — color sólido, sin degradado */
+.stat-mini-card.card-materias {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.stat-mini-card.card-materias:hover {
+    box-shadow: 0 10px 24px rgba(220, 53, 69, 0.18) !important;
+    border-color: rgba(220, 53, 69, 0.25) !important;
+}
+
+.stat-mini-card.card-materias:hover .bg-danger-soft {
+    background-color: var(--color-accent);
+    color: #ffffff !important;
+}
+
+.stat-mini-card.card-estudiantes {
+    background: #dc3545 !important;
+    background-image: none !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+.stat-mini-card.card-estudiantes:hover {
+    background: #e35d6a !important;
+    background-image: none !important;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16) !important;
+}
+
+.stat-mini-card.card-clases {
+    background: #0d9488 !important;
+    background-image: none !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+.stat-mini-card.card-clases:hover {
+    background: #14b8a6 !important;
+    background-image: none !important;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16) !important;
+}
+
+.stat-mini-card.card-evaluaciones {
+    background: #d97706 !important;
+    background-image: none !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+.stat-mini-card.card-evaluaciones:hover {
+    background: #f59e0b !important;
+    background-image: none !important;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16) !important;
+}
+
+/* Flecha animada */
+.stat-mini-card .arrow-icon {
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+}
+
+.stat-mini-card:hover .arrow-icon {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* ---- Calendario ---- */
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.cal-dow {
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #adb5bd;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 0 6px;
+}
+
+.cal-day {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 46px;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #343a40;
+    background-color: #ffffff;
+    border: 1px solid #eef0f2;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+    cursor: default;
+}
+
+.cal-day:not(.cal-day-empty):hover {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.cal-day-num {
+    line-height: 1;
+}
+
+.cal-day-empty {
+    background-color: transparent;
+    border: 1px solid transparent;
+}
+
+/* Día de hoy */
+.cal-day-today {
+    background-color: #fff5f5;
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    font-weight: 700;
+}
+
+.cal-day-today .cal-day-num {
+    color: var(--color-accent);
+}
+
+/* Día festivo */
+.cal-day-holiday {
+    font-weight: 600;
+}
+
+.cal-day-holiday .cal-dot {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.15);
+}
+
+/* Tooltip (burbuja) al hacer hover sobre un festivo */
+.cal-tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background-color: #212529;
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 5px 9px;
+    border-radius: 7px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+    z-index: 20;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.cal-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #212529;
+}
+
+.cal-day-holiday:hover .cal-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Leyenda */
+.cal-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.cal-legend .cal-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+}
+
+.cal-legend .cal-today-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 2px solid var(--color-accent);
+    background-color: #fff5f5;
+}
+
+/* ---- Pizarrón de notificaciones (vacío) ---- */
+.notices-empty-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #fafbfc;
+    border: 1px dashed #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    color: #adb5bd;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 767.98px) {
+    .stat-mini-card {
+        min-height: 150px;
+    }
+
+    .stat-mini-number {
+        font-size: 2.6rem;
+    }
+
+    .stat-mini-label {
+        font-size: 0.98rem;
+    }
+
+    .stat-mini-sub {
+        font-size: 0.82rem;
+    }
+
+    .icon-square-mini {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+
+    .cal-day {
+        height: 36px;
+        font-size: 0.9rem;
+        border-radius: 5px;
+    }
+
+    .cal-dow {
+        font-size: 0.68rem;
+    }
 }
