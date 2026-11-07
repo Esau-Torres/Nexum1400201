@@ -176,6 +176,15 @@
                                 </div>
                             </a>
                         </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('admin-academico.egresos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.egresos.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-user-graduate nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Pre-egresos</div>
+                                    <div class="nav-text-secondary">Requisitos para el egreso estudiantil</div>
+                                </div>
+                            </a>
+                        </li>
                     @endif
 
                     {{-- ============================================================ --}}

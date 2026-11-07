@@ -100,4 +100,5 @@ document.addEventListener('DOMContentLoaded', function () {
     initTable('#reglas-table', { columnDefs: [{ orderable: false, targets: 6}] });
     initTable('#recod_academico_table', { columnDefs: [{ orderable: false, targets: 6}] });
     initTable('#tabla-evaluaciones', { columnDefs: [{ orderable: false, targets: 6}] });
+    initTable('#tableEgreso', { columnDefs: [{ orderable: false, targets: 5}] });
 });

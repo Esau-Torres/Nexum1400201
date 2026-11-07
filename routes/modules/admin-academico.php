@@ -13,6 +13,7 @@
     use App\Http\Controllers\AdminAcademico\SituacionGestionController;
     use App\Http\Controllers\AdminAcademico\EvaluacionDocenteController;
     use App\Http\Controllers\AdminAcademico\ReglaBeneficioController;
+    use App\Http\Controllers\AdminAcademico\RequisitosEgresoController;
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('role:'.Role::ADMIN_ACADEMICO)->group(function () {
@@ -116,5 +117,13 @@
                 Route::get('/', [ReglaBeneficioController::class, 'index'])->name('index');
                 Route::put('/{regla}', [ReglaBeneficioController::class, 'update'])->name('update');
             });
+
+            // logica de requisito de egresado
+            Route::get('/egresos', [RequisitosEgresoController::class, 'index'])->name('egresos.index');
+            Route::post('/egresos/{alumnoId}/registrar', [RequisitosEgresoController::class, 'registrar'])->whereNumber('alumnoId')->name('egresos.registrar');
+            Route::post('/egresos/{alumnoId}/horas-sociales', [RequisitosEgresoController::class, 'gestionarHorasSociales'])->whereNumber('alumnoId')->name('egresos.horas-sociales');
+            Route::post('/egresos/{alumnoId}/pasantia', [RequisitosEgresoController::class, 'gestionarPasantia'])->whereNumber('alumnoId')->name('egresos.pasantia');
+            Route::get('/egresos/{alumnoId}/documento/{tipo}', [RequisitosEgresoController::class, 'descargarDocumento'])->whereNumber('alumnoId')->whereIn('tipo', ['social', 'pasantia'])->name('egresos.documento');
+            Route::post('/egresos/{alumnoId}/solvencia', [RequisitosEgresoController::class, 'marcarSolvencia'])->whereNumber('alumnoId')->name('egresos.solvencia');
         });
     });
