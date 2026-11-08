@@ -5,22 +5,53 @@
 @section('content')
 
 <div class="container-fluid py-4">
-
-    {{-- Header --}}
+    
+    {{-- Header con filtro --}}
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between gap-3 p-3 mb-4 rounded-4 card">
         <div class="d-flex align-items-center">
             <div class="px-3 py-2 rounded-3 bg-danger bg-opacity-10" style="width:48px;height:48px;">
                 <i class="bi bi-building-gear fs-4 text-danger"></i>
             </div>
             <div class="px-3">
-                <h1 class="h4 fw-bold mb-0">GESTION DE HORARIOS Y GRUPOS</h1>
-                <p class="text-muted mb-0 small">Gestión de edificios y aulas</p>
+                <h1 class="h4 fw-bold mb-0">GESTIÓN DE HORARIOS Y GRUPOS</h1>
+                <p class="text-muted mb-0 small">Gestión de bloques horarios y grupos de clase</p>
             </div>
         </div>
-        <a href="{{ route('coordinador-facultad.infraestructura-horarios.index') }}"
-           class="btn bg-danger-subtle text-danger border border-danger px-3 py-2">
-            <i class="fa-solid fa-home me-1"></i> Infraestructura
-        </a>
+        <div class="d-flex gap-2 align-items-end">
+            {{-- Filtro por ciclo --}}
+            <form method="GET" action="{{ route('coordinador-facultad.horarios-grupohorario.index') }}"
+                class="d-flex align-items-end gap-2">
+                <div>
+                    <label for="filtro-ciclo" class="form-label small fw-medium text-muted mb-1">
+                        <i class="bi bi-calendar3 me-1"></i> Filtrar por ciclo
+                    </label>
+                    <select name="id_ciclo_lectivo" id="filtro-ciclo"
+                            class="form-select form-select-sm"
+                            style="min-width: 220px;"
+                            onchange="this.form.submit()">
+                        <option value="">Todos los ciclos</option>
+                        @foreach($ciclosLectivos as $c)
+                            <option value="{{ $c->ciclo_lectivo_id }}"
+                                {{ $idCicloFiltro == $c->ciclo_lectivo_id ? 'selected' : '' }}>
+                                {{ $c->nombre_ciclo }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @if($idCicloFiltro)
+                    <a href="{{ route('coordinador-facultad.horarios-grupohorario.index') }}"
+                    class="btn btn-outline-secondary btn-sm"
+                    title="Quitar filtro">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                @endif
+            </form>
+
+            <a href="{{ route('coordinador-facultad.infraestructura-horarios.index') }}"
+            class="btn bg-danger-subtle text-danger border border-danger px-3 py-2">
+                <i class="fa-solid fa-home me-1"></i> Infraestructura
+            </a>
+        </div>
     </div>
 
     @if($errors->any())
@@ -76,7 +107,7 @@
             </div>
 
             <div class="card border-0 shadow-sm">
-                <div>
+                <div class="text-medium">
                     <table class="table table-hover align-middle mb-0" id="horariotable">
                         <thead class="table-light">
                             <tr>
@@ -140,11 +171,13 @@
         {{-- ============================================================
              TAB GRUPOS
              ============================================================ --}}
+
         <div class="tab-pane fade" id="tab-grupos">
 
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="h6 fw-bold mb-0">
-                    <i class="bi bi-people text-danger me-1"></i> Grupos por ciclo
+                    <i class="bi bi-people text-danger me-1"></i> Grupos
+                    <span class="badge bg-secondary ms-1">{{ $grupos->count() }}</span>
                 </h2>
                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearGrupo">
                     <i class="bi bi-plus-circle me-1"></i> Nuevo grupo
@@ -153,83 +186,79 @@
 
             <div class="alert alert-info small border-0">
                 <i class="bi bi-info-circle-fill me-1"></i>
-                Un <strong>grupo</strong> agrupa los bloques horarios que cursa un conjunto fijo de estudiantes
-                (ej: Grupo A cursa Lunes y Martes 06:10-07:50). Las secciones se asignan al grupo y heredan sus bloques.
+                Un <strong>grupo</strong> agrupa los bloques horarios que cursa un conjunto fijo de estudiantes.
+                Las secciones se asignan al grupo y heredan sus bloques.
             </div>
 
-            @forelse($grupos->groupBy('id_ciclo_lectivo') as $cicloId => $gruposCiclo)
-                @php
-                    $ciclo = $gruposCiclo->first()->cicloLectivo;
-                @endphp
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body p-0">
-                        <div>
-                            <table class="table table-hover align-middle mb-0" id="grupohorariotable">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="ps-4">Grupo</th>
-                                        <th>Bloques horarios</th>
-                                        <th>Secciones</th>
-                                        <th>Estado</th>
-                                        <th class="text-end pe-4">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($gruposCiclo as $grupo)
-                                        <tr>
-                                            <td class="ps-4">
-                                                <span class="badge bg-danger fs-6">Grupo {{ $grupo->nombre }}</span>
-                                            </td>
-                                            <td>
-                                                @if($grupo->horarios->isNotEmpty())
-                                                    <div class="d-flex flex-wrap gap-1">
-                                                        @foreach($grupo->horarios->sortBy(fn($h) => [$h->dia->isoNumber(), $h->hora_inicio]) as $h)
-                                                            <span class="badge text-bg-light border font-monospace">
-                                                                {{ $h->dia->short() }} {{ substr($h->hora_inicio, 0, 5) }}-{{ substr($h->hora_fin, 0, 5) }}
-                                                            </span>
-                                                        @endforeach
-                                                    </div>
-                                                @else
-                                                    <span class="text-muted small">Sin bloques asignados</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-secondary-subtle text-secondary border">
-                                                    {{ $grupo->secciones->count() }} sección(es)
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge {{ $grupo->activo ? 'text-bg-success' : 'text-bg-secondary' }}">
-                                                    {{ $grupo->activo ? 'Activo' : 'Inactivo' }}
-                                                </span>
-                                            </td>
-                                            <td class="text-end pe-4">
-                                                <button class="btn btn-sm btn-outline-primary me-1"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#modalEditarGrupo{{ $grupo->grupo_id }}">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#modalEliminarGrupo{{ $grupo->grupo_id }}">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+            <div class="card border-0 shadow-sm">
+                <div>
+                    <table class="table table-hover align-middle mb-0" id="grupohorariotable">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Ciclo</th>
+                                <th>Grupo</th>
+                                <th>Bloques horarios</th>
+                                <th>Secciones</th>
+                                <th>Estado</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($grupos as $grupo)
+                                <tr>
+                                    <td class="ps-4 small fs-6">{{ $grupo->cicloLectivo->nombre_ciclo ?? '—' }}</td>
+                                    <td>
+                                        <span class="badge bg-danger fs-6">Grupo {{ $grupo->nombre }}</span>
+                                    </td>
+                                    <td>
+                                        @if($grupo->horarios->isNotEmpty())
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach($grupo->horarios->sortBy(fn($h) => [$h->dia->isoNumber(), $h->hora_inicio]) as $h)
+                                                    <span class="badge text-bg-light border font-monospace fs-6">
+                                                        {{ $h->dia->short() }} {{ substr($h->hora_inicio, 0, 5) }}-{{ substr($h->hora_fin, 0, 5) }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <span class="text-muted small">Sin bloques asignados</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary-subtle text-secondary border fs-6">
+                                            {{ $grupo->secciones->count() }} sección(es)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="fs-6 badge {{ $grupo->activo ? 'text-bg-success' : 'text-bg-secondary' }}">
+                                            {{ $grupo->activo ? 'Activo' : 'Inactivo' }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-sm btn-outline-primary me-1"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEditarGrupo{{ $grupo->grupo_id }}">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEliminarGrupo{{ $grupo->grupo_id }}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-5">
+                                        <i class="bi bi-people fs-2 d-block mb-2"></i>
+                                        No hay grupos registrados
+                                        {{ $idCicloFiltro ? 'en este ciclo' : '' }}.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
-            @empty
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body text-center py-5">
-                        <i class="bi bi-people fs-1 text-muted d-block mb-3"></i>
-                        <p class="text-muted mb-0">No hay grupos registrados.</p>
-                    </div>
-                </div>
-            @endforelse
+            </div>
         </div>
     </div>
 </div>

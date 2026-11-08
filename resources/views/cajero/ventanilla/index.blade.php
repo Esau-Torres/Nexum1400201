@@ -6,7 +6,7 @@
     <!-- Encabezado de Ventanilla -->
     <div class="row mb-4">
         <div class="col-12">
-            <h2 class="fw-bold text-dark"><i class="fa-solid fa-cash-register me-2"></i> Consultas en ventanilla</h2>
+            <h2 class="fw-bold text-dark"><i class="fa-solid fa-cash-register me-2"></i> CONSULTA EN VENTANILLA</h2>
             <p class="text-muted">Selecciona los aranceles a cobrar y presiona el botón para procesar el recibo.</p>
         </div>
     </div>
@@ -36,7 +36,7 @@
                 </div>
 
                 <!-- Nuevo Botón para ir a Pagar -->
-                <button type="submit" id="btnEmitirRecibo" class="btn text-white fw-bold shadow-sm px-4" style="background-color: #ff7575; border-radius: 8px;" disabled>
+                <button type="submit" id="btnEmitirRecibo" class="btn text-white fw-bold shadow-sm px-4" style="background-color: #dc3545; border-radius: 8px;" disabled>
                     <i class="fa-solid fa-file-invoice-dollar me-2"></i> Generar recibo
                     <span class="badge bg-white text-danger ms-1" id="contadorSeleccionados">0</span>
                 </button>

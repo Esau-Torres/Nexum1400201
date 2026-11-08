@@ -2,6 +2,7 @@
 
 namespace App\Models\Estudiante;
 
+use App\Enums\EstadoInscripcion;
 use App\Models\Academico\CicloLectivo;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
@@ -21,9 +22,13 @@ class Inscripcion extends Model
         'estado_inscripcion',
     ];
 
-    protected $casts = [
-        'fecha_inscripcion' => 'date',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'fecha_inscripcion'  => 'date',
+            'estado_inscripcion' => EstadoInscripcion::class,
+        ];
+    }
 
     /**
      * Alumno al que pertenece esta inscripción.
@@ -45,6 +50,11 @@ class Inscripcion extends Model
      * Detalles de inscripción (materias inscritas en este ciclo).
      */
     public function detallesInscripcion(): HasMany
+    {
+        return $this->hasMany(DetalleInscripcion::class, 'id_inscripcion', 'inscripcion_id');
+    }
+    
+    public function detalles(): HasMany
     {
         return $this->hasMany(DetalleInscripcion::class, 'id_inscripcion', 'inscripcion_id');
     }

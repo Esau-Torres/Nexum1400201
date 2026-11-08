@@ -17,7 +17,7 @@
                     <i class="bi bi-person-plus-fill fs-4 text-danger"></i>
                 </div>
                 <div class="px-3">
-                    <h1 class="h4 fw-bold mb-0">Crear Estudiante</h1>
+                    <h1 class="h4 fw-bold mb-0">CREAR ESTUDIANTE</h1>
                     <p class="text-muted mb-0 small">
                         Registro directo con cuenta activa &mdash; Área Académica
                     </p>

@@ -11,7 +11,7 @@
                 <i class="bi bi-person-gear fs-4 text-danger"></i>
             </div>
             <div class="px-3">
-                <h1 class="h4 fw-bold mb-0">Modificar Estudiantes</h1>
+                <h1 class="h4 fw-bold mb-0">MODIFICAR ESTUDIANTE</h1>
                 <p class="text-muted mb-0 small">Edición de datos personales y gestión documental</p>
             </div>
         </div>

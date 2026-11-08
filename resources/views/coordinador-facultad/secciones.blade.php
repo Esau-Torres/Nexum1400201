@@ -6,25 +6,71 @@
 <div class="container-fluid py-4">
 
     {{-- Header --}}
-    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between gap-3 p-3 mb-4 rounded-4 card">
-        <div class="d-flex align-items-center">
-            <div class="px-3 py-2 rounded-3 bg-danger bg-opacity-10" style="width:48px;height:48px;">
-                <i class="bi bi-journal-bookmark-fill fs-4 text-danger"></i>
+    <div class="bg-white border border-light-subtle rounded-3 p-3 p-md-4 mb-4">
+        <div class="d-flex flex-column flex-xl-row align-items-xl-center justify-content-between gap-3">
+            
+            {{-- Título y Contexto Académico --}}
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-light text-secondary border border-light-subtle fw-medium px-2 py-1">
+                        Coordinación de Facultad
+                    </span>
+                </div>
+                <h1 class="h4 fw-bold text-dark mb-1 tracking-tight">GESTIÓN DE SECCIONES</h1>
+                <p class="text-secondary mb-0 small">
+                    Planificación de cátedras, distribución docente, aforos y asignación de aulas.
+                </p>
             </div>
-            <div class="px-3">
-                <h1 class="h4 fw-bold mb-0">GESTIÓN DE SECCIONES</h1>
-                <p class="text-muted mb-0 small">Asignación de materias, docentes, aulas y horarios</p>
+
+            {{-- Barra Operativa de Filtro y Acción --}}
+            <div class="d-flex flex-wrap align-items-center gap-2 pt-2 pt-xl-0">
+                
+                {{-- Filtro de Ciclo Lectivo --}}
+                <form method="GET" action="{{ route('coordinador-facultad.secciones.index') }}" class="d-flex align-items-center">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light border-light-subtle text-secondary">
+                            <i class="bi bi-calendar3" aria-hidden="true"></i>
+                        </span>
+                        <select name="id_ciclo_lectivo" 
+                                id="filtro-ciclo" 
+                                class="form-select border-light-subtle text-dark" 
+                                onchange="this.form.submit()"
+                                aria-label="Filtrar por ciclo lectivo">
+                            <option value="">Seleccione un ciclo</option>
+                            @foreach($ciclosLectivos as $c)
+                                @php
+                                    $estado = $c->estado->value ?? $c->estado;
+                                @endphp
+                                <option value="{{ $c->ciclo_lectivo_id }}" {{ (string) $idCicloFiltro === (string) $c->ciclo_lectivo_id ? 'selected' : '' }}>
+                                    {{ $c->nombre_ciclo }}
+                                    @switch($estado)
+                                        @case('MATRICULA_ABIERTA')
+                                            &bull; Matrícula Abierta
+                                            @break
+                                        @case('ACTIVO')
+                                            &bull; Ciclo Activo
+                                            @break
+                                        @case('CONFIGURACION')
+                                            &bull; En Planificación
+                                            @break
+                                    @endswitch
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </form>
+
+                <div class="vr d-none d-sm-block text-secondary opacity-25 my-1"></div>
+
+                {{-- Botón de Enlace a Horarios --}}
+                <a href="{{ route('coordinador-facultad.horarios-grupohorario.index') }}" 
+                class="btn btn-sm btn-danger d-inline-flex align-items-center gap-2 px-3">
+                    <i class="bi bi-calendar-week" aria-hidden="true"></i>
+                    <span>Matriz de Horarios</span>
+                </a>
+
             </div>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('coordinador-facultad.horarios-grupohorario.index') }}"
-               class="btn btn-outline-secondary px-3 py-2">
-                <i class="bi bi-clock-history me-1"></i> Horarios
-            </a>
-            <a href="{{ route('home') }}"
-               class="btn bg-danger-subtle text-danger border border-danger px-3 py-2">
-                <i class="fa-solid fa-home me-1"></i> Inicio
-            </a>
+
         </div>
     </div>
 
@@ -32,7 +78,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="h6 fw-bold mb-0">
             <i class="bi bi-list-ul text-danger me-1"></i>
-            Secciones registradas
+            SECCIONES REGISTRADAS
             <span class="badge bg-secondary ms-1">{{ $secciones->count() }}</span>
         </h2>
         <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearSeccion">
@@ -42,7 +88,7 @@
 
     {{-- Tabla de secciones --}}
     <div class="card border-0 shadow-sm">
-        <div>
+        <div class="text-medium">
             <table class="table table-hover align-middle mb-0" id="tabla-seccion">
                 <thead class="table-light">
                     <tr>
@@ -78,7 +124,32 @@
                                         <span class="text-warning">+{{ $seccion->cupo_extra_maximo }} extra</span>
                                     @endif
                                 </div>
-                                <small class="text-muted d-block">{{ $seccion->inscritos_count }} inscritos</small>
+
+                                @php $fase = $seccion->fase_ciclo; @endphp
+
+                                @if($fase === 'CONFIGURACION')
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-gear me-1"></i> En planificación
+                                    </small>
+                                @elseif(in_array($fase, ['MATRICULA_ABIERTA', 'ACTIVO'], true))
+                                    <small class="text-primary d-block">
+                                        <i class="bi bi-people-fill me-1"></i>
+                                        {{ $seccion->inscritos_count }} inscritos
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        {{ $seccion->cupo_disponible }} disponibles
+                                    </small>
+                                @elseif($fase === 'CERRADO')
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-archive me-1"></i>
+                                        {{ $seccion->inscritos_historicos_count }} totales
+                                    </small>
+                                    <small class="d-block">
+                                        <span class="text-success">{{ $seccion->aprobados_count }} aprobados</span> ·
+                                        <span class="text-danger">{{ $seccion->reprobados_count }} reprobados</span> ·
+                                        <span class="text-secondary">{{ $seccion->retirados_count }} retirados</span>
+                                    </small>
+                                @endif
                             </td>
                             <td>
                                 @if($seccion->horarios->isNotEmpty())
@@ -132,7 +203,16 @@
                         <tr>
                             <td colspan="8" class="text-center text-muted py-5">
                                 <i class="bi bi-journal-x fs-2 d-block mb-2"></i>
-                                No hay secciones registradas.
+                                No hay secciones registradas
+                                {{ $idCicloFiltro ? 'en este ciclo' : '' }}.
+                                @if($idCicloFiltro)
+                                    <div class="mt-3">
+                                        <button class="btn btn-sm btn-outline-secondary"
+                                                onclick="document.getElementById('filtro-ciclo').value=''; document.getElementById('filtro-ciclo').form.submit();">
+                                            <i class="bi bi-arrow-clockwise me-1"></i> Ver todos los ciclos
+                                        </button>
+                                    </div>
+                                @endif
                             </td>
                         </tr>
                     @endforelse

@@ -29,6 +29,9 @@ body {
         sans-serif;
     min-height: 100vh;
 }
+.text-medium {
+    font-size: 1.1rem;
+}
 
 .dashboard-wrapper {
     background-color: var(--bg-main);

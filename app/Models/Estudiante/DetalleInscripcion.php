@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\CoordinadorFacultad\Seccion;
 use App\Models\Estudiante\Inscripcion;
-use App\Models\Users\User;                    // ✅ CORREGIDO: era App\Models\User
-use App\Models\Academico\Asistencia;          // ✅ CORREGIDO: era App\Models\Asistencia\Asistencia
+use App\Models\Users\User;
+use App\Models\Academico\Asistencia;
 use App\Models\Academico\Calificacion;
 use App\Models\Estudiante\ExamenDiferido;
+use App\Models\Academico\EvaluacionDocente;
 
 class DetalleInscripcion extends Model
 {
@@ -111,5 +112,15 @@ class DetalleInscripcion extends Model
             'id_detalle_inscripcion',
             'detalle_inscripcion_id'
         );
+    }
+
+    // En DetalleInscripcion
+    public function evaluacionDocente(): BelongsTo
+    {
+        return $this->belongsTo(
+            EvaluacionDocente::class,
+            'id_seccion',
+            'id_seccion'
+        )->where('id_ciclo_lectivo', $this->inscripcion?->id_ciclo_lectivo);
     }
 }
