@@ -23,4 +23,8 @@ class Docentes extends Model
     {
         return $this->belongsTo(User::class, 'id_usuario', 'id');
     }
+    public function usuario(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'id_usuario', 'id');
+    }
 }

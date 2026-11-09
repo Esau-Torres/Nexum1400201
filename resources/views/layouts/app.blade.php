@@ -185,6 +185,15 @@
                                 </div>
                             </a>
                         </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('admin-academico.graduacion.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.graduacion.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-file-invoice nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Proceso Graduación</div>
+                                    <div class="nav-text-secondary">Proceso de estudiantes a graduar</div>
+                                </div>
+                            </a>
+                        </li>
                     @endif
 
                     {{-- ============================================================ --}}

@@ -14,6 +14,7 @@
     use App\Http\Controllers\AdminAcademico\EvaluacionDocenteController;
     use App\Http\Controllers\AdminAcademico\ReglaBeneficioController;
     use App\Http\Controllers\AdminAcademico\RequisitosEgresoController;
+    use App\Http\Controllers\AdminAcademico\ProcesoGraduacionController;
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('role:'.Role::ADMIN_ACADEMICO)->group(function () {
@@ -125,5 +126,13 @@
             Route::post('/egresos/{alumnoId}/pasantia', [RequisitosEgresoController::class, 'gestionarPasantia'])->whereNumber('alumnoId')->name('egresos.pasantia');
             Route::get('/egresos/{alumnoId}/documento/{tipo}', [RequisitosEgresoController::class, 'descargarDocumento'])->whereNumber('alumnoId')->whereIn('tipo', ['social', 'pasantia'])->name('egresos.documento');
             Route::post('/egresos/{alumnoId}/solvencia', [RequisitosEgresoController::class, 'marcarSolvencia'])->whereNumber('alumnoId')->name('egresos.solvencia');
+
+            // proceso de graduacion
+            Route::get('/graduacion', [ProcesoGraduacionController::class, 'index'])->name('graduacion.index');
+            Route::post('/graduacion/{alumnoId}', [ProcesoGraduacionController::class, 'store'])->whereNumber('alumnoId')->name('graduacion.store');
+            Route::patch('/graduacion/{procesoId}/estado', [ProcesoGraduacionController::class, 'cambiarEstado'])->whereNumber('procesoId')->name('graduacion.cambiar-estado');
+            Route::get('/graduacion/{alumnoId}/pagos-disponibles/{modalidad}', [ProcesoGraduacionController::class, 'pagosDisponibles'])->whereNumber('alumnoId')->name('graduacion.pagos-disponibles');
+            Route::patch('/graduacion/{procesoId}/titulo', [ProcesoGraduacionController::class, 'actualizarTitulo'])->whereNumber('procesoId')->name('graduacion.actualizar-titulo');
+            Route::get('/graduacion/{alumnoId}/historial', [ProcesoGraduacionController::class, 'historial'])->whereNumber('alumnoId')->name('graduacion.historial');
         });
     });
