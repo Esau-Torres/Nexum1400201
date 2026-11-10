@@ -3,6 +3,7 @@
 namespace App\Models\Adfinanciero;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class ReglaPago extends Model
 {
@@ -18,6 +19,7 @@ class ReglaPago extends Model
     // 4. Campos permitidos para inserción masiva
     protected $fillable = [
         'tipo',
+        'meses_aplicables',
         'dia_inicio_ordinario',
         'dia_fin_ordinario',
         'dia_inicio_extra',
@@ -32,4 +34,6 @@ class ReglaPago extends Model
         // Cambia 'ConceptoPago::class' por el nombre y ruta real de tu modelo de conceptos si es diferente
         return $this->belongsTo(\App\Models\Adfinanciero\ConceptoPago::class, 'id_concepto_recargo', 'concepto_pago_id');
     }
+
+
 }

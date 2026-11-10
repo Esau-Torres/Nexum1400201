@@ -4,11 +4,18 @@ namespace App\Models\Estudiante;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\BelongsTo; 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
-use App\Models\Academico\BeneficioEstudiante;
+
 Use App\Models\Users\User;
+Use App\Models\Estudiante\AlumnoDocumentos;
+Use App\Models\Estudiante\Carreras;
+Use App\Models\Academico\BeneficioEstudiante;
+Use App\Models\Academico\CargoEstudiante;
+use App\Models\Estudiante\RequisitosEgreso;
+use App\Models\Academico\ProcesoGraduacion;
+use App\Enums\EstadoBeneficio;
 
 class Alumnos extends Model
 {
@@ -17,9 +24,18 @@ class Alumnos extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'id_usuario', 'id_carrera', 'codigo_estudiante', 
-        'correo_institucional', 'estado_carrera'
+        'id_usuario', 'id_carrera', 'codigo_estudiante',
+        'correo_institucional', 'estado_carrera',
+        'foto_carnet', 'foto_carnet_validada_at', 
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'foto_carnet_validada_at' => 'datetime',
+            'estado_carrera'          => 'string',
+        ];
+    }
 
     // relaciones
     public function documentos(): HasOne {
@@ -33,6 +49,23 @@ class Alumnos extends Model
     public function carrera(): BelongsTo
     {
         return $this->belongsTo(Carreras::class, 'id_carrera', 'carrera_id');
+    }
+
+    public function requisitosEgreso(): HasMany
+    {
+        return $this->hasMany(RequisitosEgreso::class, 'id_alumno', 'alumno_id');
+    }
+
+    public function procesosGraduacion(): HasMany
+    {
+        return $this->hasMany(ProcesoGraduacion::class, 'id_alumno', 'alumno_id');
+    }
+
+    public function procesoGraduacionActivo(): HasOne
+    {
+        return $this->hasOne(ProcesoGraduacion::class, 'id_alumno', 'alumno_id')
+            ->where('es_activo', true)
+            ->latestOfMany('proceso_id');
     }
 
     public function beneficios(): HasMany
@@ -66,5 +99,47 @@ class Alumnos extends Model
             'carrera.facultad',
             'documentos',
         ]);
+    }
+
+    public function beneficioActivo(): ?BeneficioEstudiante
+    {
+        return $this->beneficios->firstWhere('estado', EstadoBeneficio::ACTIVO);
+    }
+    // ========================================================
+    // para profile carnet
+    // ========================================================
+    /** URL de la foto del carnet (subida específicamente) */
+    public function getFotoCarnetUrlAttribute(): ?string
+    {
+        return $this->foto_carnet
+            ? route('estudiante.foto', absolute: false)  // ← ruta relativa
+            : null;
+    }
+
+    public function getFotoExpedienteUrlAttribute(): ?string
+    {
+        if (!$this->documentos?->fotografia_personal) {
+            return null;
+        }
+
+        return route('estudiante.foto', absolute: false);
+    }
+
+    /** URL final de la foto a mostrar en el carnet */
+    public function getFotoCarnetMostrarAttribute(): ?string
+    {
+        return $this->foto_carnet_url ?? $this->foto_expediente_url;
+    }
+
+    /** Indica si la foto mostrada es la del carnet (subida específicamente) */
+    public function getFotoCarnetEsSubidaAttribute(): bool
+    {
+        return $this->foto_carnet_url !== null;
+    }
+    
+        /** Año de vigencia del carnet (año actual) */
+    public function getAnioVigenciaCarnetAttribute(): int
+    {
+        return now()->year;
     }
 }

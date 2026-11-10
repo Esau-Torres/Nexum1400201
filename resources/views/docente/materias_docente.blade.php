@@ -3,121 +3,98 @@
 @section('title', 'Mis Materias - Docente | NEXUM')
 
 @section('content')
+<div class="materias-wrapper">
+    <div class="container-fluid p-4 p-lg-5">
+        <div class="mx-auto" style="max-width: 900px;">
 
-@php
-// ============================================
-// DATOS QUEMADOS (temporal)
-// En el futuro estos datos vendrán del controlador
-// desde la base de datos según el docente autenticado.
-// ============================================
-$materias = $materias ?? [
-[
-'id' => 1,
-'nombre' => 'Programación I',
-'grupo' => 'A',
-'descripcion' => 'Fundamentos de programación, algoritmos y estructuras de datos básicas aplicadas a la resolución de problemas computacionales.',
-'estudiantes' => 28,
-'aula' => 'Aula 12 · Edificio Central',
-'horario' => 'Lun - Mié · 07:00 - 08:30',
-],
-[
-'id' => 2,
-'nombre' => 'Base de Datos',
-'grupo' => 'B',
-'descripcion' => 'Diseño, implementación y administración de bases de datos relacionales utilizando SQL y modelado entidad-relación.',
-'estudiantes' => 32,
-'aula' => 'Aula 08 · Edificio TIC',
-'horario' => 'Mar - Jue · 09:00 - 10:30',
-],
-[
-'id' => 3,
-'nombre' => 'Desarrollo Web',
-'grupo' => 'A',
-'descripcion' => 'Creación de aplicaciones web modernas con tecnologías frontend y backend, incluyendo HTML5, CSS3, JavaScript y frameworks actuales.',
-'estudiantes' => 25,
-'aula' => 'Aula 15 · Edificio TIC',
-'horario' => 'Mié - Vie · 11:00 - 12:30',
-],
-];
-@endphp
+            <!-- ENCABEZADO -->
+            <div class="d-flex align-items-center mb-4">
+                <div class="bg-white rounded-circle p-3 me-3 shadow-sm">
+                    <i class="fa-solid fa-chalkboard-user text-danger fs-3"></i>
+                </div>
+                <div>
+                    <h1 class="display-6 fw-bold mb-1" style="letter-spacing: -0.5px;">Tus Materias</h1>
+                    <p class="text-muted mb-0">Gestiona tus cursos asignados del ciclo actual.</p>
+                </div>
+            </div>
 
-<div class="container-fluid p-4 p-lg-5">
-    <div class="mx-auto" style="max-width: 1200px;">
+            <!-- GRID DE MATERIAS -->
+            <div class="row g-3 ps-2 ps-lg-4">
+                @forelse($materias as $materia)
+                <div class="col-12 col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 materia-card-minimal">
+                        <div class="card-body p-4 d-flex flex-column">
 
-        <!-- ============================================ -->
-        <!-- ENCABEZADO                                   -->
-        <!-- ============================================ -->
-        <div class="text-left mb-5">
-            <h1 class="display-5 fw-bold mb-2" style="letter-spacing: -0.5px;">Tus Materias</h1>
-            <p class="text-muted fs-6 mb-0">Gestiona tus materias asignadas del ciclo actual</p>
-        </div>
-
-        <!-- ============================================ -->
-        <!-- GRID DE MATERIAS (DINÁMICO)                  -->
-        <!-- ============================================ -->
-        <div class="row g-4">
-
-            @forelse($materias as $materia)
-            <div class="col-12 col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 materia-large-card h-100">
-                    <div class="card-body p-4 p-lg-5">
-                        <!-- Título + Grupo -->
-                        <div class="mb-3">
-                            <h3 class="fw-bold mb-2">{{ $materia['nombre'] }}</h3>
-                            <span class="badge bg-danger rounded-pill">Grupo {{ $materia['grupo'] }}</span>
-                        </div>
-
-                        <!-- Descripción -->
-                        <p class="materia-description">
-                            {{ $materia['descripcion'] }}
-                        </p>
-
-                        <!-- Stats -->
-                        <div class="materia-stats mb-4">
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="fa-solid fa-users me-2 text-danger"></i>
-                                <span class="small"><strong>{{ $materia['estudiantes'] }}</strong> estudiantes inscritos</span>
+                            <!-- Header: código como pill VERDE a la izquierda -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-success text-white px-2 py-1 rounded-pill small">
+                                    {{ $materia->codigo }}
+                                </span>
                             </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="fa-solid fa-location-dot me-2 text-danger"></i>
-                                <span class="small">{{ $materia['aula'] }}</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <i class="fa-solid fa-clock me-2 text-danger"></i>
-                                <span class="small">{{ $materia['horario'] }}</span>
-                            </div>
-                        </div>
 
-                        <!-- Acciones (botones grandes) -->
-                        <div class="d-flex flex-column flex-sm-row gap-2">
-                            <a href="#" class="btn btn-outline-danger rounded-3 flex-fill materia-btn-large">
-                                <i class="fa-solid fa-clipboard-check me-2"></i>Asistencia
-                            </a>
-                            <a href="{{ route('docente.notas', $materia['id']) }}" class="btn btn-outline-danger rounded-3 flex-fill materia-btn-large">
-                                <i class="fa-solid fa-file-pen me-2"></i>Notas
-                            </a>
+                            <!-- Título grande -->
+                            <h2 class="materia-nombre mb-2">{{ $materia->nombre }}</h2>
+
+                            <!-- Descripción breve -->
+                            <p class="text-muted small mb-3">{{ $materia->descripcion }}</p>
+
+                            <!-- Stats en 2 filas: cortos arriba, horario abajo -->
+                            <div class="materia-stats-stack mb-4 mt-auto">
+
+                                <!-- Fila 1: Alumnos y Aula (stats cortos) -->
+                                <div class="d-flex gap-3 mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-users text-danger small"></i>
+                                        <span class="text-dark fw-medium small">{{ $materia->estudiantes }} alumnos</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-location-dot text-danger small"></i>
+                                        <span class="text-dark fw-medium small">{{ $materia->aula }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Fila 2: Horario (con espacio propio, se ajusta a múltiples líneas) -->
+                                <div class="stat-horario d-flex align-items-start gap-2">
+                                    <i class="fa-solid fa-clock text-danger small flex-shrink-0 mt-1"></i>
+                                    <span class="text-dark fw-medium small lh-sm">
+                                        {{ $materia->horario }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Acciones -->
+                            <div class="d-grid gap-2 d-flex">
+                                <a href="{{ route('docente.asistencia', $materia->id) }}" class="btn btn-asistencia py-2 rounded-3 flex-fill d-flex align-items-center justify-content-center gap-2">
+                                    <i class="fa-solid fa-clipboard-check"></i>
+                                    <span>Asistencia</span>
+                                </a>
+                                <a href="{{ route('docente.notas', $materia->id) }}" class="btn btn-notas py-2 rounded-3 flex-fill d-flex align-items-center justify-content-center gap-2">
+                                    <i class="fa-solid fa-file-pen"></i>
+                                    <span>Notas</span>
+                                </a>
+                            </div>
+
                         </div>
                     </div>
                 </div>
-            </div>
-            @empty
-            <!-- Estado vacío: cuando el docente no tiene materias asignadas -->
-            <div class="col-12">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-body p-5 text-center">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
-                            style="width: 72px; height: 72px; background-color: #fff5f5;">
-                            <i class="fa-solid fa-book-open fs-2 text-danger"></i>
+                @empty
+                <!-- Estado vacío -->
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-body p-5 text-center">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3 bg-danger-soft"
+                                style="width: 80px; height: 80px;">
+                                <i class="fa-solid fa-book-open fs-2 text-danger"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">No tienes materias asignadas</h5>
+                            <p class="text-muted mb-0">Actualmente no tienes materias registradas para este ciclo.</p>
                         </div>
-                        <h5 class="fw-bold mb-2">No tienes materias asignadas</h5>
-                        <p class="text-muted mb-0">Actualmente no tienes materias registradas para este ciclo.</p>
                     </div>
                 </div>
+                @endforelse
             </div>
-            @endforelse
 
         </div>
-
     </div>
 </div>
 @endsection
