@@ -32,4 +32,10 @@ class DetallePago extends Model
     {
         return $this->belongsTo(ConceptoPago::class, 'id_concepto', 'concepto_pago_id');
     }
+
+    // Esto le enseña a Laravel cómo conectar el detalle del pago con el cargo (deuda) original
+    public function cargo()
+    {
+        return $this->belongsTo(CargoEstudiante::class, 'id_cargo', 'cargo_id');
+    }
 }

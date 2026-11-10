@@ -2,120 +2,249 @@
 import * as bootstrap from 'bootstrap';
 
 /**
- * Escapa HTML para prevenir XSS al inyectar strings del dataset.
+ * Escapa HTML para evitar inyección de código al mostrar datos.
  */
-function escapeHtml(str) {
-    if (!str) return '';
+function escapeHtml(value) {
+    if (value === null || value === undefined) {
+        return '';
+    }
+
     const div = document.createElement('div');
-    div.textContent = str;
+    div.textContent = String(value);
     return div.innerHTML;
 }
 
 /**
- * Inicializa el Modal 1: Edición de Estado del Rol.
+ * Convierte un dataset JSON en un arreglo seguro.
+ */
+function parseJsonArray(value, label) {
+    try {
+        const parsed = JSON.parse(value || '[]');
+
+        if (!Array.isArray(parsed)) {
+            throw new Error('El valor no es un arreglo.');
+        }
+
+        return parsed;
+    } catch (error) {
+        console.error(`[NEXUM_RBAC] Error al interpretar ${label}:`, error);
+        return [];
+    }
+}
+
+/**
+ * MODAL 1: Modificar estado de un rol.
  */
 function initRoleStatusModal() {
-    const modalRoleStatusEl = document.getElementById('modalEditRoleStatus');
-    const formRoleStatus    = document.getElementById('formUpdateRoleStatus');
-    const inputRoleName     = document.getElementById('roleStatusModalName');
-    const selectRoleStatus  = document.getElementById('roleStatusModalSelect');
-    const hiddenRoleId      = document.getElementById('roleStatusModalId');
-    const roleImpactWarning = document.getElementById('roleImpactWarning');
+    const modalElement = document.getElementById('modalEditRoleStatus');
 
-    if (!modalRoleStatusEl) return;
+    if (!modalElement) return;
 
-    const bsRoleStatusModal = new bootstrap.Modal(modalRoleStatusEl);
+    const form = document.getElementById('formUpdateRoleStatus');
+    const roleName = document.getElementById('roleStatusModalName');
+    const roleStatus = document.getElementById('roleStatusModalSelect');
+    const roleIdInput = document.getElementById('roleStatusModalId');
+    const impactWarning = document.getElementById('roleImpactWarning');
+    const submitButton = document.getElementById('btnSubmitRoleStatus');
 
-    // Delegación de eventos: abrir modal desde cualquier botón .btn-edit-role-status
+    if (!form || !roleName || !roleStatus || !roleIdInput) {
+        console.error('[NEXUM_RBAC] Faltan elementos del modal de estado.');
+        return;
+    }
+
+    const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+
+    // Abrir modal.
     document.addEventListener('click', (event) => {
-        const btn = event.target.closest('.btn-edit-role-status');
-        if (!btn) return;
+        const button = event.target.closest('.btn-edit-role-status');
 
-        const { id, name, status } = btn.dataset;
-        formRoleStatus.action = formRoleStatus.dataset.route;
-        inputRoleName.textContent = name;
-        selectRoleStatus.value    = status;
-        hiddenRoleId.value        = id;
+        if (!button) return;
 
-        // Resetear advertencia al abrir
-        roleImpactWarning.classList.add('d-none');
+        const { id, name, status } = button.dataset;
 
-        bsRoleStatusModal.show();
-    });
-
-    // Escuchar cambios del select para previsualizar impacto
-    selectRoleStatus.addEventListener('change', async (event) => {
-        const selectedStatus = event.target.value;
-        const roleId = hiddenRoleId.value;
-
-        // Si eligen "Activo", ocultar advertencia
-        if (selectedStatus !== '0') {
-            roleImpactWarning.classList.add('d-none');
+        if (!id || !/^\d+$/.test(id)) {
+            console.error('[NEXUM_RBAC] ID de rol inválido:', id);
             return;
         }
 
-        // Si eligen "Inactivo", consultar impacto al backend
+        roleName.textContent = name || '';
+        roleStatus.value = status ?? '1';
+        roleIdInput.value = id;
+
+        form.action = `${window.location.origin}/superadmin/roles/status`;
+
+        impactWarning?.classList.add('d-none');
+
+        modal.show();
+    });
+
+    // Consultar impacto cuando se selecciona estado inactivo.
+    roleStatus.addEventListener('change', async (event) => {
+        const selectedStatus = event.target.value;
+        const roleId = roleIdInput.value;
+
+        if (selectedStatus !== '0') {
+            impactWarning?.classList.add('d-none');
+            return;
+        }
+
+        if (!roleId || !/^\d+$/.test(roleId)) {
+            console.error('[NEXUM_RBAC] ID de rol inválido:', roleId);
+            return;
+        }
+
         try {
-            const res = await fetch(`/superadmin/roles/${roleId}/impact`, {
-                headers: { 'Accept': 'application/json' },
-            });
+            const response = await fetch(
+                `/superadmin/roles/${encodeURIComponent(roleId)}/impact`,
+                {
+                    method: 'GET',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                }
+            );
 
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const data = await res.json();
-
-            document.getElementById('impactAffectedCount').textContent = data.affected_users;
-
-            const orphanBlock = document.getElementById('orphanUsersBlock');
-            if (data.orphan_users > 0) {
-                document.getElementById('impactOrphanCount').textContent = data.orphan_users;
-                document.getElementById('orphanUserListItems').innerHTML = data.users
-                    .filter(u => u.orphan)
-                    .map(u => `<li><strong>${escapeHtml(u.name)}</strong> — ${escapeHtml(u.email)}</li>`)
-                    .join('');
-                orphanBlock.classList.remove('d-none');
-            } else {
-                orphanBlock.classList.add('d-none');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
             }
 
-            roleImpactWarning.classList.remove('d-none');
-        } catch (err) {
-            console.error('[NEXUM_RBAC] Error al obtener impacto del rol:', err);
-            roleImpactWarning.classList.add('d-none');
+            const data = await response.json();
+
+            document.getElementById('impactAffectedCount').textContent =
+                data.affected_users ?? 0;
+
+            const orphanBlock = document.getElementById('orphanUsersBlock');
+            const orphanCount = Number(data.orphan_users ?? 0);
+            const orphanList = document.getElementById('orphanUserListItems');
+
+            if (orphanCount > 0) {
+                document.getElementById('impactOrphanCount').textContent =
+                    orphanCount;
+
+                if (orphanList) {
+                    orphanList.replaceChildren();
+
+                    (Array.isArray(data.users) ? data.users : [])
+                        .filter(user => user.orphan)
+                        .forEach(user => {
+                            const li = document.createElement('li');
+                            const strong = document.createElement('strong');
+
+                            strong.textContent = user.name ?? '';
+                            li.appendChild(strong);
+                            li.appendChild(
+                                document.createTextNode(
+                                    ` — ${user.email ?? ''}`
+                                )
+                            );
+
+                            orphanList.appendChild(li);
+                        });
+                }
+
+                orphanBlock?.classList.remove('d-none');
+            } else {
+                orphanBlock?.classList.add('d-none');
+                orphanList?.replaceChildren();
+            }
+
+            impactWarning?.classList.remove('d-none');
+        } catch (error) {
+            console.error(
+                '[NEXUM_RBAC] Error al consultar el impacto del rol:',
+                error
+            );
+
+            impactWarning?.classList.add('d-none');
         }
     });
 
-    // Envío real del formulario al guardar
-    document.getElementById('btnSubmitRoleStatus')?.addEventListener('click', () => {
-        formRoleStatus.submit();
+    // Enviar actualización del estado.
+    submitButton?.addEventListener('click', () => {
+        const roleId = roleIdInput.value;
+
+        if (!roleId || !/^\d+$/.test(roleId)) {
+            console.error('[NEXUM_RBAC] Falta un ID de rol válido.');
+            return;
+        }
+
+        form.action = `${window.location.origin}/superadmin/roles/status`;
+
+        console.log('[NEXUM_RBAC] Actualizando estado:', {
+            action: form.action,
+            roleId,
+            method: 'PUT'
+        });
+
+        form.requestSubmit();
     });
 }
 
 /**
- * Inicializa el Modal 2: Asignación de Roles por Usuario.
+ * MODAL 2: Asignación de roles por usuario.
  */
 function initUserRolesModal() {
-    const modalUserRolesEl = document.getElementById('modalManageUserRoles');
-    const formUserRoles    = document.getElementById('formUpdateUserRoles');
-    const subtitleEl       = document.getElementById('modalUserRoleSubtitle');
-    const selfRoleWarning  = document.getElementById('selfRoleWarning');
-    const hiddenUserId     = document.getElementById('userIdHiddenInput');
-    const roleCheckboxes   = document.querySelectorAll('.user-role-checkbox');
+    const modalElement = document.getElementById('modalManageUserRoles');
 
-    if (!modalUserRolesEl) return;
+    if (!modalElement) return;
 
-    const bsUserRolesModal = new bootstrap.Modal(modalUserRolesEl);
+    const form = document.getElementById('formUpdateUserRoles');
+    const subtitle = document.getElementById('modalUserRoleSubtitle');
+    const selfRoleWarning = document.getElementById('selfRoleWarning');
+    const userIdInput = document.getElementById('userIdHiddenInput');
+    const submitButton = document.getElementById('btnSubmitUserRoles');
 
-        function lockSuperAdminCheckbox(cb) {
-        cb.checked = true;
-        cb.setAttribute('data-locked', 'true');
-        cb.setAttribute('aria-disabled', 'true');
-        cb.style.pointerEvents = 'none';
-        cb.style.opacity = '0.6';
-        cb.style.cursor = 'not-allowed';
+    if (!form || !userIdInput) {
+        console.error('[NEXUM_RBAC] Faltan elementos del modal de usuarios.');
+        return;
+    }
 
-        // También bloqueamos visualmente el contenedor padre
-        const wrapper = cb.closest('.form-check');
+    const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+
+    /**
+     * Obtiene el prefijo desde Blade.
+     * No utiliza marcadores como __USER_ID__.
+     */
+    function getRoutePrefix() {
+        const prefix = form.dataset.routePrefix;
+
+        if (!prefix) {
+            throw new Error('No existe data-route-prefix en el formulario.');
+        }
+
+        return prefix.replace(/\/+$/, '');
+    }
+
+    /**
+     * Construye la URL utilizando un ID numérico real.
+     */
+    function setUserRolesAction(userId) {
+        if (!userId || !/^\d+$/.test(String(userId))) {
+            throw new Error(`ID de usuario inválido: ${userId}`);
+        }
+
+        const prefix = getRoutePrefix();
+
+        form.action =
+            `${prefix}/${encodeURIComponent(String(userId))}/roles`;
+    }
+
+    /**
+     * Bloquea visualmente el rol SUPER_ADMIN
+     * cuando se está editando la propia cuenta.
+     */
+    function lockSuperAdminCheckbox(checkbox) {
+        checkbox.checked = true;
+        checkbox.dataset.locked = 'true';
+        checkbox.setAttribute('aria-disabled', 'true');
+        checkbox.style.pointerEvents = 'none';
+        checkbox.style.opacity = '0.6';
+        checkbox.style.cursor = 'not-allowed';
+
+        const wrapper = checkbox.closest('.form-check');
+
         if (wrapper) {
             wrapper.classList.add('border-warning-subtle');
             wrapper.style.backgroundColor = '#fffbeb';
@@ -123,117 +252,197 @@ function initUserRolesModal() {
     }
 
     /**
-     * Restaura el checkbox de SUPER_ADMIN a su estado normal.
+     * Restaura el checkbox a su estado normal.
      */
-    function unlockSuperAdminCheckbox(cb) {
-        cb.removeAttribute('data-locked');
-        cb.removeAttribute('aria-disabled');
-        cb.style.pointerEvents = '';
-        cb.style.opacity = '';
-        cb.style.cursor = '';
+    function unlockSuperAdminCheckbox(checkbox) {
+        delete checkbox.dataset.locked;
+        checkbox.removeAttribute('aria-disabled');
+        checkbox.style.pointerEvents = '';
+        checkbox.style.opacity = '';
+        checkbox.style.cursor = '';
 
-        const wrapper = cb.closest('.form-check');
+        const wrapper = checkbox.closest('.form-check');
+
         if (wrapper) {
             wrapper.classList.remove('border-warning-subtle');
             wrapper.style.backgroundColor = '';
         }
     }
-    
+
+    /**
+     * Abre y prepara el modal para el usuario seleccionado.
+     */
     document.addEventListener('click', (event) => {
-        const btn = event.target.closest('.btn-manage-user-roles');
- 
-        if (!btn) return;
+        const button = event.target.closest('.btn-manage-user-roles');
 
-        const { id, name, email, roles, inactiveRoles, isCurrent } = btn.dataset;
-        formUserRoles.action = formUserRoles.dataset.route.replace('__USER_ID__', id);
+        if (!button) return;
 
-        const userRoles = JSON.parse(roles || '[]');
-        const userInactiveRoles = JSON.parse(inactiveRoles || '[]');
+        const {
+            id,
+            name,
+            email,
+            roles,
+            inactiveRoles,
+            isCurrent
+        } = button.dataset;
 
-        // Subtítulo del modal
-        subtitleEl.innerHTML = `Usuario: <strong>${escapeHtml(name)}</strong> (${escapeHtml(email)}) | ID: UMA-${String(id).padStart(5, '0')}`;
+        if (!id || !/^\d+$/.test(id)) {
+            console.error('[NEXUM_RBAC] ID de usuario inválido:', id);
+            return;
+        }
 
-        // Guardar ID de usuario en el hidden input del form
-        if (hiddenUserId) hiddenUserId.value = id;
+        try {
+            setUserRolesAction(id);
+        } catch (error) {
+            console.error('[NEXUM_RBAC] No se pudo construir la ruta:', error);
+            return;
+        }
 
-        //Determinar visibilidad de cada rol
+        const userRoles = parseJsonArray(roles, 'roles del usuario');
+        const userInactiveRoles = parseJsonArray(
+            inactiveRoles,
+            'roles inactivos del usuario'
+        );
+
+        // Guardar el ID real en el formulario.
+        userIdInput.value = id;
+
+        if (subtitle) {
+            subtitle.textContent = '';
+
+            const label = document.createElement('span');
+            label.textContent =
+                `Usuario: ${name || ''} (${email || ''}) | ID: UMA-${String(id).padStart(5, '0')}`;
+
+            subtitle.appendChild(label);
+        }
+
+        // Mostrar roles activos y roles inactivos ya asignados.
         document.querySelectorAll('.role-item').forEach(item => {
-            const roleId     = parseInt(item.dataset.roleId, 10);
-            const isActive   = item.dataset.roleActive === '1';
+            const roleId = Number(item.dataset.roleId);
+            const isActive = item.dataset.roleActive === '1';
+            const isAssignedInactive = userInactiveRoles.some(
+                value => Number(value) === roleId
+            );
 
-            // R1: rol activo → siempre visible
-            // R3: rol reactivado (isActive=1) → vuelve a ser visible para todos
-            if (isActive) {
-                item.classList.remove('d-none');
-                return;
-            }
+            item.classList.toggle(
+                'd-none',
+                !isActive && !isAssignedInactive
+            );
 
-            // R2: rol inactivo → visible SOLO si el usuario lo tiene asignado
-            if (userInactiveRoles.includes(roleId)) {
-                item.classList.remove('d-none');
-            } else {
-                item.classList.add('d-none');
-            }
-        });
+            const checkbox = item.querySelector('.user-role-checkbox');
 
-        // Resetear todos los checkboxes
-        roleCheckboxes.forEach(cb => {
-            cb.checked  = false;
-            unlockSuperAdminCheckbox(cb);
-        });
-
-        // Marcar los roles actuales del usuario
-        userRoles.forEach(roleId => {
-            const cb = document.getElementById(`rol_switch_${roleId}`);
-            if (cb) cb.checked = true;
-        });
-
-        // marca los roles inactivos actuales 
-        userInactiveRoles.forEach(roleId => {
-            const cb = document.getElementById(`rol_switch_${roleId}`);
-            if (cb) {
-                cb.checked = true;
-                // Marcar visualmente que está inactivo pero asignado
-                const wrapper = cb.closest('.role-wrapper');
-                if (wrapper) wrapper.classList.add('border-warning');
+            if (checkbox) {
+                const wrapper = checkbox.closest('.role-wrapper');
+                wrapper?.classList.remove('border-warning');
             }
         });
 
+        // Reiniciar selección y desbloquear controles.
+        form.querySelectorAll('.user-role-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+            unlockSuperAdminCheckbox(checkbox);
+        });
 
-        // Si es el usuario en sesión, proteger SUPER_ADMIN
+        // Marcar roles que el usuario ya tiene asignados.
+        userRoles.forEach(value => {
+            const checkbox = document.getElementById(
+                `rol_switch_${Number(value)}`
+            );
+
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        });
+
+        // Mantener marcados los roles inactivos asignados.
+        userInactiveRoles.forEach(value => {
+            const checkbox = document.getElementById(
+                `rol_switch_${Number(value)}`
+            );
+
+            if (checkbox) {
+                checkbox.checked = true;
+
+                checkbox.closest('.role-wrapper')
+                    ?.classList.add('border-warning');
+            }
+        });
+
+        // Proteger SUPER_ADMIN si es la cuenta actual.
         if (isCurrent === 'true') {
-            selfRoleWarning.classList.remove('d-none');
+            selfRoleWarning?.classList.remove('d-none');
 
-            roleCheckboxes.forEach(cb => {
-                if (cb.dataset.roleName === 'SUPER_ADMIN') {
-                    lockSuperAdminCheckbox(cb);
+            form.querySelectorAll('.user-role-checkbox').forEach(checkbox => {
+                if (checkbox.dataset.roleName === 'SUPER_ADMIN') {
+                    lockSuperAdminCheckbox(checkbox);
                 }
             });
         } else {
-            selfRoleWarning.classList.add('d-none');
+            selfRoleWarning?.classList.add('d-none');
         }
 
-        bsUserRolesModal.show();
-    });
-
-    document.addEventListener('change', (event) => {
-        const cb = event.target.closest('.user-role-checkbox[data-locked="true"]');
-        if (cb && !cb.checked) {
-            cb.checked = true;
-        }
-    });
-
-    // Envío real del formulario
-    document.getElementById('btnSubmitUserRoles')?.addEventListener('click', () => {
-        document.querySelectorAll('.user-role-checkbox[data-locked="true"]').forEach(cb => {
-            cb.checked = true;
+        console.log('[NEXUM_RBAC] Modal de usuario preparado:', {
+            userId: id,
+            action: form.action
         });
-        formUserRoles.submit();
+
+        modal.show();
+    });
+
+    // Evitar que se desmarque el rol protegido.
+    form.addEventListener('change', (event) => {
+        const checkbox = event.target.closest(
+            '.user-role-checkbox[data-locked="true"]'
+        );
+
+        if (checkbox) {
+            checkbox.checked = true;
+        }
+    });
+
+    /**
+     * Envío del formulario de asignación.
+     */
+    submitButton?.addEventListener('click', () => {
+        const userId = userIdInput.value.trim();
+
+        if (!userId || !/^\d+$/.test(userId)) {
+            console.error('[NEXUM_RBAC] ID de usuario inválido:', userId);
+            return;
+        }
+
+        try {
+            // Reconstruir la ruta justo antes del envío.
+            setUserRolesAction(userId);
+        } catch (error) {
+            console.error('[NEXUM_RBAC] Error de ruta:', error);
+            return;
+        }
+
+        // Los checkboxes deshabilitados no se envían.
+        // Por eso se mantienen marcados, sin usar disabled.
+        form.querySelectorAll(
+            '.user-role-checkbox[data-locked="true"]'
+        ).forEach(checkbox => {
+            checkbox.checked = true;
+        });
+
+        console.log('[NEXUM_RBAC] Enviando asignación de roles:', {
+            action: form.action,
+            userId,
+            method: 'PUT',
+            roles: Array.from(
+                form.querySelectorAll('.user-role-checkbox:checked')
+            ).map(checkbox => checkbox.value)
+        });
+
+        form.requestSubmit();
     });
 }
 
 /**
- * Punto de entrada: inicializa ambos modales cuando el DOM está listo.
+ * Inicialización de los modales.
  */
 document.addEventListener('DOMContentLoaded', () => {
     initRoleStatusModal();

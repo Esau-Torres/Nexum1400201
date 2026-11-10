@@ -142,7 +142,7 @@
                                     <!-- OBSERVACIONES -->
                                     <td class="responsive-td mobile-spacer" width="55%" valign="top">
                                         <div class="box-observaciones" style="border: 1px solid #000; padding: 8px; font-size: 11px; text-align: left; margin-right: 15px; box-sizing: border-box;">
-                                            <strong>Operación:</strong> Contado - {{ $metodoPago }}<br><br>
+                                            <strong>Operación:</strong> {{ $metodoPago }}<br><br>
                                             <strong>Facturador:</strong> {{ strtoupper($nombreCajero) }}<br><br>
                                             <strong>Observaciones:</strong> Comprobante generado electrónicamente. Válido para trámites internos.
                                         </div>

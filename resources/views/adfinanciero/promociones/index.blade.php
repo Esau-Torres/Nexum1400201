@@ -6,7 +6,7 @@
     <!-- Encabezado de la página -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold text-dark mb-0">Gestión de promociones</h2>
+            <h2 class="fw-bold text-dark mb-0">GESTIÓN DE PROMOCIONES</h2>
             <span class="text-muted">Configuración de descuentos por pronto pago, becas y beneficios especiales</span>
         </div>
         <!-- Botón para abrir Modal de Nueva Promoción -->

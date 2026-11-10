@@ -5,7 +5,13 @@ use App\Http\Controllers\Estudiante\registroController;
 use App\Http\Controllers\Users\homeController;
 use App\Http\Controllers\Adfinanciero\AdminfinancieroController;
 use App\Http\Controllers\Cajero\CajeroController;
+use App\Http\Controllers\Directivo\DirectivoController;
+use App\Http\Controllers\Estudiante\CarnetController;
+use App\Http\Controllers\Estudiante\FotoPerfilController;
 
+// ============================================
+// RUTAS PÚBLICAS
+// ============================================
 Route::view('/about', 'about')->name('about');
 
 Route::get('/', function () {
@@ -13,77 +19,43 @@ Route::get('/', function () {
 });
 
 Route::get('/register', [registroController::class, 'index'])->name('register');
-//Route::get('/carreras', [registroController::class, 'carrera'])->name('carreras');
 
-// Rutas protegidas por autenticación y verificación de correo electrónico
-
+// ============================================
+// RUTAS PROTEGIDAS (Auth + Verified)
+// ============================================
 Route::middleware(['auth', 'verified'])->group(function () {
 
-
+    // Rutas comunes
     Route::get('/home', [homeController::class, 'index'])->name('home');
 
-    Route::get('/profile', function () {
-        return view('profile');
-    })->name('profile');
+    // estudiante
+    Route::get('/profile', function () { $user = auth()->user();
+        if ($user->alumno) {
+            $user->alumno->load('documentos', 'carrera.facultad');
+        }
+        return view('profile'); })->name('profile');
+    Route::get('/mi-foto', [FotoPerfilController::class, 'show'])->name('estudiante.foto');
+    Route::post('/profile/carnet', [CarnetController::class, 'store'])->name('estudiante.carnet.store');
 
-    // Ruta de prueba para ver el layout
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
 
-// Rutas de Docente
-    Route::get('/home-docente', function () {
-        return view('docente.home_docente');
-    })->name('home.docente');
-
-    Route::get('/prueba-notas', function () {
-        return view('docente.prueba-notas');
-    })->name('prueba.notas');
-
-    Route::get('/materias-docente', function () {
-        return view('docente.materias_docente');
-    })->name('docente.materias');
-
-    Route::get('/notas/{materiaId}', function ($materiaId) {
-        // Futuro: Aquí buscarás la materia en la BD por ID
-        // y pasarás los datos a la vista
-        return view('docente.notas_materia', [
-            'materiaId' => $materiaId
-        ]);
-    })->name('docente.notas');
-
-    Route::get('/asistencia/{materiaId}', function ($materiaId) {
-        // Futuro: Aquí buscarás la materia en la BD por ID
-        // y pasarás los datos a la vista
-        return view('docente.asistencia_materia', [
-            'materiaId' => $materiaId
-        ]);
-    })->name('docente.asistencia');
-
+    // ============================================
+    // RUTAS ADMIN FINANCIERO
+    // ============================================
     Route::prefix('adfinanciero')->group(function () {
-
-        // URL: nexum.test/adfinanciero/conceptospagos
         Route::get('/conceptospagos', [AdminfinancieroController::class, 'conceptosIndex'])->name('adfinanciero.conceptospagos.index');
-
-        //modal de actualizacion de editar en concepto pago
         Route::put('/conceptospagos/{id}', [AdminfinancieroController::class, 'update'])->name('adfinanciero.conceptospagos.update');
-
-        //modal para nuevo concepto
         Route::post('/conceptospagos', [AdminfinancieroController::class, 'store'])->name('adfinanciero.conceptospagos.store');
 
-        //rutas para ciclos y aranceles
         Route::get('/ciclosarancel', [AdminfinancieroController::class, 'ciclosIndex'])->name('adfinanciero.ciclosarancel.index');
-
         Route::post('/ciclosarancel', [AdminfinancieroController::class, 'ciclosStore'])->name('adfinanciero.ciclosarancel.store');
-
         Route::put('/ciclosarancel/{id}', [AdminfinancieroController::class, 'ciclosUpdate'])->name('adfinanciero.ciclosarancel.update');
 
-        // Gestión de Promociones
-        Route::get('/adfinanciero/promociones', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'promocionesIndex'])->name('adfinanciero.promociones.index');
-
-        Route::post('/adfinanciero/promociones', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'promocionesStore'])->name('adfinanciero.promociones.store');
-
-        Route::put('/adfinanciero/promociones/{id}', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'promocionesUpdate'])->name('adfinanciero.promociones.update');
+        Route::get('/adfinanciero/promociones', [AdminfinancieroController::class, 'promocionesIndex'])->name('adfinanciero.promociones.index');
+        Route::post('/adfinanciero/promociones', [AdminfinancieroController::class, 'promocionesStore'])->name('adfinanciero.promociones.store');
+        Route::put('/adfinanciero/promociones/{id}', [AdminfinancieroController::class, 'promocionesUpdate'])->name('adfinanciero.promociones.update');
 
         // Gestion Cargos estudiantiles
         Route::get('/adfinanciero/cargosestudiante', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'cargosIndex'])->name('adfinanciero.cargos.index');
@@ -92,35 +64,43 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::put('/adfinanciero/cargosestudiante/{id}/estado', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'cargosUpdateEstado'])->name('adfinanciero.cargos.updateEstado');
 
+        //nuevas rutas
+        // NUEVA RUTA: Vista para crear un cargo manual
+        Route::get('/adfinanciero/cargosestudiante/nuevo', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'cargosCreate'])->name('adfinanciero.cargos.create');
+
+        // NUEVA RUTA: Guardar el cargo y calcular el beneficio
+        Route::post('/adfinanciero/cargosestudiante/guardar', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'cargosStore'])->name('adfinanciero.cargos.store');
+
         // Gestion de pagos y reportes
-        // Dashboard Financiero y Auditoría (Solo Lectura)
+        // (Solo Lectura)
         Route::get('/adfinanciero/reportes', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'reportesIndex'])->name('adfinanciero.reportes.index');
 
-        // Reglas pagos
-        Route::get('/reglas-pago', [App\Http\Controllers\Reglaspago\ReglasController::class, 'index'])->name('reglas.index');
-        // Ruta para guardar (Crear)
+        Route::get('/reglas-pago', [\App\Http\Controllers\Reglaspago\ReglasController::class, 'index'])->name('reglas.index');
         Route::post('/adfinanciero/reglas-pago', [\App\Http\Controllers\Reglaspago\ReglasController::class, 'store'])->name('reglas.store');
-        // Ruta para actualizar (Editar)
         Route::put('/adfinanciero/reglas-pago/{id}', [\App\Http\Controllers\Reglaspago\ReglasController::class, 'update'])->name('reglas.update');
+
+        Route::post('/adfinanciero/cargosestudiante/pagar', [\App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'procesarPagoEnLinea'])->name('adfinanciero.cargos.pagar');
+
+        Route::post('/adfinanciero/cargos/store-masivo', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'cargosStoreMasivo'])->name('adfinanciero.cargos.storeMasivo');
     });
 
-
+    // MODULO CAJERO
     Route::prefix('cajero')->group(function () {
+        Route::get('/deuda', [CajeroController::class, 'deudaIndex'])->name('cajero.deuda.index');
+        Route::put('/deuda/{id}/liquidar', [CajeroController::class, 'deudaLiquidar'])->name('cajero.deuda.liquidar');
 
-        Route::get('/deuda', [App\Http\Controllers\Cajero\CajeroController::class, 'deudaIndex'])->name('cajero.deuda.index');
-        Route::put('/deuda/{id}/liquidar', [App\Http\Controllers\Cajero\CajeroController::class, 'deudaLiquidar'])->name('cajero.deuda.liquidar');
+        Route::get('/cajero/ventanilla', [CajeroController::class, 'indexVentanilla'])->name('cajero.ventanilla.index');
+        Route::get('/ventanilla', [CajeroController::class, 'indexVentanilla'])->name('cajero.ventanilla.index');
 
-        //consulta de aranceles para el cajero
-        Route::get('/cajero/ventanilla', [\App\Http\Controllers\Cajero\CajeroController::class, 'indexVentanilla'])->name('cajero.ventanilla.index');
-        Route::get('/ventanilla', [\App\Http\Controllers\Cajero\CajeroController::class, 'indexVentanilla'])->name('cajero.ventanilla.index');
-
-        //promociones cajero
-        Route::get('/promociones', [\App\Http\Controllers\Cajero\CajeroController::class, 'promociones'])->name('cajero.promociones.index');
+        Route::get('/promociones', [CajeroController::class, 'promociones'])->name('cajero.promociones.index');
 
         // En routes/cajero.php (o web.php)
         Route::get('/cajero/pagos/nuevo', [\App\Http\Controllers\Cajero\CajeroController::class, 'crearPago'])->name('cajero.pagos.create');
         Route::post('/cajero/pagos/guardar', [\App\Http\Controllers\Cajero\CajeroController::class, 'guardarPago'])->name('cajero.pagos.store');
+
+
+        Route::get('/api/verificar-alumno/{carnet}', [App\Http\Controllers\Cajero\CajeroController::class, 'verificarAlumnoAPI'])->name('cajero.api.verificar');
     });
 
-
+    require __DIR__.'/modules/directivo.php';
 });

@@ -6,7 +6,7 @@
     <!-- Encabezado y botón de Crear -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-0">Ciclos y Aranceles</h2>
+            <h2 class="fw-bold mb-0">CICLOS Y ARANCELES</h2>
             <p class="text-muted">Configuración de ventanas de pago ordinarias y recargos por mora extemporánea.</p>
         </div>
         <div>

@@ -6,7 +6,7 @@
     <!-- Encabezado y botón de Crear -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-0">Gestión de aranceles</h2>
+            <h2 class="fw-bold mb-0">GESTIÓN DE ARANCELES</h2>
             <p class="text-muted">Administración de aranceles</p>
         </div>
         <div>
