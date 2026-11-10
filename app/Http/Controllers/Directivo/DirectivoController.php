@@ -250,62 +250,67 @@ class DirectivoController extends Controller
         // 3. INDICADORES: CICLO ACTIVO VS CICLO CERRADO
         // ---------------------------------------------------------
 
-        // Verificamos si el ciclo seleccionado actualmente está ACTIVO
-        $cicloActualObj = DB::table('ciclo_lectivo')->where('ciclo_lectivo_id', $cicloId)->first();
-        $esCicloActivo = ($cicloActualObj && $cicloActualObj->estado === 'ACTIVO');
+         // A) Estudiantes de Nuevo Ingreso (Tarjeta 2) - Se calcula para TODOS los ciclos
+        $nuevoIngreso = (clone $queryBase)
+            ->whereNotExists(function ($query) use ($cicloId) {
+                $query->select(DB::raw(1))
+                    ->from('inscripciones as i2')
+                    ->whereColumn('i2.id_alumno', 'inscripciones.id_alumno')
+                    ->where('i2.id_ciclo_lectivo', '<', $cicloId);
+            })
+            ->distinct('inscripciones.id_alumno')
+            ->count('inscripciones.id_alumno');
 
-        $nuevoIngreso = 0;
-        $alumnosRetenidos = 0;
-        $estudiantesActivos = 0;
-        $estudiantesInactivos = 0;
+         // B) Alumnos que continúan / Antiguo Ingreso (Tarjeta 3) - Se calcula para TODOS los ciclos
+        $alumnosRetenidos = $totalMatriculados - $nuevoIngreso;
+
+         // C) Variación vs ciclo anterior (Tarjeta 1) - Se calcula para TODOS los ciclos
         $varMatricula = '0.0%';
+        $cicloAnterior = DB::table('ciclo_lectivo')
+            ->where('ciclo_lectivo_id', '<', $cicloId)
+            ->orderByDesc('ciclo_lectivo_id')
+            ->first();
 
-        // Si el ciclo está ACTIVO, calculamos todos los resultados normales
-        if ($esCicloActivo) {
+         if ($cicloAnterior) {
+            $queryAnterior = DB::table('inscripciones')
+                ->join('alumnos', 'inscripciones.id_alumno', '=', 'alumnos.alumno_id')
+                ->leftJoin('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id')
+                ->where('inscripciones.id_ciclo_lectivo', $cicloAnterior->ciclo_lectivo_id);
 
-            // A) Estudiantes de Nuevo Ingreso (Tarjeta 2)
-            $nuevoIngreso = (clone $queryBase)
-                ->whereNotExists(function ($query) use ($cicloId) {
-                    $query->select(DB::raw(1))
-                        ->from('inscripciones as i2')
-                        ->whereColumn('i2.id_alumno', 'inscripciones.id_alumno')
-                        ->where('i2.id_ciclo_lectivo', '<', $cicloId);
-                })
-                ->distinct('inscripciones.id_alumno')
-                ->count('inscripciones.id_alumno');
+             if ($facultadId) $queryAnterior->where('carreras.id_facultad', $facultadId);
+            if ($carreraId) $queryAnterior->where('alumnos.id_carrera', $carreraId);
 
-            // B) Alumnos que continúan / Antiguo Ingreso (Tarjeta 3)
-            $alumnosRetenidos = $totalMatriculados - $nuevoIngreso;
+             $matriculaAnterior = (clone $queryAnterior)->distinct('inscripciones.id_alumno')->count('inscripciones.id_alumno');
 
-            // C) Variación vs ciclo anterior (Tarjeta 1)
-            $cicloAnterior = DB::table('ciclo_lectivo')
-                ->where('ciclo_lectivo_id', '<', $cicloId)
-                ->orderByDesc('ciclo_lectivo_id')
-                ->first();
-
-            if ($cicloAnterior) {
-                $queryAnterior = DB::table('inscripciones')
-                    ->join('alumnos', 'inscripciones.id_alumno', '=', 'alumnos.alumno_id')
-                    ->leftJoin('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id')
-                    ->where('inscripciones.id_ciclo_lectivo', $cicloAnterior->ciclo_lectivo_id);
-
-                if ($facultadId) $queryAnterior->where('carreras.id_facultad', $facultadId);
-                if ($carreraId) $queryAnterior->where('alumnos.id_carrera', $carreraId);
-
-                $matriculaAnterior = (clone $queryAnterior)->distinct('inscripciones.id_alumno')->count('inscripciones.id_alumno');
-
-                if ($matriculaAnterior > 0) {
-                    $porcentaje = (($totalMatriculados - $matriculaAnterior) / $matriculaAnterior) * 100;
-                    $signo = $porcentaje > 0 ? '+' : '';
-                    $varMatricula = $signo . number_format($porcentaje, 1) . '%';
-                }
+             if ($matriculaAnterior > 0) {
+                $porcentaje = (($totalMatriculados - $matriculaAnterior) / $matriculaAnterior) * 100;
+                $signo = $porcentaje > 0 ? '+' : '';
+                $varMatricula = $signo . number_format($porcentaje, 1) . '%';
             }
+        }
 
-            // D) Estudiantes Activos e Inactivos (Tarjetas 4 y 5)
+         // D) Estudiantes Activos e Inactivos (Tarjetas 4 y 5) Cambio
+        $cicloActualObj = DB::table('ciclo_lectivo')->where('ciclo_lectivo_id', $cicloId)->first();
+
+         // Verificamos si el ciclo está en cualquiera de los estados "vivos" (no cerrado)
+        $estadosVivos = ['CONFIGURACION', 'MATRICULA_ABIERTA', 'ACTIVO'];
+        $esCicloVivo = ($cicloActualObj && in_array($cicloActualObj->estado, $estadosVivos));
+
+         $estudiantesActivos = (clone $queryBase)
+            ->where('alumnos.estado_carrera', 'ACTIVO')
+            ->distinct('inscripciones.id_alumno')
+            ->count('inscripciones.id_alumno');
+
+        $estudiantesInactivos = (clone $queryBase)
+            ->where('alumnos.estado_carrera', 'INACTIVO')
+            ->distinct('inscripciones.id_alumno')
+            ->count('inscripciones.id_alumno');
+
+         if ($esCicloVivo) {
             $queryAlumnos = DB::table('alumnos')
                 ->leftJoin('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id');
 
-            if ($facultadId) {
+             if ($facultadId) {
                 $queryAlumnos->where('carreras.id_facultad', $facultadId);
             }
             if ($carreraId) {
@@ -315,10 +320,9 @@ class DirectivoController extends Controller
             $estudiantesActivos = (clone $queryAlumnos)->where('alumnos.estado_carrera', 'ACTIVO')->count();
             $estudiantesInactivos = (clone $queryAlumnos)->where('alumnos.estado_carrera', 'INACTIVO')->count();
         }
-        // Si el ciclo NO está activo (está cerrado), todas estas variables se quedan en 0 automáticamente.
 
 
-        // ---------------------------------------------------------
+      // ---------------------------------------------------------
         // 4. AGRUPACIONES POR CARRERA Y FACULTAD (CON ABREVIATURAS)
         // ---------------------------------------------------------
         $abreviaturasCarrera = [
