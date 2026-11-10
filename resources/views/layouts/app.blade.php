@@ -20,7 +20,7 @@
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
     @vite(['resources/css/app.css','resources/css/toast.css' , 'resources/js/app.js'])
     @endif
-    @stack('styles') 
+    @stack('styles')
 </head>
 
 <body class="bg-light">
@@ -302,6 +302,44 @@
                                 <div>
                                     <div class="fw-medium">Recursos</div>
                                     <div class="nav-text-secondary">Bibliográficos</div>
+                                </div>
+                            </a>
+                        </li>
+                    @endif
+
+                    {{-- ============================================================ --}}
+                    {{-- DIRECTIVO --}}
+                    {{-- ============================================================ --}}
+                    @if(auth()->user()->hasRole('DIRECTIVO'))
+                        <!-- Botón 1: Panel Directivo (Financiero) -->
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('directivo.dashboard.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('directivo.dashboard.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-chart-pie nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Dashboard financiero</div>
+                                    <div class="nav-text-secondary">Métricas y estadísticas</div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <!-- Botón 3: mora (Académico) -->
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('directivo.morosidad.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('directivo.morosidad.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Morosidad y Cuentas</div>
+                                    <div class="nav-text-secondary">Cobros y deuda estudiantil</div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <!-- Botón 2: Matrícula y Deserción (Académico) -->
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('directivo.matricula.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('directivo.matricula.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-user-graduate nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Dashboard academico</div>
+                                    <div class="nav-text-secondary">Población y retención</div>
                                 </div>
                             </a>
                         </li>

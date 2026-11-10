@@ -35,7 +35,7 @@ const nexumDataTableDefaults = {
 initComplete: function () {
     const container = this.api().table().container();
     const filter = container.querySelector('.dataTables_filter, .dt-search');
-    
+
     if (filter) {
         const label = filter.querySelector('label');
         if (label) {
@@ -46,7 +46,7 @@ initComplete: function () {
                 }
             });
         }
-        
+
         // Asegura que el input conserve el placeholder
         const input = filter.querySelector('input');
         if (input && !input.getAttribute('placeholder')) {
@@ -69,10 +69,10 @@ function initTable(selector, overrides = {}) {
 
     // 1. Definimos una regla segura: si falta una celda/dato, usa una cadena vacía
     const safeColumnDef = { targets: '_all', defaultContent: '' };
-    
+
     // 2. Extraemos los columnDefs del override (si existen) y el resto de propiedades
     const { columnDefs: overrideColumnDefs = [], ...restOverrides } = overrides;
-    
+
     return new DataTable(el, {
         ...nexumDataTableDefaults,
         ...restOverrides,
@@ -83,9 +83,9 @@ function initTable(selector, overrides = {}) {
 document.addEventListener('DOMContentLoaded', function () {
     initTable('#usersTable', { columnDefs: [{ orderable: false, targets: 5 }] });
     initTable('#tabla-solicitudes', { columnDefs: [{ orderable: false, targets: [0, 4] }] }); // es este mero
-    initTable('#rolesTable', { 
+    initTable('#rolesTable', {
         ...nexumDataTableRoles,
-        columnDefs: [{ orderable: false, targets: 3 }] 
+        columnDefs: [{ orderable: false, targets: 3 }]
     });
     initTable('#modify-student-Table', { columnDefs: [{ orderable: false, targets: 5}] });
     initTable('#usersAssignTable', { columnDefs: [{ orderable: false, targets: 4 }] });
@@ -106,4 +106,6 @@ document.addEventListener('DOMContentLoaded', function () {
     initTable('#tableHistoricos', { columnDefs: [{ orderable: false, targets: 7}] });
     initTable('#tableregistroegreso', { columnDefs: [{ orderable: false, targets: 4}] });
     initTable('#tableprocesograduado2', { columnDefs: [{ orderable: false, targets: 8}] });
+    initTable('#tablaMorosos', { order: [[3, 'desc']], columnDefs: [{ orderable: false, targets: 4 }] });
 });
+

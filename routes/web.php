@@ -5,6 +5,7 @@ use App\Http\Controllers\Estudiante\registroController;
 use App\Http\Controllers\Users\homeController;
 use App\Http\Controllers\Adfinanciero\AdminfinancieroController;
 use App\Http\Controllers\Cajero\CajeroController;
+use App\Http\Controllers\Directivo\DirectivoController;
 use App\Http\Controllers\Estudiante\CarnetController;
 use App\Http\Controllers\Estudiante\FotoPerfilController;
 
@@ -27,7 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Rutas comunes
     Route::get('/home', [homeController::class, 'index'])->name('home');
 
-    // estudiante 
+    // estudiante
     Route::get('/profile', function () { $user = auth()->user();
         if ($user->alumno) {
             $user->alumno->load('documentos', 'carrera.facultad');
@@ -83,9 +84,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/adfinanciero/cargos/store-masivo', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'cargosStoreMasivo'])->name('adfinanciero.cargos.storeMasivo');
     });
 
-    // ============================================
-    // RUTAS CAJERO
-    // ============================================
+    // MODULO CAJERO
     Route::prefix('cajero')->group(function () {
         Route::get('/deuda', [CajeroController::class, 'deudaIndex'])->name('cajero.deuda.index');
         Route::put('/deuda/{id}/liquidar', [CajeroController::class, 'deudaLiquidar'])->name('cajero.deuda.liquidar');
@@ -102,4 +101,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/api/verificar-alumno/{carnet}', [App\Http\Controllers\Cajero\CajeroController::class, 'verificarAlumnoAPI'])->name('cajero.api.verificar');
     });
+
+    require __DIR__.'/modules/directivo.php';
 });
