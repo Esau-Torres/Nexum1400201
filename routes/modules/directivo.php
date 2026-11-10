@@ -14,6 +14,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         //dashboard de matricula
         Route::get('/matricula', [DirectivoController::class, 'matricula'])->name('directivo.matricula.index');
 
+        //dashboard de morosidad
+        Route::get('/morosidad', [App\Http\Controllers\Directivo\DirectivoController::class, 'morosidad'])->name('directivo.morosidad.index');
+
     });
 });
 

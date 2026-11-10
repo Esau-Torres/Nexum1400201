@@ -391,13 +391,8 @@ document.addEventListener("DOMContentLoaded", function() {
             let porcentaje = totalFacultades > 0 ? ((monto / totalFacultades) * 100).toFixed(1) : 0;
             let montoFormateado = monto.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-            let prefijo = "";
-            if (labelsFacultad.length > 1) {
-                if (index === 0) prefijo = "⬆️ Mayor: ";
-                else if (index === labelsFacultad.length - 1) prefijo = "⬇️ Menor: ";
-            }
-
-            return `${prefijo}${nombre} - $${montoFormateado} (${porcentaje}%)`;
+            // Retornamos directamente el texto limpio, con el símbolo de dólar pegado al monto
+            return `${nombre} - $${montoFormateado} (${porcentaje}%)`;
         });
 
         new Chart(document.getElementById('chartFacultades'), {

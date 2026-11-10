@@ -20,7 +20,7 @@
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
     @vite(['resources/css/app.css','resources/css/toast.css' , 'resources/js/app.js'])
     @endif
-    @stack('styles') 
+    @stack('styles')
 </head>
 
 <body class="bg-light">
@@ -300,6 +300,17 @@
                                 <div>
                                     <div class="fw-medium">Dashboard financiero</div>
                                     <div class="nav-text-secondary">Métricas y estadísticas</div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <!-- Botón 3: mora (Académico) -->
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('directivo.morosidad.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('directivo.morosidad.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Morosidad y Cuentas</div>
+                                    <div class="nav-text-secondary">Cobros y deuda estudiantil</div>
                                 </div>
                             </a>
                         </li>
