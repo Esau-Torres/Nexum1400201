@@ -12,7 +12,7 @@
                 <i class="bi bi-mortarboard-fill fs-4 text-danger"></i>
             </div>
             <div class="px-3">
-                <h2 class="h4 fw-bold mb-0">Proceso de Graduación</h2>
+                <h2 class="h4 fw-bold mb-0">PROCESO DE GRADUACIÓN</h2>
                 <p class="text-muted mb-0 small">Gestión de tesis y cursos de pre-especialización.</p>
             </div>
         </div>
@@ -98,8 +98,8 @@
 
             {{-- Tabla activos --}}
             <div class="card border-0 shadow-sm">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                <div>
+                    <table class="table table-hover align-middle mb-0" id="tableprocesograduado2">
                         <thead class="table-light">
                             <tr>
                                 <th>Carnet</th>
@@ -161,6 +161,7 @@
                                                     data-estado="{{ $p->estado_proceso->value }}"
                                                     data-estado-label="{{ $p->estado_proceso->label() }}"
                                                     data-intentos="{{ $p->intentos_defensa }}"
+                                                    data-nota="{{ $p->nota_defensa }}"
                                                     data-estado-url="{{ route('admin-academico.graduacion.cambiar-estado', $p->proceso_id) }}">
                                                 <i class="bi bi-arrow-repeat"></i> Estado
                                             </button>
@@ -206,8 +207,8 @@
             </div>
 
             <div class="card border-0 shadow-sm">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                <div>
+                    <table class="table table-hover align-middle mb-0" id="tableregistroegreso">
                         <thead class="table-light">
                             <tr>
                                 <th>Carnet</th>
@@ -294,8 +295,8 @@
             </div>
 
             <div class="card border-0 shadow-sm">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                <div>
+                    <table class="table table-hover align-middle mb-0" id="tableHistoricos">
                         <thead class="table-light">
                             <tr>
                                 <th>Carnet</th>
@@ -704,6 +705,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let modalidadActual = null;
     let estadoActual    = null;
     let intentosActual  = 0;
+    let notaActual = null;
 
     if (modalEstado && formEstado) {
         modalEstado.addEventListener('show.bs.modal', function (event) {
@@ -714,6 +716,7 @@ document.addEventListener('DOMContentLoaded', function () {
             modalidadActual = btn.getAttribute('data-modalidad');
             estadoActual    = btn.getAttribute('data-estado');
             intentosActual  = parseInt(btn.getAttribute('data-intentos') || '0');
+            notaActual      = btn.getAttribute('data-nota');
 
             document.getElementById('eActual').textContent = btn.getAttribute('data-estado-label');
             formEstado.action = btn.getAttribute('data-estado-url');
@@ -755,13 +758,33 @@ document.addEventListener('DOMContentLoaded', function () {
                     eAvisoFlujo.className = 'alert alert-danger border-0 small mb-0';
                     eAvisoFlujo.innerHTML = `
                         <i class="bi bi-x-circle-fill me-1"></i>
-                        <strong>Proceso cerrado.</strong> El alumno reprobó dos veces.
+                        <strong>Proceso cerrado.</strong>
+                        El alumno reprobó dos veces${notaActual ? ` (última nota: ${notaActual})` : ''}.
                         Debe iniciar un nuevo proceso desde cero.
                     `;
                     return;
                 }
 
+                // Primera reprobación → permitir EN_DEFENSA con aviso según modalidad
                 eSelect.disabled = false;
+
+                if (modalidadActual === 'PRE_ESPECIALIZACION') {
+                    eAvisoFlujo.className = 'alert alert-warning border-0 small mb-0';
+                    eAvisoFlujo.innerHTML = `
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <strong>Primera reprobación (Pre-especialización).</strong>
+                        El alumno debe cancelar el arancel <strong>TRA-017</strong> (Examen de Suficiencia, $100)
+                        para presentar la recuperación en EN_DEFENSA.
+                    `;
+                } else {
+                    eAvisoFlujo.className = 'alert alert-warning border-0 small mb-0';
+                    eAvisoFlujo.innerHTML = `
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <strong>Primera reprobación (Tesis).</strong>
+                        El alumno tiene derecho a una segunda convocatoria.
+                        Al pasar a EN_DEFENSA se reprograma la defensa.
+                    `;
+                }
                 actualizarAvisoFlujo('');
                 return;
             }
@@ -846,35 +869,85 @@ document.addEventListener('DOMContentLoaded', function () {
         let mensaje = '';
 
         if (valor === 'EN_DESARROLLO') {
-            mensaje = `
-                <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                <strong>Validaciones:</strong>
-                <ul class="mb-0 ps-3 mt-1">
-                    <li>Arancel de entrega/revisión de anteproyecto pagado.</li>
-                </ul>
-            `;
+            if (modalidadActual === 'PRE_ESPECIALIZACION') {
+                mensaje = `
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <strong>Validaciones al pasar a EN_DESARROLLO (Pre-especialización):</strong>
+                    <ul class="mb-0 ps-3 mt-1">
+                        <li>Arancel de matrícula <strong>PRE-001</strong> pagado.</li>
+                    </ul>
+                `;
+            } else {
+                mensaje = `
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <strong>Validaciones al pasar a EN_DESARROLLO (Tesis):</strong>
+                    <ul class="mb-0 ps-3 mt-1">
+                        <li>Arancel de entrega/revisión de anteproyecto pagado.</li>
+                    </ul>
+                `;
+            }
         } else if (valor === 'EN_DEFENSA') {
-            mensaje = `
-                <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                <strong>Validaciones:</strong>
-                <ul class="mb-0 ps-3 mt-1">
-                    <li>12 cuotas de asesoría pagadas.</li>
-                    <li>Arancel de revisión de tesis pagado.</li>
-                    <li>Arancel de defensa pagado.</li>
-                </ul>
-            `;
+            if (estadoActual === 'REPROBADO') {
+                if (modalidadActual === 'PRE_ESPECIALIZACION') {
+                    mensaje = `
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <strong>Recuperación de pre-especialización:</strong>
+                        <ul class="mb-0 ps-3 mt-1">
+                            <li>Arancel <strong>TRA-017</strong> (Examen de Suficiencia, $100) pagado.</li>
+                        </ul>
+                    `;
+                } else {
+                    mensaje = `
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <strong>Segunda convocatoria de tesis:</strong>
+                        <ul class="mb-0 ps-3 mt-1">
+                            <li>El alumno ya tiene derecho a esta segunda oportunidad.</li>
+                        </ul>
+                    `;
+                }
+            } else {
+                if (modalidadActual === 'PRE_ESPECIALIZACION') {
+                    mensaje = `
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <strong>Validaciones al pasar a EN_DEFENSA (Pre-especialización):</strong>
+                        <ul class="mb-0 ps-3 mt-1">
+                            <li>12 mensualidades <strong>PRE-002</strong> pagadas.</li>
+                        </ul>
+                    `;
+                } else {
+                    mensaje = `
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <strong>Validaciones al pasar a EN_DEFENSA (Tesis):</strong>
+                        <ul class="mb-0 ps-3 mt-1">
+                            <li>12 cuotas de asesoría pagadas.</li>
+                            <li>Arancel de revisión de tesis pagado.</li>
+                            <li>Arancel de defensa pagado.</li>
+                        </ul>
+                    `;
+                }
+            }
         } else if (valor === 'APROBADO') {
             mensaje = `<i class="bi bi-info-circle me-1"></i>Ingresa una nota entre <strong>6.0 y 10.0</strong> para aprobar.`;
         } else if (valor === 'REPROBADO') {
             mensaje = `<i class="bi bi-info-circle me-1"></i>Ingresa una nota <strong>menor a 6.0</strong> para reprobar.`;
         } else if (valor === 'GRADUADO') {
-            mensaje = `
-                <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                <strong>Validaciones:</strong>
-                <ul class="mb-0 ps-3 mt-1">
-                    <li>Arancel de derechos de grado pagado.</li>
-                </ul>
-            `;
+            if (modalidadActual === 'PRE_ESPECIALIZACION') {
+                mensaje = `
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <strong>Validaciones al pasar a GRADUADO (Pre-especialización):</strong>
+                    <ul class="mb-0 ps-3 mt-1">
+                        <li>Arancel de derechos de grado <strong>PRE-003</strong> pagado.</li>
+                    </ul>
+                `;
+            } else {
+                mensaje = `
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <strong>Validaciones al pasar a GRADUADO (Tesis):</strong>
+                    <ul class="mb-0 ps-3 mt-1">
+                        <li>Arancel de derechos de grado pagado.</li>
+                    </ul>
+                `;
+            }
         } else {
             mensaje = `<i class="bi bi-info-circle me-1"></i>Flujo: <strong>INSCRITO → EN_DESARROLLO → EN_DEFENSA → APROBADO → GRADUADO</strong>.`;
         }
@@ -959,8 +1032,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         row.innerHTML = `
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div>
-                                    <span class="badge ${p.modalidad_badge} me-1">${p.modalidad}</span>
-                                    <span class="badge ${p.estado_badge}">${p.estado}</span>
+                                    <span class="badge bg-info ${p.modalidad_badge} me-1">${p.modalidad}</span>
+                                    <span class="badge bg-info ${p.estado_badge}">${p.estado}</span>
                                     ${p.es_activo ? '<span class="badge bg-success ms-1">Activo</span>' : '<span class="badge bg-secondary ms-1">Histórico</span>'}
                                 </div>
                                 <small class="text-muted">Intento #${idx + 1}</small>

@@ -59,6 +59,7 @@ class ProcesoGraduacionController extends Controller
         $egresadosSinProceso = Alumnos::with(['usuario', 'carrera'])
             ->whereHas('requisitosEgreso', fn ($q) => $q->where('estado_egreso', 'EGRESADO'))
             ->whereDoesntHave('procesosGraduacion', fn ($q) => $q->where('es_activo', true))
+            ->whereDoesntHave('procesosGraduacion', fn ($q) => $q->where('estado_proceso', 'GRADUADO'))
             ->orderBy('codigo_estudiante')
             ->get();
 

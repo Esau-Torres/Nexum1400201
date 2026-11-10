@@ -353,7 +353,6 @@
                     {{-- ADMIN_FINANCIERO --}}
                     {{-- ============================================================ --}}
                     @if(auth()->user()->hasRole('ADMIN_FINANCIERO'))
-                        <p class="p-1 text-muted small ">VISTAS DE FINANCIERA <i class="fa-solid fa-arrow-down nav-icon  me-3 text-muted small"></i></p>
                         <li class="nav-item mb-1">
                             <a href="{{ route('adfinanciero.conceptospagos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('adfinanciero.conceptospagos.*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-tags nav-icon fs-5 me-3 text-muted"></i>
@@ -398,7 +397,6 @@
                     {{-- CAJERO --}}
                     {{-- ============================================================ --}}
                     @if(auth()->user()->hasRole('CAJERO'))
-                    <p class="p-1 text-muted small ">VISTAS DE CAJERO <i class="fa-solid fa-arrow-down nav-icon  me-3 text-muted small"></i></p>
                     <li class="nav-item mb-1">
                         <a href="{{ route('cajero.deuda.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('cajero/deuda*') ? 'active' : '' }}">
                             <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>

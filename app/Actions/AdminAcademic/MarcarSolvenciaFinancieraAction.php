@@ -52,6 +52,32 @@ class MarcarSolvenciaFinancieraAction
 
             if ($fechaInicio->gt($hoy)) continue;
 
+            if (!$cicloCerrado) {
+                $tieneMateriasEnCurso = DB::table('detalle_inscripcion as di')
+                    ->join('inscripciones as i', 'di.id_inscripcion', '=', 'i.inscripcion_id')
+                    ->where('i.id_alumno', $alumno->alumno_id)
+                    ->where('i.id_ciclo_lectivo', $ciclo->ciclo_lectivo_id)
+                    ->where('i.estado_inscripcion', 'ACTIVA')
+                    ->where('di.estado_materia', 'CURSANDO')
+                    ->exists();
+
+                if (!$tieneMateriasEnCurso) {
+                    // Alumno ya terminó sus materias: no se exige matrícula ni cuotas
+                    // Solo verificamos que lo que sí tiene esté pagado
+                    $detalles[] = [
+                        'ciclo'              => $ciclo->nombre_ciclo,
+                        'estado_ciclo'       => $ciclo->estado,
+                        'meses_esperados'    => 0,
+                        'cuotas_pagadas'     => 0,
+                        'matricula_cubierta' => true,
+                        'adeudo'             => false,
+                        'motivos'            => [],
+                        'nota'               => 'El alumno no tiene materias en curso en este ciclo.',
+                    ];
+                    continue;
+                }
+            }
+
             $mesesEsperados = $this->mesesTranscurridos($fechaInicio, $fechaLimite);
 
             // 1. Matrícula (concepto según carrera)

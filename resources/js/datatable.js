@@ -103,4 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initTable('#tableEgreso', { columnDefs: [{ orderable: false, targets: 5}] });
     initTable('#tablegarduados', { columnDefs: [{ orderable: false, targets: 3}] });
     initTable('#tableprocesograduado', { columnDefs: [{ orderable: false, targets: 6}] });
+    initTable('#tableHistoricos', { columnDefs: [{ orderable: false, targets: 7}] });
+    initTable('#tableregistroegreso', { columnDefs: [{ orderable: false, targets: 4}] });
+    initTable('#tableprocesograduado2', { columnDefs: [{ orderable: false, targets: 8}] });
 });

@@ -3,6 +3,7 @@
 namespace App\Rules\Graduacion;
 
 use App\Models\Academico\ProcesoGraduacion;
+use App\Enums\ArancelesGraduacion;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\DB;

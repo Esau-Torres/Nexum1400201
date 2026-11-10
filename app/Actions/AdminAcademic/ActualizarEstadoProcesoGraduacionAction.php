@@ -17,6 +17,8 @@ use App\Rules\Graduacion\ArancelRevisionTesisPagadoRule;
 use App\Rules\Graduacion\PagoExamenSuficienciaRule;
 use App\Rules\Graduacion\PuedeReprogramarDefensaRule;
 use App\Rules\Graduacion\ProcesoNoAgotadoRule;
+use App\Rules\Graduacion\ArancelMatriculaPreEspecializacionPagadoRule;
+use App\Rules\Graduacion\CuotasPreEspecializacionCompletasRule;
 
 class ActualizarEstadoProcesoGraduacionAction
 {
@@ -47,10 +49,7 @@ class ActualizarEstadoProcesoGraduacionAction
             EstadoProcesoGraduacion::EN_DESARROLLO->value => [EstadoProcesoGraduacion::EN_DEFENSA->value],
             EstadoProcesoGraduacion::EN_DEFENSA->value    => [EstadoProcesoGraduacion::APROBADO->value, EstadoProcesoGraduacion::REPROBADO->value],
             EstadoProcesoGraduacion::APROBADO->value      => [EstadoProcesoGraduacion::GRADUADO->value],
-            EstadoProcesoGraduacion::REPROBADO->value     => [
-                EstadoProcesoGraduacion::EN_DEFENSA->value,
-                EstadoProcesoGraduacion::EN_DESARROLLO->value,
-            ],
+            EstadoProcesoGraduacion::REPROBADO->value     => [EstadoProcesoGraduacion::EN_DEFENSA->value],
         ];
 
         $estadoActual = $proceso->estado_proceso->value;
@@ -67,9 +66,13 @@ class ActualizarEstadoProcesoGraduacionAction
         if ($nuevoEstado === EstadoProcesoGraduacion::EN_DESARROLLO
             && $estadoActual === EstadoProcesoGraduacion::INSCRITO->value) {
 
+            $rules = $proceso->modalidad === ModalidadGraduacion::TRABAJO_GRADUACION
+                ? [new ArancelRevisionAnteproyectoPagadoRule($proceso)]
+                : [new ArancelMatriculaPreEspecializacionPagadoRule($proceso)];
+
             $validator = Validator::make(
                 ['transicion' => true],
-                ['transicion' => [new ArancelRevisionAnteproyectoPagadoRule($proceso)]]
+                ['transicion' => $rules]
             );
 
             if ($validator->fails()) {
@@ -83,15 +86,17 @@ class ActualizarEstadoProcesoGraduacionAction
         if ($nuevoEstado === EstadoProcesoGraduacion::EN_DEFENSA
             && $estadoActual === EstadoProcesoGraduacion::EN_DESARROLLO->value) {
 
+            $rules = $proceso->modalidad === ModalidadGraduacion::TRABAJO_GRADUACION
+                ? [
+                    new CuotasAsesoriaCompletasRule($proceso),
+                    new ArancelRevisionTesisPagadoRule($proceso),
+                    new ArancelDefensaPagadoRule($proceso),
+                ]
+                : [new CuotasPreEspecializacionCompletasRule($proceso)];
+
             $validator = Validator::make(
                 ['transicion' => true],
-                [
-                    'transicion' => [
-                        new CuotasAsesoriaCompletasRule($proceso),
-                        new ArancelRevisionTesisPagadoRule($proceso),
-                        new ArancelDefensaPagadoRule($proceso),
-                    ],
-                ]
+                ['transicion' => $rules]
             );
 
             if ($validator->fails()) {
@@ -123,24 +128,33 @@ class ActualizarEstadoProcesoGraduacionAction
         }
 
         // ─────────────────────────────────────────────
-        // REPROBADO → EN_DEFENSA (segunda convocatoria tesis)
+        // REPROBADO → EN_DEFENSA
+        //   Tesis: segunda convocatoria (sin pago adicional)
+        //   Pre-especialización: examen de suficiencia (TRA-017)
         // ─────────────────────────────────────────────
         if ($nuevoEstado === EstadoProcesoGraduacion::EN_DEFENSA
             && $estadoActual === EstadoProcesoGraduacion::REPROBADO->value) {
 
-            if ($proceso->modalidad !== ModalidadGraduacion::TRABAJO_GRADUACION) {
-                throw ValidationException::withMessages([
-                    'estado' => 'La pre-especialización no usa segunda convocatoria de defensa.',
-                ]);
-            }
+            if ($proceso->modalidad === ModalidadGraduacion::TRABAJO_GRADUACION) {
+                // Segunda convocatoria de tesis
+                $validator = Validator::make(
+                    ['transicion' => true],
+                    ['transicion' => [new PuedeReprogramarDefensaRule($proceso)]]
+                );
 
-            $validator = Validator::make(
-                ['transicion' => true],
-                ['transicion' => [new PuedeReprogramarDefensaRule($proceso)]]
-            );
+                if ($validator->fails()) {
+                    throw ValidationException::withMessages(['estado' => $validator->errors()->all()]);
+                }
+            } else {
+                // Pre-especialización: examen de suficiencia (TRA-017)
+                $validator = Validator::make(
+                    ['transicion' => true],
+                    ['transicion' => [new PagoExamenSuficienciaRule($proceso)]]
+                );
 
-            if ($validator->fails()) {
-                throw ValidationException::withMessages(['estado' => $validator->errors()->all()]);
+                if ($validator->fails()) {
+                    throw ValidationException::withMessages(['pago' => $validator->errors()->all()]);
+                }
             }
         }
 
@@ -170,6 +184,7 @@ class ActualizarEstadoProcesoGraduacionAction
         // APROBADO → GRADUADO: derechos de grado
         // ─────────────────────────────────────────────
         if ($nuevoEstado === EstadoProcesoGraduacion::GRADUADO) {
+
             $validator = Validator::make(
                 ['estado' => $nuevoEstado->value],
                 ['estado' => [new TienePagoDerechosGradoRule($proceso)]]
@@ -177,6 +192,13 @@ class ActualizarEstadoProcesoGraduacionAction
 
             if ($validator->fails()) {
                 throw ValidationException::withMessages(['pago' => $validator->errors()->all()]);
+            }
+
+            $proceso->fecha_graduacion = now()->toDateString();
+            $proceso->es_activo        = false;
+
+            if (!$proceso->id_pago_derechos_grado) {
+                $proceso->id_pago_derechos_grado = $this->buscarPagoDerechosGrado($proceso);
             }
         }
 
@@ -205,9 +227,13 @@ class ActualizarEstadoProcesoGraduacionAction
             if ($nuevoEstado === EstadoProcesoGraduacion::REPROBADO) {
                 $proceso->intentos_defensa = $proceso->intentos_defensa + 1;
 
+                // ═══════════════════════════════════════════════════════
+                // TRABAJO_GRADUACION
+                // ═══════════════════════════════════════════════════════
                 if ($proceso->modalidad === ModalidadGraduacion::TRABAJO_GRADUACION) {
                     if ($proceso->intentos_defensa >= 2) {
-                        $proceso->nota_defensa = null;
+                        $proceso->es_activo = false; 
+
                         if ($proceso->grupo) {
                             $proceso->grupo->estado_grupo = 'CANCELADO';
                             $proceso->grupo->save();
@@ -215,9 +241,12 @@ class ActualizarEstadoProcesoGraduacionAction
                     }
                 }
 
+                // ═══════════════════════════════════════════════════════
+                // PRE_ESPECIALIZACION
+                // ═══════════════════════════════════════════════════════
                 if ($proceso->modalidad === ModalidadGraduacion::PRE_ESPECIALIZACION) {
                     if ($proceso->intentos_defensa >= 2) {
-                        $proceso->nota_defensa = null;
+                        $proceso->es_activo = false; 
                     }
                 }
             }
@@ -242,7 +271,7 @@ class ActualizarEstadoProcesoGraduacionAction
             ->where('c.carrera_id', $proceso->alumno->id_carrera)
             ->value('na.codigo');
 
-        $codigo = \App\Support\ArancelesGraduacion::derechosGrado($nivel, $proceso->modalidad->value);
+        $codigo = ArancelesGraduacion::derechosGrado($nivel, $proceso->modalidad->value);
 
         return DB::table('pago as p')
             ->join('detalle_pago as dp', 'p.pago_id', '=', 'dp.id_pago')
