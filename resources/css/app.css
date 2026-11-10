@@ -1,4 +1,4 @@
-@import "bootstrap/dist/css/bootstrap.min.css";
+﻿@import "bootstrap/dist/css/bootstrap.min.css";
 @import "bootstrap-icons/font/bootstrap-icons.css";
 
 @theme {
@@ -528,19 +528,31 @@ ul.pagination .page-item.disabled .page-link {
     overflow: hidden;
 }
 
-/* Fila horizontal de stats (icono + texto al lado) */
-.materia-stats-row {
+/* Stack de stats: 2 filas (stats cortos arriba + horario abajo) */
+.materia-stats-stack {
+    padding: 0.75rem 0.875rem;
+    background-color: #fafbfc;
     border: 1px solid #f1f3f5;
+    border-radius: 10px;
 }
 
-.materia-stats-row .small {
-    font-weight: 400;
-}
-
-.materia-stats-row i {
+.materia-stats-stack .fa-icon {
     width: 14px;
     text-align: center;
-    font-size: 0.75rem;
+}
+
+/* Fila del horario con fondo sutil para destacar */
+.stat-horario {
+    padding: 0.5rem 0.65rem;
+    background-color: #ffffff;
+    border: 1px solid #f1f3f5;
+    border-radius: 8px;
+    margin-top: 0.25rem;
+}
+
+.stat-horario span {
+    flex: 1;
+    word-break: break-word;
 }
 
 /* Botón Asistencia - AMBER SÓLIDO (mismo tono del dashboard) */

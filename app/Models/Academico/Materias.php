@@ -5,8 +5,8 @@ namespace App\Models\Academico;
 use App\Enums\EstadoMateria;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Docente\Seccion;
-use App\Models\Academico\pensumMateria;
+use App\Models\CoordinadorFacultad\Seccion; // Corregido namespace
+use App\Models\Academico\PensumMateria; // Corregido a mayúscula
 
 class Materias extends Model
 {
@@ -38,6 +38,4 @@ class Materias extends Model
     {
         return $this->hasMany(Seccion::class, 'id_materia', 'materia_id');
     }
-
-
 }
