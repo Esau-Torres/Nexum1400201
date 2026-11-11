@@ -20,10 +20,10 @@ class StoreSeccionRules extends FormRequest
         return $this->user()?->hasRole(Role::COORDINADOR_FACULTAD) ?? false;
     }
 
-    public function rules(): array
+public function rules(): array
     {
         $seccionParam = $this->route('seccion');
-        $seccionId = is_object($seccionParam) ? $seccionParam->seccion_id : $seccionParam;
+        $seccionId = is_object($seccionParam) ? $seccionParam->seccion_id : (is_numeric($seccionParam) ? $seccionParam : null);
 
         return [
             'id_materia'       => ['required', 'integer', 'exists:materias,materia_id'],

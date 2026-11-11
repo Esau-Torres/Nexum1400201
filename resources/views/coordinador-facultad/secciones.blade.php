@@ -39,7 +39,8 @@
                             <option value="">Seleccione un ciclo</option>
                             @foreach($ciclosLectivos as $c)
                                 @php
-                                    $estado = $c->estado->value ?? $c->estado;
+                                    // FIX SEGURO: Validación de Enum a String
+                                    $estado = is_object($c->estado) ? ($c->estado->value ?? $c->estado->name) : $c->estado;
                                 @endphp
                                 <option value="{{ $c->ciclo_lectivo_id }}" {{ (string) $idCicloFiltro === (string) $c->ciclo_lectivo_id ? 'selected' : '' }}>
                                     {{ $c->nombre_ciclo }}
@@ -125,7 +126,9 @@
                                     @endif
                                 </div>
 
-                                @php $fase = $seccion->fase_ciclo; @endphp
+                                @php 
+                                    $fase = is_object($seccion->fase_ciclo) ? ($seccion->fase_ciclo->value ?? $seccion->fase_ciclo->name) : $seccion->fase_ciclo; 
+                                @endphp
 
                                 @if($fase === 'CONFIGURACION')
                                     <small class="text-muted d-block">
@@ -156,11 +159,13 @@
                                     <div class="d-flex flex-wrap gap-1">
                                         @foreach($seccion->horarios as $sh)
                                             <span class="badge text-bg-light border small font-monospace">
-                                                {{ $sh->horario->dia->short() }} {{ substr($sh->horario->hora_inicio, 0, 5) }}
+                                                {{-- FIX SEGURO ANTI-500: Validación del método short() --}}
+                                                {{ is_object($sh->horario->dia) && method_exists($sh->horario->dia, 'short') ? $sh->horario->dia->short() : substr(is_object($sh->horario->dia) ? ($sh->horario->dia->value ?? $sh->horario->dia->name) : $sh->horario->dia, 0, 3) }} 
+                                                {{ substr($sh->horario->hora_inicio, 0, 5) }}
                                                 · {{ $sh->aula->nombre_aula }}
                                                 @if($sh->claseCompartida && $sh->claseCompartida->seccionesHorario->count() > 1)
                                                     <span class="badge bg-info text-white ms-1" 
-                                                        title="Compartida con otras {{ $sh->claseCompartida->seccionesHorario->count() - 1 }} sección(es)">
+                                                          title="Compartida con otras {{ $sh->claseCompartida->seccionesHorario->count() - 1 }} sección(es)">
                                                         <i class="bi bi-people-fill"></i>
                                                     </span>
                                                 @endif
@@ -172,8 +177,9 @@
                                 @endif
                             </td>
                             <td>
-                                <span class="badge {{ $seccion->estado->badge() }}">
-                                    {{ $seccion->estado->label() }}
+                                {{-- FIX SEGURO ANTI-500: Validación de los métodos badge() y label() --}}
+                                <span class="badge {{ is_object($seccion->estado) && method_exists($seccion->estado, 'badge') ? $seccion->estado->badge() : 'bg-secondary' }}">
+                                    {{ is_object($seccion->estado) && method_exists($seccion->estado, 'label') ? $seccion->estado->label() : (is_object($seccion->estado) ? ($seccion->estado->value ?? $seccion->estado->name) : $seccion->estado) }}
                                 </span>
                             </td>
                             <td class="text-end pe-4">
@@ -267,7 +273,7 @@
                                             <tr>
                                                 <td class="ps-3">
                                                     <span class="badge text-bg-light border font-monospace"
-                                                        x-text="h.etiqueta"></span>
+                                                          x-text="h.etiqueta"></span>
                                                 </td>
                                                 <td>
                                                     <select :name="`aulas_por_horario[${h.horario_id}]`"
@@ -453,7 +459,8 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <span class="badge text-bg-light border font-monospace">
-                                        {{ $sh->horario->dia->label() }}
+                                        {{-- FIX SEGURO ANTI-500 --}}
+                                        {{ is_object($sh->horario->dia) && method_exists($sh->horario->dia, 'label') ? $sh->horario->dia->label() : (is_object($sh->horario->dia) ? ($sh->horario->dia->value ?? $sh->horario->dia->name) : $sh->horario->dia) }}
                                         {{ substr($sh->horario->hora_inicio, 0, 5) }}–{{ substr($sh->horario->hora_fin, 0, 5) }}
                                     </span>
                                     <span class="ms-2 small text-muted">
@@ -505,10 +512,11 @@
 @push('scripts')
     <script>
     @php
+        // FIX SEGURO ANTI-500 EN EL MAPEADO JSON PARA EL SCRIPT DE ALPINE
         $horariosJson = $horariosPorCiclo->map(fn($items) => $items->map(fn($h) => [
             'horario_id'  => $h->horario_id,
             'etiqueta'    => $h->etiqueta,
-            'dia'         => $h->dia->value,
+            'dia'         => is_object($h->dia) ? ($h->dia->value ?? $h->dia->name) : $h->dia,
             'hora_inicio' => $h->hora_inicio,
         ])->values());
 
@@ -532,7 +540,7 @@
 
     window.HORARIOS_POR_CICLO = @json($horariosJson);
     window.GRUPOS_CON_BLOQUES = @json($gruposConBloques);
-    window.AULAS             = @json($aulasJson);
+    window.AULAS              = @json($aulasJson);
 
     document.addEventListener('alpine:init', () => {
         Alpine.data('seccionForm', () => ({
@@ -548,7 +556,6 @@
             bloquesLibres: [],
 
             init() {
-                // Si estamos editando, precargar
                 const cicloInicial   = @js($isEdit ?? false ? $seccion->id_ciclo_lectivo : '');
                 const grupoInicial   = @js($isEdit ?? false ? $seccion->id_grupo : '');
                 const cupoInicial    = @js($isEdit ?? false ? $seccion->cupo_maximo : 30);
@@ -595,7 +602,6 @@
                 if (grupo) {
                     this.nombreGrupo = grupo.nombre;
                     this.horariosDelGrupo = grupo.horarios || [];
-                    // Resetear aulas por horario
                     this.aulasPorHorario = {};
                     this.horariosDelGrupo.forEach(h => {
                         this.aulasPorHorario[h.horario_id] = '';
@@ -619,21 +625,15 @@
             },
 
             get capacidadMinima() {
-                // Calcula la capacidad mínima entre las aulas elegidas
                 let capacidades = [];
-
-                // Modo grupo
                 Object.values(this.aulasPorHorario).forEach(id => {
                     const aula = window.AULAS.find(a => String(a.aula_id) === String(id));
                     if (aula) capacidades.push(aula.capacidad);
                 });
-
-                // Modo libre
                 this.bloquesLibres.forEach(b => {
                     const aula = window.AULAS.find(a => String(a.aula_id) === String(b.id_aula));
                     if (aula) capacidades.push(aula.capacidad);
                 });
-
                 return capacidades.length > 0 ? Math.min(...capacidades) : null;
             },
 
@@ -645,9 +645,6 @@
             ajustarCupo() {
                 const min = this.capacidadMinima;
                 if (min !== null && this.cupoMaximo > min) {
-                    // Opción A: no dejar avanzar (solo advertencia visual)
-                    // Opción B: auto-ajustar al mínimo
-                    // → Vamos con B: auto-ajustar y avisar
                     this.cupoMaximo = min;
                 }
             },
