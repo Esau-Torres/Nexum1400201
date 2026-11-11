@@ -40,7 +40,7 @@ class SeccionesController extends Controller
             ->orderByDesc('fecha_inicio')
             ->first();
 
-        $idCicloFiltro = $request->filled('id_ciclo_lectivo') ? (int) $request->input('id_ciclo_lectivo') : $cicloActual?->ciclo_lectivo_id;
+        $idCicloFiltro = $request->filled('id_ciclo_lectivo') ? (int) $request->input('id_ciclo_lectivo') : ($cicloActual->ciclo_lectivo_id ?? 0);
 
         $seccionesQuery = Seccion::query()
             ->with([
@@ -55,58 +55,47 @@ class SeccionesController extends Controller
             ->orderBy('nombre_grupo')
             ->orderBy('id_materia');
 
-        if ($idCicloFiltro) {
+        if ($idCicloFiltro !== 0) {
+            $seccionesQuery->where('id_ciclo_lectivo', $idCicloFiltro);
+        }
+
+        $seccionesQuery = Seccion::query()
+            ->with([
+                'materia',
+                'cicloLectivo',
+                'docente.user',
+                'grupo',
+                'horarios.horario',
+                'horarios.aula.edificio',
+            ])
+            ->orderByDesc('id_ciclo_lectivo')
+            ->orderBy('nombre_grupo')
+            ->orderBy('id_materia');
+
+        if ($idCicloFiltro !== 0) {
             $seccionesQuery->where('id_ciclo_lectivo', $idCicloFiltro);
         }
 
         $secciones = $seccionesQuery->get();
-
-        $ciclosLectivos     = CicloLectivo::orderByDesc('fecha_inicio')->get();
-        $materias           = Materias::query()->where('estado', 'ACTIVO')->with(['pensumMaterias.pensum.carrera.facultad'])->orderBy('nombre')->get();
-        
-        $pensumMaterias     = PensumMateria::query()
-            ->with(['materia', 'pensum.carrera.facultad'])
-            ->whereHas('materia', function ($query) { 
-                $query->where('estado', 'ACTIVO'); 
-            })
-            ->orderBy('id_pensum')
-            ->orderBy('ciclo_sugerido')
-            ->get();
-            
+        $ciclosLectivos = CicloLectivo::orderByDesc('fecha_inicio')->get();
+        $materias = Materias::query()->where('estado', 'ACTIVO')->with(['pensumMaterias.pensum.carrera.facultad'])->orderBy('nombre')->get();
+        $pensumMaterias = PensumMateria::query()->with([ 'materia', 'pensum.carrera.facultad' ])->whereHas('materia', function ($query) { $query->where('estado', 'ACTIVO'); })->orderBy('id_pensum')->orderBy('ciclo_sugerido')->get();
         $materiasPorCarrera = $pensumMaterias->groupBy(fn ($pm) => $pm->pensum?->carrera?->nombre ?? 'Sin carrera');
-        $docentes           = Docentes::with('user')->where('estado', 'ACTIVO')->get();
-        $grupos             = Grupo::with('cicloLectivo')->orderByDesc('id_ciclo_lectivo')->orderBy('nombre')->get();
-        $aulas              = Aula::with('edificio')->where('activo', true)->orderBy('id_edificio')->orderBy('nombre_aula')->get();
-        
-        $horarios           = Horarios::with('cicloLectivo')
+        $docentes = Docentes::with('user')->where('estado', 'ACTIVO')->get();
+        $grupos = Grupo::with('cicloLectivo')->orderByDesc('id_ciclo_lectivo')->orderBy('nombre')->get();
+        $aulas = Aula::with('edificio')->where('activo', true)->orderBy('id_edificio')->orderBy('nombre_aula')->get();
+        $horarios = Horarios::with('cicloLectivo')
             ->orderBy('id_ciclo_lectivo', 'desc')
-            ->orderByRaw("CASE dia
-                WHEN 'LUNES' THEN 1
-                WHEN 'MARTES' THEN 2
-                WHEN 'MIERCOLES' THEN 3
-                WHEN 'JUEVES' THEN 4
-                WHEN 'VIERNES' THEN 5
-                WHEN 'SABADO' THEN 6
-                ELSE 7 END")
+            ->orderByRaw("CASE dia WHEN 'LUNES' THEN 1 WHEN 'MARTES' THEN 2 WHEN 'MIERCOLES' THEN 3 WHEN 'JUEVES' THEN 4 WHEN 'VIERNES' THEN 5 WHEN 'SABADO' THEN 6 ELSE 7 END")
             ->orderBy('hora_inicio')
             ->get();
 
         $horariosPorCiclo = $horarios->groupBy('id_ciclo_lectivo');
 
-        return view('coordinador-facultad.secciones', [
-            'secciones'          => $secciones,
-            'ciclosLectivos'     => $ciclosLectivos,
-            'materiasPorCarrera' => $materiasPorCarrera,
-            'pensumMateria'      => $pensumMaterias,
-            'materias'           => $materias,
-            'docentes'           => $docentes,
-            'grupos'             => $grupos,
-            'aulas'              => $aulas,
-            'horarios'           => $horarios,
-            'horariosPorCiclo'   => $horariosPorCiclo,
-            'estados'            => EstadoSeccion::cases(),
-            'idCicloFiltro'      => $idCicloFiltro,
-        ]);
+        return view('coordinador-facultad.secciones', compact(
+            'secciones', 'ciclosLectivos', 'materiasPorCarrera', 'pensumMaterias', 
+            'materias', 'docentes', 'grupos', 'aulas', 'horarios', 'horariosPorCiclo', 'idCicloFiltro'
+        ))->with('estados', EstadoSeccion::cases());
     }
 
     public function store(StoreSeccionRules $request, CreateSeccionAction $action): RedirectResponse
