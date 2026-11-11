@@ -17,13 +17,6 @@ class HomeController extends Controller
             return redirect()->route('docente.home');
         }
 
-        // ==========================================
-        // REDIRECCIÓN HACIA EL NUEVO MÓDULO DIRECTIVO
-        // ==========================================
-        if ($usuario->hasRole('DIRECTIVO')) {
-            return redirect()->route('directivo.dashboard.index');
-        }
-
         $relations = ['roles', 'regionalactivo'];
 
         if ($usuario->hasRole('ESTUDIANTE')) {

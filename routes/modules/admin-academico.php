@@ -57,7 +57,7 @@
             // gestionamiento de pensum, materias y ciclo lectivo
 
             Route::prefix('materias')->name('materias.')->group(function () {
-                Route::get('/materias', [MateriaController::class, 'index'])->name('materias');
+                Route::get('/', [MateriaController::class, 'index'])->name('materias');
                 Route::post('/materia', [MateriaController::class, 'store'])->name('store');
                 Route::put('/materia/{materia}', [MateriaController::class, 'update'])->name('update');
             });
@@ -85,16 +85,16 @@
 
             
             Route::prefix('pensum')->name('pensum.')->group(function () {
-                Route::get('/pensum',                  [PensumController::class, 'index'])->name('pensum');
-                Route::post('/pensum',                 [PensumController::class, 'store'])->name('store');
-                Route::get('/pensum/{pensum}',         [PensumController::class, 'show'])->name('show');
-                Route::get('/pensum/{pensum}/editar',  [PensumController::class, 'edit'])->name('edit');
+                Route::get('/',                  [PensumController::class, 'index'])->name('pensum');
+                Route::post('/',                 [PensumController::class, 'store'])->name('store');
+                Route::get('/{pensum}',         [PensumController::class, 'show'])->name('show');
+                Route::get('/{pensum}/editar',  [PensumController::class, 'edit'])->name('edit');
 
-                Route::patch('/pensum/{pensum}/estado', [PensumController::class, 'changeEstado'])->name('changeEstado');
+                Route::patch('/{pensum}/estado', [PensumController::class, 'changeEstado'])->name('changeEstado');
 
                 // Materias dentro del pensum
-                Route::post('/pensum/{pensum}/materia',              [PensumController::class, 'addMateria'])->name('addMateria');
-                Route::delete('/pensum-materia/{pensumMateria}',     [PensumController::class, 'removeMateria'])->name('removeMateria');
+                Route::post('/{pensum}/materia',              [PensumController::class, 'addMateria'])->name('addMateria');
+                Route::delete('/{pensumMateria}',     [PensumController::class, 'removeMateria'])->name('removeMateria');
 
                 // Prerequisitos
                 Route::post('/pensum-materia/{pensumMateria}/prerequisito', [PensumController::class, 'addPrerequisito'])->name('addPrerequisito');
@@ -136,3 +136,4 @@
             Route::get('/graduacion/{alumnoId}/historial', [ProcesoGraduacionController::class, 'historial'])->whereNumber('alumnoId')->name('graduacion.historial');
         });
     });
+    

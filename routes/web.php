@@ -37,10 +37,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/mi-foto', [FotoPerfilController::class, 'show'])->name('estudiante.foto');
     Route::post('/profile/carnet', [CarnetController::class, 'store'])->name('estudiante.carnet.store');
 
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
     // ============================================
     // RUTAS ADMIN FINANCIERO
     // ============================================
@@ -90,7 +86,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/deuda/{id}/liquidar', [CajeroController::class, 'deudaLiquidar'])->name('cajero.deuda.liquidar');
 
         Route::get('/cajero/ventanilla', [CajeroController::class, 'indexVentanilla'])->name('cajero.ventanilla.index');
-        Route::get('/ventanilla', [CajeroController::class, 'indexVentanilla'])->name('cajero.ventanilla.index');
+        //Route::get('/ventanilla', [CajeroController::class, 'indexVentanilla'])->name('cajero.ventanilla.index');
 
         Route::get('/promociones', [CajeroController::class, 'promociones'])->name('cajero.promociones.index');
 
