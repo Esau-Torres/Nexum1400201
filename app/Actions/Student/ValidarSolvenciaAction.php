@@ -9,17 +9,10 @@ use Illuminate\Support\Facades\DB;
 
 class ValidarSolvenciaAction
 {
-    /**
-     * Códigos de concepto (según tabla concepto_pago).
-     * Centralizados para evitar typos y facilitar cambios futuros.
-     */
-    private const CONCEPTO_MATRICULA       = 'MAT-001'; // Matrícula de pregrado
-    private const CONCEPTO_CUOTA_MENSUAL   = 'MAT-002'; // Cuota mensual pregrado
-    private const CONCEPTO_CUOTA_BECARIA   = 'MAT-003'; // Cuota mensual franja becaria
+    private const CONCEPTO_MATRICULA       = 'MAT-001';
+    private const CONCEPTO_CUOTA_MENSUAL   = 'MAT-002';
+    private const CONCEPTO_CUOTA_BECARIA   = 'MAT-003';
 
-    /**
-     * Estados de cargo considerados como "pendiente" (deuda activa).
-     */
     private const ESTADOS_PENDIENTES = ['PENDIENTE', 'VENCIDO'];
 
     private const MESES_NOMBRE = [
@@ -42,22 +35,51 @@ class ValidarSolvenciaAction
         $motivos = [];
 
         $esNuevoIngreso = $this->esNuevoIngreso($alumno, $cicloLectivoId);
+        $cicloActual    = CicloLectivo::find($cicloLectivoId);
 
-        $cicloActual = CicloLectivo::find($cicloLectivoId);
         if (!$cicloActual) {
             return [
-                'solvente' => false,
-                'motivos'  => ['No se encontró el ciclo lectivo actual.'],
+                'solvente'         => false,
+                'motivos'          => ['No se encontró el ciclo lectivo actual.'],
                 'es_nuevo_ingreso' => $esNuevoIngreso,
             ];
         }
+
+        // ═══════════════════════════════════════════════════════
+        // CASO ESPECIAL: ciclo no cerrado + alumno sin materias en curso
+        // → No se exige matrícula ni cuotas del ciclo actual.
+        // → Solo se valida que no tenga cuotas pendientes del ciclo anterior.
+        // ═══════════════════════════════════════════════════════
+        if ($cicloActual->estado->value !== 'CERRADO'
+            && !$this->tieneMateriasCursando($alumno, $cicloLectivoId)) {
+
+            if (!$esNuevoIngreso) {
+                $cicloAnterior = $this->obtenerCicloAnterior($cicloActual);
+                if ($cicloAnterior) {
+                    $pendientes = $this->cuotasPendientes($alumno, $cicloAnterior->ciclo_lectivo_id);
+                    if ($pendientes > 0) {
+                        $motivos[] = "Tienes {$pendientes} cuota(s) pendiente(s) del ciclo anterior ({$cicloAnterior->nombre_ciclo}).";
+                    }
+                }
+            }
+
+            return [
+                'solvente'         => empty($motivos),
+                'motivos'          => $motivos,
+                'es_nuevo_ingreso' => $esNuevoIngreso,
+            ];
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // FLUJO NORMAL: matrícula + primera cuota + ciclo anterior
+        // ═══════════════════════════════════════════════════════
 
         // 1. Matrícula del ciclo actual
         if (!$this->matriculaPagada($alumno, $cicloLectivoId)) {
             $motivos[] = 'No has pagado la matrícula del ciclo actual.';
         }
 
-        // 2. Primera cuota del ciclo actual (mes de inicio, NO "mes 1" calendario)
+        // 2. Primera cuota del ciclo actual (mes de inicio del ciclo, no "mes 1")
         $mesInicio = $this->mesInicioDelCiclo($cicloActual);
         if (!$this->cuotaMesPagada($alumno, $cicloLectivoId, $mesInicio)) {
             $motivos[] = "No has cancelado la primera cuota del ciclo actual (mes de {$this->nombreMes($mesInicio)}).";
@@ -81,14 +103,12 @@ class ValidarSolvenciaAction
         ];
     }
 
-
     /* ==========================================================
      * HELPERS
      * ========================================================== */
 
     /**
      * Determina si el alumno es de nuevo ingreso respecto al ciclo evaluado.
-     * Considera "nuevo ingreso" si no tiene ninguna inscripción registrada en ciclos anteriores.
      */
     protected function esNuevoIngreso(Alumnos $alumno, int $cicloLectivoId): bool
     {
@@ -113,7 +133,6 @@ class ValidarSolvenciaAction
 
     /**
      * Verifica si una cuota mensual específica del ciclo actual está pagada.
-     * Acepta tanto cuota normal (MAT-002) como becaria (MAT-003).
      */
     protected function cuotaMesPagada(Alumnos $alumno, int $cicloLectivoId, int $mes): bool
     {
@@ -130,7 +149,6 @@ class ValidarSolvenciaAction
             ->whereIn('ce.estado_cargo', ['PAGADO', 'EXONERADO']);
 
         // Si NO hay mes_arancel registrado (NULL), aceptamos el cargo como pagado
-        // (útil si en tu BD algunas cuotas no tienen mes por un tema histórico).
         $query->where(function ($q) use ($variantes) {
             $q->whereNull('ce.mes_arancel')
               ->orWhere(function ($q2) use ($variantes) {
@@ -144,7 +162,7 @@ class ValidarSolvenciaAction
     }
 
     /**
-     * Devuelve las variantes en mayúsculas que puede tener el mes en `mes_arancel`.
+     * Variantes en mayúsculas que puede tener el mes en `mes_arancel`.
      */
     private function variantesMes(int $mes): array
     {
@@ -154,7 +172,6 @@ class ValidarSolvenciaAction
             (string) $mes,
             str_pad((string) $mes, 2, '0', STR_PAD_LEFT),
             $nombre,
-            // Por si guardan "ENERO 2026" o "ENERO-2026"
         ]));
     }
 
@@ -164,14 +181,16 @@ class ValidarSolvenciaAction
     }
 
     /**
-     * Determina el número de mes en el que inicia el ciclo lectivo.
-     * Ej: si el ciclo empieza en 2026-07-02, devuelve 7 (julio).
+     * Mes de inicio del ciclo lectivo (1-12).
      */
     protected function mesInicioDelCiclo(CicloLectivo $ciclo): int
     {
         return (int) $ciclo->fecha_inicio->format('n');
     }
 
+    /**
+     * Obtiene el ciclo inmediatamente anterior al ciclo actual.
+     */
     protected function obtenerCicloAnterior(CicloLectivo $cicloActual): ?CicloLectivo
     {
         return CicloLectivo::where('fecha_fin', '<', $cicloActual->fecha_inicio)
@@ -179,6 +198,9 @@ class ValidarSolvenciaAction
             ->first();
     }
 
+    /**
+     * Cuenta las cuotas pendientes del ciclo indicado.
+     */
     protected function cuotasPendientes(Alumnos $alumno, int $cicloLectivoId): int
     {
         return DB::table('cargo_estudiante as ce')
@@ -191,5 +213,20 @@ class ValidarSolvenciaAction
             ])
             ->whereIn('ce.estado_cargo', self::ESTADOS_PENDIENTES)
             ->count();
+    }
+
+    /**
+     * Determina si el alumno tiene materias CURSANDO en el ciclo.
+     * Es la clave para decidir si se exigen o no matrícula/cuotas del ciclo actual.
+     */
+    protected function tieneMateriasCursando(Alumnos $alumno, int $cicloLectivoId): bool
+    {
+        return DB::table('detalle_inscripcion as di')
+            ->join('inscripciones as i', 'di.id_inscripcion', '=', 'i.inscripcion_id')
+            ->where('i.id_alumno', $alumno->alumno_id)
+            ->where('i.id_ciclo_lectivo', $cicloLectivoId)
+            ->where('i.estado_inscripcion', 'ACTIVA')
+            ->where('di.estado_materia', 'CURSANDO')
+            ->exists();
     }
 }

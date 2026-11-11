@@ -6,7 +6,7 @@
     <!-- Encabezado de Ventanilla -->
     <div class="row mb-4">
         <div class="col-12">
-            <h2 class="fw-bold text-dark"><i class="fa-solid fa-cash-register me-2"></i> Consultas en ventanilla</h2>
+            <h2 class="fw-bold text-dark"><i class="fa-solid fa-cash-register me-2"></i> CONSULTA EN VENTANILLA</h2>
             <p class="text-muted">Selecciona los aranceles a cobrar y presiona el botón para procesar el recibo.</p>
         </div>
     </div>

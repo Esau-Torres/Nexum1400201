@@ -5,7 +5,7 @@
     <!-- Encabezado -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-0">Atención en ventanilla</h2>
+            <h2 class="fw-bold mb-0">ATENCIÓN EN VENTANILLA</h2>
             <p class="text-muted">Consulta y liquidación de deuda pendiente de alumnos.</p>
         </div>
     </div>

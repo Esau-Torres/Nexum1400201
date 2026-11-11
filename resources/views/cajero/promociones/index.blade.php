@@ -7,7 +7,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <h2 class="fw-bold text-dark">
-                <i class="fa-solid fa-tags me-2" style="color: #ff7575;"></i> Promociones
+                <i class="fa-solid fa-tags me-2" style="color: #ff7575;"></i> PROMOCIONES
             </h2>
             <p class="text-muted">Validación de descuentos aplicables según fecha y estado de solvencia (Solo Lectura).</p>
         </div>

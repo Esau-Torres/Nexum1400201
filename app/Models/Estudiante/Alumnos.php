@@ -13,6 +13,8 @@ Use App\Models\Estudiante\AlumnoDocumentos;
 Use App\Models\Estudiante\Carreras;
 Use App\Models\Academico\BeneficioEstudiante;
 Use App\Models\Academico\CargoEstudiante;
+use App\Models\Estudiante\RequisitosEgreso;
+use App\Models\Academico\ProcesoGraduacion;
 use App\Enums\EstadoBeneficio;
 
 class Alumnos extends Model
@@ -47,6 +49,23 @@ class Alumnos extends Model
     public function carrera(): BelongsTo
     {
         return $this->belongsTo(Carreras::class, 'id_carrera', 'carrera_id');
+    }
+
+    public function requisitosEgreso(): HasMany
+    {
+        return $this->hasMany(RequisitosEgreso::class, 'id_alumno', 'alumno_id');
+    }
+
+    public function procesosGraduacion(): HasMany
+    {
+        return $this->hasMany(ProcesoGraduacion::class, 'id_alumno', 'alumno_id');
+    }
+
+    public function procesoGraduacionActivo(): HasOne
+    {
+        return $this->hasOne(ProcesoGraduacion::class, 'id_alumno', 'alumno_id')
+            ->where('es_activo', true)
+            ->latestOfMany('proceso_id');
     }
 
     public function beneficios(): HasMany

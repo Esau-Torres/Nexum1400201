@@ -37,7 +37,7 @@
                     <i class="fa-solid fa-file-invoice-dollar fs-3 brand-text"></i>
                 </div>
                 <div>
-                    <h2 class="fw-bold text-dark mb-1">Emisión de Recibo</h2>
+                    <h2 class="fw-bold text-dark mb-1">EMISIÓN DE RECIBOS</h2>
                     <p class="text-muted mb-0">Verifica los datos y procesa el pago para generar el comprobante.</p>
                 </div>
             </div>

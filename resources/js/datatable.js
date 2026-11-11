@@ -100,6 +100,12 @@ document.addEventListener('DOMContentLoaded', function () {
     initTable('#reglas-table', { columnDefs: [{ orderable: false, targets: 6}] });
     initTable('#recod_academico_table', { columnDefs: [{ orderable: false, targets: 6}] });
     initTable('#tabla-evaluaciones', { columnDefs: [{ orderable: false, targets: 6}] });
+    initTable('#tableEgreso', { columnDefs: [{ orderable: false, targets: 5}] });
+    initTable('#tablegarduados', { columnDefs: [{ orderable: false, targets: 3}] });
+    initTable('#tableprocesograduado', { columnDefs: [{ orderable: false, targets: 6}] });
+    initTable('#tableHistoricos', { columnDefs: [{ orderable: false, targets: 7}] });
+    initTable('#tableregistroegreso', { columnDefs: [{ orderable: false, targets: 4}] });
+    initTable('#tableprocesograduado2', { columnDefs: [{ orderable: false, targets: 8}] });
     initTable('#tablaMorosos', { order: [[3, 'desc']], columnDefs: [{ orderable: false, targets: 4 }] });
 });
 

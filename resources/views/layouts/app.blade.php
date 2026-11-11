@@ -95,7 +95,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('admin-academico.alumnos.modify-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.modify-student') ? 'active' : '' }}">
+                        <a href="{{ route('admin-academico.alumnos.modify-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.alumnos.modify-student') ? 'active' : '' }}">
                             <i class="fa-solid fa-chart-pie nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Gestionar Alumno</div>
@@ -104,7 +104,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('admin-academico.admin-academico.beneficios.modify-benefit-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.modify-benefit-student') ? 'active' : '' }}">
+                        <a href="{{ route('admin-academico.admin-academico.beneficios.modify-benefit-student') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.admin-academico.beneficios.modify-benefit-student') ? 'active' : '' }}">
                             <i class="fa-solid fa-graduation-cap nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Gestionar becas</div>
@@ -159,7 +159,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('admin-academico.evaluaciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('evaluacion*') ? 'active' : '' }}">
+                            <a href="{{ route('admin-academico.evaluaciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.evaluaciones.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-clipboard-check nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Evaluación del Desempeño</div>
@@ -168,11 +168,29 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('admin-academico.reglas-beneficio.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('admin-academico.reglas-beneficio.index*') ? 'active' : '' }}">
+                            <a href="{{ route('admin-academico.reglas-beneficio.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.reglas-beneficio.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-gavel nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Reglas Beneficio</div>
                                     <div class="nav-text-secondary">Gestión de reglas de beneficio estudiantil</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('admin-academico.egresos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.egresos.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-user-graduate nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Pre-egresos</div>
+                                    <div class="nav-text-secondary">Requisitos para el egreso estudiantil</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('admin-academico.graduacion.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.graduacion.index') ? 'active' : '' }}">
+                                <i class="fa-solid fa-file-invoice nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Proceso Graduación</div>
+                                    <div class="nav-text-secondary">Proceso de estudiantes a graduar</div>
                                 </div>
                             </a>
                         </li>
@@ -216,7 +234,7 @@
                     {{-- ============================================================ --}}
                     @if(auth()->user()->hasRole('ESTUDIANTE'))
                         <li class="nav-item mb-1">
-                            <a href="{{ route('student.pensum.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('pensum.index*') ? 'active' : '' }}">
+                            <a href="{{ route('student.pensum.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('student.pensum.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-book-open nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Pensum</div>
@@ -225,7 +243,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('student.inscripcion.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('inscripcion.index*') ? 'active' : '' }}">
+                            <a href="{{ route('student.inscripcion.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('student.inscripcion.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-pen-to-square nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Inscripción</div>
@@ -234,7 +252,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('student.record.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('student.record.index*') ? 'active' : '' }}">
+                            <a href="{{ route('student.record.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('student.record.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-graduation-cap nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Record Académico</div>
@@ -243,7 +261,7 @@
                             </a>
                         </li>
                          <li class="nav-item mb-1">
-                            <a href="{{ route('docente.prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('docente.prueba.notas*') ? 'active' : '' }}">
+                            <a href="{{ route('docente.prueba.notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('docente.prueba.notas') ? 'active' : '' }}">
                                 <i class="fa-solid fa-file-pen nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Prueba de Notas</div>
@@ -252,7 +270,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('student.desempeno-docente.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('evaluacion*') ? 'active' : '' }}">
+                            <a href="{{ route('student.desempeno-docente.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('student.desempeno-docente.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-clipboard-check nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Evaluación del Desempeño</div>
@@ -261,7 +279,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('adfinanciero.cargos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('record-financiero*') ? 'active' : '' }}">
+                            <a href="{{ route('adfinanciero.cargos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('adfinanciero.cargos.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Record Financiero</div>
@@ -270,7 +288,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('student.situaciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('situaciones.index*') ? 'active' : '' }}">
+                            <a href="{{ route('student.situaciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('student.situaciones.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-envelope nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Buzón</div>
@@ -279,7 +297,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('student.recursos.bibliograficos') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('student.recursos.bibliograficos*') ? 'active' : '' }}">
+                            <a href="{{ route('student.recursos.bibliograficos') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('student.recursos.bibliograficos') ? 'active' : '' }}">
                                 <i class="fa-solid fa-folder-open nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Recursos</div>
@@ -350,7 +368,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('superadmin.roles.manageroles') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('superadmin/roles.manageroles*') ? 'active' : '' }}">
+                        <a href="{{ route('superadmin.roles.manageroles') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('superadmin.roles.manageroles') ? 'active' : '' }}">
                             <i class="fa-solid fa-sliders nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Gestión</div>
@@ -373,7 +391,6 @@
                     {{-- ADMIN_FINANCIERO --}}
                     {{-- ============================================================ --}}
                     @if(auth()->user()->hasRole('ADMIN_FINANCIERO'))
-                        <p class="p-1 text-muted small ">VISTAS DE FINANCIERA <i class="fa-solid fa-arrow-down nav-icon  me-3 text-muted small"></i></p>
                         <li class="nav-item mb-1">
                             <a href="{{ route('adfinanciero.conceptospagos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('adfinanciero.conceptospagos.*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-tags nav-icon fs-5 me-3 text-muted"></i>
@@ -418,7 +435,6 @@
                     {{-- CAJERO --}}
                     {{-- ============================================================ --}}
                     @if(auth()->user()->hasRole('CAJERO'))
-                    <p class="p-1 text-muted small ">VISTAS DE CAJERO <i class="fa-solid fa-arrow-down nav-icon  me-3 text-muted small"></i></p>
                     <li class="nav-item mb-1">
                         <a href="{{ route('cajero.deuda.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('cajero/deuda*') ? 'active' : '' }}">
                             <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
@@ -438,7 +454,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('cajero.promociones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('*promociones*') ? 'active' : '' }}">
+                        <a href="{{ route('cajero.promociones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('cajero.promociones.index') ? 'active' : '' }}">
                             <i class="fa-solid fa-tags nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Promociones</div>
@@ -447,7 +463,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('cajero.pagos.create') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('*pagos*') ? 'active' : '' }}">
+                        <a href="{{ route('cajero.pagos.create') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('cajero.pagos.create') ? 'active' : '' }}">
                             <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Cobrar</div>
@@ -458,7 +474,7 @@
                     @endif
                     @if(auth()->user()->hasRole('COORDINADOR_FACULTAD'))
                     <li class="nav-item mb-1">
-                        <a href="{{ route('coordinador-facultad.infraestructura-horarios.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/infraestructura-horarios.index*') ? 'active' : '' }}">
+                        <a href="{{ route('coordinador-facultad.infraestructura-horarios.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('ccoordinador-facultad.infraestructura-horarios.index') ? 'active' : '' }}">
                             <i class="fa-solid fa-industry nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Infraestructura</div>
@@ -467,7 +483,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('coordinador-facultad.horarios-grupohorario.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/horarios-grupohorario.index*') ? 'active' : '' }}">
+                        <a href="{{ route('coordinador-facultad.horarios-grupohorario.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('coordinador-facultad.horarios-grupohorario.index') ? 'active' : '' }}">
                             <i class="fa-solid fa-calendar nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Horarios</div>
@@ -476,7 +492,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('coordinador-facultad.secciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/secciones.index*') ? 'active' : '' }}">
+                        <a href="{{ route('coordinador-facultad.secciones.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('coordinador-facultad.secciones.index') ? 'active' : '' }}">
                             <i class="fa-solid fa-people-group nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Secciones</div>
@@ -485,7 +501,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('coordinador-facultad.dashboard') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('coordinador-facultad/dashboard*') ? 'active' : '' }}">
+                        <a href="{{ route('coordinador-facultad.dashboard') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('coordinador-facultad.dashboard') ? 'active' : '' }}">
                             <i class="fa-solid fa-chart-line nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Dasboard</div>
@@ -513,12 +529,22 @@
                         </h5>
                     </div>
 
-                    {{-- Ajustes --}}
-                    <a href="{{ route('profile') }}"
-                        class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('profile') ? 'active' : '' }}"
-                        title="Ajustes">
-                        <i class="fa-solid fa-gear nav-icon fs-5 text-muted"></i>
-                    </a>
+                    {{-- Ajustes + Cerrar Sesión --}}
+                    <div class="d-flex align-items-center gap-1">
+                        <a href="{{ route('profile') }}"
+                            class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('profile') ? 'active' : '' }}"
+                            title="Ajustes">
+                            <i class="fa-solid fa-gear nav-icon fs-5 text-muted"></i>
+                        </a>
+
+                        <button type="button"
+                            class="nav-item-custom d-flex align-items-center text-decoration-none text-dark border-0 bg-transparent p-0"
+                            data-bs-toggle="modal"
+                            data-bs-target="#confirmLogoutLayoutModal"
+                            title="Cerrar Sesión">
+                            <i class="fa-solid fa-right-from-bracket nav-icon fs-5 text-muted"></i>
+                        </button>
+                    </div>
 
                 </div>
             </div>
@@ -528,6 +554,34 @@
         <main class="main-content flex-grow-1">
             @yield('content')
         </main>
+    </div>
+
+    <!-- Modal de confirmación de cierre de sesión (global del layout) -->
+    <div class="modal fade" id="confirmLogoutLayoutModal" tabindex="-1" aria-labelledby="confirmLogoutLayoutLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-3">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark" id="confirmLogoutLayoutLabel">
+                        <i class="fa-solid fa-right-from-bracket me-2 text-danger"></i>Cerrar Sesión Activa
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body py-3">
+                    <p class="text-secondary mb-0">
+                        ¿Estás seguro de que deseas salir de la plataforma NEXUM? Toda transacción o formulario no guardado se perderá al invalidar la sesión.
+                    </p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Permanecer</button>
+                    <form method="POST" action="{{ route('logout') }}" class="m-0">
+                        @csrf
+                        <button type="submit" class="btn btn-danger px-4 fw-semibold">
+                            Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <x-toast-container />

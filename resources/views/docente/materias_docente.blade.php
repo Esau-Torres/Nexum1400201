@@ -18,43 +18,51 @@
                 </div>
             </div>
 
-            <!-- GRID DE MATERIAS (2 por fila, alineado a la izquierda con respiro) -->
+            <!-- GRID DE MATERIAS -->
             <div class="row g-3 ps-2 ps-lg-4">
                 @forelse($materias as $materia)
                 <div class="col-12 col-md-6">
                     <div class="card border-0 shadow-sm rounded-4 h-100 materia-card-minimal">
                         <div class="card-body p-4 d-flex flex-column">
 
-                            <!-- Header: grupo a la izquierda, código como pill VERDE a la derecha -->
+                            <!-- Header: código como pill VERDE a la izquierda -->
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="badge bg-success text-white px-2 py-1 rounded-pill small">
                                     {{ $materia->codigo }}
                                 </span>
                             </div>
 
-                            <!-- Título MUCHO más grande -->
+                            <!-- Título grande -->
                             <h2 class="materia-nombre mb-2">{{ $materia->nombre }}</h2>
 
-                            <!-- Descripción breve (1-2 oraciones) -->
+                            <!-- Descripción breve -->
                             <p class="text-muted small mb-3">{{ $materia->descripcion }}</p>
 
-                            <!-- Stats centrados: alumnos, aula y horario en fila -->
-                            <div class="materia-stats-row d-flex justify-content-around align-items-center mb-4 mt-auto py-3 px-2 bg-light rounded-3">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-users text-danger"></i>
-                                    <span class="text-dark">{{ $materia->estudiantes }}</span>
+                            <!-- Stats en 2 filas: cortos arriba, horario abajo -->
+                            <div class="materia-stats-stack mb-4 mt-auto">
+
+                                <!-- Fila 1: Alumnos y Aula (stats cortos) -->
+                                <div class="d-flex gap-3 mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-users text-danger small"></i>
+                                        <span class="text-dark fw-medium small">{{ $materia->estudiantes }} alumnos</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-location-dot text-danger small"></i>
+                                        <span class="text-dark fw-medium small">{{ $materia->aula }}</span>
+                                    </div>
                                 </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-location-dot text-danger"></i>
-                                    <span class="text-dark">{{ $materia->aula }}</span>
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-clock text-danger"></i>
-                                    <span class="text-dark">{{ $materia->horario }}</span>
+
+                                <!-- Fila 2: Horario (con espacio propio, se ajusta a múltiples líneas) -->
+                                <div class="stat-horario d-flex align-items-start gap-2">
+                                    <i class="fa-solid fa-clock text-danger small flex-shrink-0 mt-1"></i>
+                                    <span class="text-dark fw-medium small lh-sm">
+                                        {{ $materia->horario }}
+                                    </span>
                                 </div>
                             </div>
 
-                            <!-- Acciones: Asistencia AMBER sólido / Notas ROJO sólido -->
+                            <!-- Acciones -->
                             <div class="d-grid gap-2 d-flex">
                                 <a href="{{ route('docente.asistencia', $materia->id) }}" class="btn btn-asistencia py-2 rounded-3 flex-fill d-flex align-items-center justify-content-center gap-2">
                                     <i class="fa-solid fa-clipboard-check"></i>
