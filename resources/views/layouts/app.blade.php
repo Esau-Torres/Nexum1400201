@@ -474,7 +474,7 @@
                     @endif
                     @if(auth()->user()->hasRole('COORDINADOR_FACULTAD'))
                     <li class="nav-item mb-1">
-                        <a href="{{ route('coordinador-facultad.infraestructura-horarios.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('ccoordinador-facultad.infraestructura-horarios.index') ? 'active' : '' }}">
+                        <a href="{{ route('coordinador-facultad.infraestructura-horarios.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('coordinador-facultad.infraestructura-horarios.index') ? 'active' : '' }}">
                             <i class="fa-solid fa-industry nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Infraestructura</div>
