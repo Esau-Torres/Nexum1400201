@@ -5,8 +5,8 @@ namespace App\Models\Academico;
 use App\Enums\EstadoMateria;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\CoordinadorFacultad\Seccion; // Corregido namespace
-use App\Models\Academico\PensumMateria; // Corregido a mayúscula
+use App\Models\CoordinadorFacultad\Seccion;
+use App\Models\Academico\PensumMateria;
 
 class Materias extends Model
 {

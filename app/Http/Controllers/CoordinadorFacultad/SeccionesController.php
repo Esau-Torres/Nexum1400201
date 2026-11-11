@@ -9,7 +9,6 @@ use App\Models\CoordinadorFacultad\Aula;
 use App\Models\CoordinadorFacultad\Grupo;
 use App\Models\CoordinadorFacultad\Horarios;
 use App\Models\CoordinadorFacultad\Seccion;
-use App\Models\CoordinadorFacultad\SeccionHorario;
 use App\Models\Docente\Docentes;
 use App\Actions\CoordinadorFacultad\CreateSeccionAction;
 use App\Actions\CoordinadorFacultad\UpdateSeccionAction;
@@ -19,6 +18,7 @@ use App\Enums\EstadoSeccion;
 use App\Models\Academico\PensumMateria;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Throwable;
@@ -140,46 +140,6 @@ class SeccionesController extends Controller
             return redirect()
                 ->route('coordinador-facultad.secciones.index')
                 ->with('success', 'Sección eliminada correctamente.');
-        } catch (Throwable $e) {
-            report($e);
-            return back()->with('error', $e->getMessage());
-        }
-    }
-
-    /* ============================================================
-       HORARIOS DE LA SECCIÓN (modal aparte)
-       ============================================================ */
-
-    public function addHorario(
-        StoreSeccionHorarioRules $request,
-        Seccion $seccion,
-        AddSeccionHorarioAction $action
-    ): RedirectResponse {
-        try {
-            $action->execute($seccion, $request->validated());
-
-            return redirect()
-                ->route('coordinador-facultad.secciones.index')
-                ->with('success', 'Bloque horario asignado a la sección.');
-        } catch (ValidationException $e) {
-            throw $e;
-        } catch (Throwable $e) {
-            report($e);
-            return back()->withInput()->with('error', 'No se pudo asignar: ' . $e->getMessage());
-        }
-    }
-
-    public function removeHorario(
-        Seccion $seccion,
-        SeccionHorario $seccionHorario,
-        RemoveSeccionHorarioAction $action
-    ): RedirectResponse {
-        try {
-            $action->execute($seccionHorario);
-
-            return redirect()
-                ->route('coordinador-facultad.secciones.index')
-                ->with('success', 'Bloque horario eliminado de la sección.');
         } catch (Throwable $e) {
             report($e);
             return back()->with('error', $e->getMessage());
