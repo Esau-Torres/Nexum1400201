@@ -231,7 +231,7 @@
                 <div class="col-12">
                     <div class="d-flex align-items-center gap-2 border-bottom pb-2">
                         <i class="bi bi-person-badge fs-4" style="color: var(--color-accent);"></i>
-                        <h4 class="fw-bold text-dark m-0">ACRUALIZACIPON DE DATOS Y CREDENCIALES</h4>
+                        <h4 class="fw-bold text-dark m-0">ACTUALIZACION DE DATOS Y CREDENCIALES</h4>
                     </div>
                 </div>
 

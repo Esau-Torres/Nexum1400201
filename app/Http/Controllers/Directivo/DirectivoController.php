@@ -246,24 +246,11 @@ class DirectivoController extends Controller
         $totalMatriculados = (clone $queryBase)->distinct('inscripciones.id_alumno')->count('inscripciones.id_alumno');
 
 
-        // ---------------------------------------------------------
-        // 3. INDICADORES: CICLO ACTIVO VS CICLO CERRADO
-        // ---------------------------------------------------------
+            // ---------------------------------------------------------
+            // 3. INDICADORES: CICLO ACTIVO VS CICLO CERRADO
+            // ---------------------------------------------------------
 
-        // Verificamos si el ciclo seleccionado actualmente está ACTIVO
-        $cicloActualObj = DB::table('ciclo_lectivo')->where('ciclo_lectivo_id', $cicloId)->first();
-        $esCicloActivo = ($cicloActualObj && $cicloActualObj->estado === 'ACTIVO');
-
-        $nuevoIngreso = 0;
-        $alumnosRetenidos = 0;
-        $estudiantesActivos = 0;
-        $estudiantesInactivos = 0;
-        $varMatricula = '0.0%';
-
-        // Si el ciclo está ACTIVO, calculamos todos los resultados normales
-        if ($esCicloActivo) {
-
-            // A) Estudiantes de Nuevo Ingreso (Tarjeta 2)
+            // A) Estudiantes de Nuevo Ingreso (Tarjeta 2) - Se calcula para TODOS los ciclos
             $nuevoIngreso = (clone $queryBase)
                 ->whereNotExists(function ($query) use ($cicloId) {
                     $query->select(DB::raw(1))
@@ -274,10 +261,11 @@ class DirectivoController extends Controller
                 ->distinct('inscripciones.id_alumno')
                 ->count('inscripciones.id_alumno');
 
-            // B) Alumnos que continúan / Antiguo Ingreso (Tarjeta 3)
+            // B) Alumnos que continúan / Antiguo Ingreso (Tarjeta 3) - Se calcula para TODOS los ciclos
             $alumnosRetenidos = $totalMatriculados - $nuevoIngreso;
 
-            // C) Variación vs ciclo anterior (Tarjeta 1)
+            // C) Variación vs ciclo anterior (Tarjeta 1) - Se calcula para TODOS los ciclos
+            $varMatricula = '0.0%';
             $cicloAnterior = DB::table('ciclo_lectivo')
                 ->where('ciclo_lectivo_id', '<', $cicloId)
                 ->orderByDesc('ciclo_lectivo_id')
@@ -301,21 +289,37 @@ class DirectivoController extends Controller
                 }
             }
 
-            // D) Estudiantes Activos e Inactivos (Tarjetas 4 y 5)
-            $queryAlumnos = DB::table('alumnos')
-                ->leftJoin('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id');
+            // D) Estudiantes Activos e Inactivos (Tarjetas 4 y 5) Cambio
+            $cicloActualObj = DB::table('ciclo_lectivo')->where('ciclo_lectivo_id', $cicloId)->first();
 
-            if ($facultadId) {
-                $queryAlumnos->where('carreras.id_facultad', $facultadId);
-            }
-            if ($carreraId) {
-                $queryAlumnos->where('alumnos.id_carrera', $carreraId);
-            }
+            // Verificamos si el ciclo está en cualquiera de los estados "vivos" (no cerrado)
+            $estadosVivos = ['CONFIGURACION', 'MATRICULA_ABIERTA', 'ACTIVO'];
+            $esCicloVivo = ($cicloActualObj && in_array($cicloActualObj->estado, $estadosVivos));
 
-            $estudiantesActivos = (clone $queryAlumnos)->where('alumnos.estado_carrera', 'ACTIVO')->count();
-            $estudiantesInactivos = (clone $queryAlumnos)->where('alumnos.estado_carrera', 'INACTIVO')->count();
-        }
-        // Si el ciclo NO está activo (está cerrado), todas estas variables se quedan en 0 automáticamente.
+            $estudiantesActivos = (clone $queryBase)
+                ->where('alumnos.estado_carrera', 'ACTIVO')
+                ->distinct('inscripciones.id_alumno')
+                ->count('inscripciones.id_alumno');
+
+            $estudiantesInactivos = (clone $queryBase)
+                ->where('alumnos.estado_carrera', 'INACTIVO')
+                ->distinct('inscripciones.id_alumno')
+                ->count('inscripciones.id_alumno');
+
+            if ($esCicloVivo) {
+                $queryAlumnos = DB::table('alumnos')
+                    ->leftJoin('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id');
+
+                if ($facultadId) {
+                    $queryAlumnos->where('carreras.id_facultad', $facultadId);
+                }
+                if ($carreraId) {
+                    $queryAlumnos->where('alumnos.id_carrera', $carreraId);
+                }
+
+                $estudiantesActivos = (clone $queryAlumnos)->where('alumnos.estado_carrera', 'ACTIVO')->count();
+                $estudiantesInactivos = (clone $queryAlumnos)->where('alumnos.estado_carrera', 'INACTIVO')->count();
+            }
 
 
         // ---------------------------------------------------------
