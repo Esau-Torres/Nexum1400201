@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Estudiante\registroController;
-use App\Http\Controllers\Users\homeController;
+use App\Http\Controllers\Users\HomeController;
 use App\Http\Controllers\Adfinanciero\AdminfinancieroController;
 use App\Http\Controllers\Cajero\CajeroController;
 use App\Http\Controllers\Directivo\DirectivoController;
@@ -26,7 +26,7 @@ Route::get('/register', [registroController::class, 'index'])->name('register');
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rutas comunes
-    Route::get('/home', [homeController::class, 'index'])->name('home');
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
 
     // estudiante
     Route::get('/profile', function () { $user = auth()->user();
