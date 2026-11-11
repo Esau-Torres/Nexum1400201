@@ -10,6 +10,7 @@ class HomeController extends Controller
 {
     public function index(): View|RedirectResponse
     {
+        // Obtener el usuario autenticado
         $usuario = auth()->user();
 
         // Redirecciones según el rol del usuario

@@ -20,6 +20,7 @@ class CreateUserController extends Controller
 {
     public function index()
     {
+        // Obtener los tipos de documento y regionales desde la base de datos
         $tiposDocumento = DB::table('tipo_documento_identidad')->get();
         $regionales     = DB::table('regional_activo')->get();
 

@@ -8,11 +8,13 @@
 
     class RegistroController extends Controller
     {
-        // constructor cosulta de datos en para el formulario de registro
+        // constructor cosulta de datos en para el formulario de registro de usuario
         public function index()
         {
             $tipo_documento_identidad = DB::table('tipo_documento_identidad')->get();
+            
             $carreras = Carreras::activasConPensum();
+
             return view('auth.register', compact('tipo_documento_identidad', 'carreras'));
         }
     }
