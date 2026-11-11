@@ -436,7 +436,7 @@
                     {{-- ============================================================ --}}
                     @if(auth()->user()->hasRole('CAJERO'))
                     <li class="nav-item mb-1">
-                        <a href="{{ route('cajero.deuda.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('cajero/deuda*') ? 'active' : '' }}">
+                        <a href="{{ route('cajero.deuda.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('cajero.deuda.index') ? 'active' : '' }}">
                             <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Deuda Pendiente</div>
@@ -445,7 +445,7 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
-                        <a href="{{ route('cajero.ventanilla.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->is('*ventanilla*') ? 'active' : '' }}">
+                        <a href="{{ route('cajero.ventanilla.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('cajero.ventanilla.index') ? 'active' : '' }}">
                             <i class="fa-solid fa-cash-register nav-icon fs-5 me-3 text-muted"></i>
                             <div>
                                 <div class="fw-medium">Consultas en ventanilla</div>

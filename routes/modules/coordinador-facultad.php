@@ -36,10 +36,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/grupos/{grupo}', [HorariosController::class, 'deleteGrupo'])->name('grupos.destroy');
 
             // ---- Secciones ----
-            Route::get('/secciones-store',  [SeccionesController::class, 'index'])->name('secciones.index');
-            Route::post('/secciones',       [SeccionesController::class, 'store'])->name('secciones.store');
-            Route::put('/{seccion}',        [SeccionesController::class, 'update'])->name('secciones.update');
-            Route::delete('/{seccion}',     [SeccionesController::class, 'destroy'])->name('secciones.destroy');
+            Route::get('/secciones/secciones-store',  [SeccionesController::class, 'index'])->name('secciones.index');
+            Route::post('/secciones/secciones',       [SeccionesController::class, 'store'])->name('secciones.store');
+            Route::put('/secciones/{seccion}',        [SeccionesController::class, 'update'])->name('secciones.update');
+            Route::delete('/secciones/{seccion}',     [SeccionesController::class, 'destroy'])->name('secciones.destroy');
 
             // ---- Dashboard ----
             Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
