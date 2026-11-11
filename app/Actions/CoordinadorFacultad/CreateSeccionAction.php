@@ -14,15 +14,13 @@ class CreateSeccionAction
     public function execute(array $data): Seccion
     {
         return DB::transaction(function () use ($data) {
-
-            // 1. Resolver los bloques horarios definitivos
             $bloques = $this->resolverBloques($data);
 
             if (empty($bloques)) {
                 throw new RuntimeException('Debés asignar al menos un bloque horario a la sección.');
             }
 
-            // 2. Crear la sección
+            // FIX: filter_var protege contra 'Undefined array key' de los checkboxes
             $seccion = Seccion::create([
                 'id_materia'        => $data['id_materia'],
                 'id_ciclo_lectivo'  => $data['id_ciclo_lectivo'],
@@ -30,19 +28,18 @@ class CreateSeccionAction
                 'id_grupo'          => $data['id_grupo'] ?? null,
                 'nombre_grupo'      => strtoupper($data['nombre_grupo']),
                 'cupo_maximo'       => (int) $data['cupo_maximo'],
-                'cupo_extra_maximo' => (int) $data['cupo_extra_maximo'] ?? 0,
-                'permite_sobrecupo' => (bool) $data['permite_sobrecupo'],
+                'cupo_extra_maximo' => (int) ($data['cupo_extra_maximo'] ?? 0),
+                'permite_sobrecupo' => filter_var($data['permite_sobrecupo'] ?? false, FILTER_VALIDATE_BOOLEAN),
                 'estado'            => $data['estado'],
             ]);
 
-            // 3. Insertar los bloques
             foreach ($bloques as $b) {
                 $claseCompartida = $this->obtenerOCrearClaseCompartida(
-                    idDocente: (int) $data['id_docente'],
-                    idCiclo:   (int) $data['id_ciclo_lectivo'],
-                    idAula:    (int) $b['id_aula'],
-                    idHorario: (int) $b['id_horario'],
-                    cupoNuevo: (int) $data['cupo_maximo'],
+                    (int) $data['id_docente'],
+                    (int) $data['id_ciclo_lectivo'],
+                    (int) $b['id_aula'],
+                    (int) $b['id_horario'],
+                    (int) $data['cupo_maximo']
                 );
 
                 SeccionHorario::create([
@@ -60,17 +57,8 @@ class CreateSeccionAction
         });
     }
 
-    /**
-     * Busca una clase compartida existente o crea una nueva.
-     * Valida que la capacidad del aula alcance para sumar el nuevo cupo.
-     */
-    private function obtenerOCrearClaseCompartida(
-        int $idDocente,
-        int $idCiclo,
-        int $idAula,
-        int $idHorario,
-        int $cupoNuevo
-    ): ClaseCompartida {
+    private function obtenerOCrearClaseCompartida(int $idDocente, int $idCiclo, int $idAula, int $idHorario, int $cupoNuevo): ClaseCompartida 
+    {
         $existente = ClaseCompartida::query()
             ->where('id_docente', $idDocente)
             ->where('id_ciclo_lectivo', $idCiclo)
@@ -79,21 +67,15 @@ class CreateSeccionAction
             ->first();
 
         if ($existente) {
-            // Verificar que la capacidad del aula alcance para sumar el nuevo cupo
             $aula = $existente->aula;
-            $cupoActual = $existente->cupo_total;
-            $cupoTotal = $cupoActual + $cupoNuevo;
+            $cupoTotal = $existente->cupo_total + $cupoNuevo;
 
             if ($aula && $cupoTotal > $aula->capacidad) {
-                throw new RuntimeException(
-                    "No se puede compartir la clase: el aula '{$aula->nombre_aula}' tiene capacidad {$aula->capacidad} y la suma de cupos sería {$cupoTotal}."
-                );
+                throw new RuntimeException("Capacidad excedida para el aula '{$aula->nombre_aula}'.");
             }
-
             return $existente;
         }
 
-        // Crear nueva clase compartida
         return ClaseCompartida::create([
             'id_docente'       => $idDocente,
             'id_ciclo_lectivo' => $idCiclo,
@@ -102,46 +84,26 @@ class CreateSeccionAction
         ]);
     }
 
-    /**
-     * Resuelve los bloques definitivos de la sección.
-     *
-     * - Si hay grupo: usa los bloques del grupo, y toma las aulas del input `aulas_por_horario`.
-     * - Si NO hay grupo: usa los bloques del input `horarios[]`.
-     *
-     * @return array<int, array{id_horario:int, id_aula:int}>
-     */
     private function resolverBloques(array $data): array
     {
         $idGrupo = $data['id_grupo'] ?? null;
 
         if ($idGrupo) {
             $grupo = Grupo::with('horarios')->find($idGrupo);
-            if (!$grupo) {
-                throw new RuntimeException('El grupo seleccionado no existe.');
-            }
-
-            // Aulas vienen como: aulas_por_horario[<horario_id>] = <aula_id>
             $aulasPorHorario = $data['aulas_por_horario'] ?? [];
             $bloques = [];
 
             foreach ($grupo->horarios as $horario) {
                 $idAula = $aulasPorHorario[$horario->horario_id] ?? null;
                 if (!$idAula) {
-                    throw new RuntimeException(
-                        "Falta asignar un aula para el bloque del {$horario->dia->label()} " .
-                        "{$horario->hora_inicio}–{$horario->hora_fin}."
-                    );
+                    $diaText = is_object($horario->dia) && method_exists($horario->dia, 'label') ? $horario->dia->label() : (is_object($horario->dia) ? $horario->dia->value : $horario->dia);
+                    throw new RuntimeException("Falta asignar un aula para el bloque del {$diaText}.");
                 }
-                $bloques[] = [
-                    'id_horario' => $horario->horario_id,
-                    'id_aula'    => (int) $idAula,
-                ];
+                $bloques[] = ['id_horario' => $horario->horario_id, 'id_aula' => (int) $idAula];
             }
-
             return $bloques;
         }
 
-        // Sin grupo: los bloques vienen del input directo
         $bloques = [];
         foreach ($data['horarios'] ?? [] as $h) {
             if (empty($h['id_horario']) || empty($h['id_aula'])) continue;
@@ -150,7 +112,6 @@ class CreateSeccionAction
                 'id_aula'    => (int) $h['id_aula'],
             ];
         }
-
         return $bloques;
     }
 }

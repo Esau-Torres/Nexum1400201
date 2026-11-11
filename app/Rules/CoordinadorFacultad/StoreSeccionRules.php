@@ -11,6 +11,7 @@ use App\Models\CoordinadorFacultad\Aula;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Support\Facades\DB;
 
 class StoreSeccionRules extends FormRequest
 {
@@ -21,7 +22,8 @@ class StoreSeccionRules extends FormRequest
 
     public function rules(): array
     {
-        $seccionId = $this->route('seccion')?->seccion_id;
+        $seccionParam = $this->route('seccion');
+        $seccionId = is_object($seccionParam) ? $seccionParam->seccion_id : $seccionParam;
 
         return [
             'id_materia'       => ['required', 'integer', 'exists:materias,materia_id'],
@@ -43,11 +45,9 @@ class StoreSeccionRules extends FormRequest
             'permite_sobrecupo' => ['required', 'boolean'],
             'estado'            => ['required', new Enum(EstadoSeccion::class)],
 
-            // Modo grupo: un aula por cada horario del grupo
             'aulas_por_horario'   => ['nullable', 'array'],
             'aulas_por_horario.*' => ['integer', 'exists:aula,aula_id'],
 
-            // Modo libre: pares horario+aula
             'horarios'              => ['nullable', 'array'],
             'horarios.*.id_horario' => ['required_with:horarios.*.id_aula', 'integer', 'exists:horarios,horario_id'],
             'horarios.*.id_aula'    => ['required_with:horarios.*.id_horario', 'integer', 'exists:aula,aula_id'],
@@ -57,19 +57,19 @@ class StoreSeccionRules extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($v) {
-
             $idGrupo     = $this->input('id_grupo');
             $idDocente   = $this->input('id_docente');
             $idCiclo     = $this->input('id_ciclo_lectivo');
             $cupoMaximo  = (int) $this->input('cupo_maximo');
-            $permite     = (bool) $this->input('permite_sobrecupo', false);
+            $permite     = filter_var($this->input('permite_sobrecupo', false), FILTER_VALIDATE_BOOLEAN);
             $cupoExtra   = (int) $this->input('cupo_extra_maximo', 0);
             $nombreGrupo = $this->input('nombre_grupo');
-            $seccionId   = $this->route('seccion')?->seccion_id;
-            $seccion     = $this->route('seccion'); 
-            $esUpdate    = $seccion !== null;
+            
+            // FIX Seguro
+            $seccionParam = $this->route('seccion');
+            $seccionId    = is_object($seccionParam) ? $seccionParam->seccion_id : $seccionParam;
+            $esUpdate     = !empty($seccionId);
 
-            // === Validación de sobrecupo ===
             if ($permite && $cupoExtra === 0) {
                 $v->errors()->add('cupo_extra_maximo', 'Si permitís sobrecupo, el cupo extra debe ser mayor a 0.');
             }
@@ -77,8 +77,7 @@ class StoreSeccionRules extends FormRequest
                 $v->errors()->add('cupo_extra_maximo', 'No podés definir cupo extra sin permitir sobrecupo.');
             }
 
-            // Resolver bloques+aulas
-            if(!$esUpdate){
+            if (!$esUpdate) {
                 $bloques = [];
                 if ($idGrupo) {
                     $grupo = Grupo::with('horarios')->find($idGrupo);
@@ -86,9 +85,11 @@ class StoreSeccionRules extends FormRequest
                     foreach ($grupo?->horarios ?? [] as $h) {
                         $idAula = $aulasPorHorario[$h->horario_id] ?? null;
                         if (!$idAula) {
+                            // FIX: Previene fallo "Call to a member function on string"
+                            $diaText = is_object($h->dia) && method_exists($h->dia, 'label') ? $h->dia->label() : (is_object($h->dia) ? $h->dia->value : $h->dia);
                             $v->errors()->add(
                                 'aulas_por_horario',
-                                "Falta asignar un aula para el bloque {$h->dia->label()} {$h->hora_inicio}–{$h->hora_fin}."
+                                "Falta asignar un aula para el bloque {$diaText} {$h->hora_inicio}–{$h->hora_fin}."
                             );
                             continue;
                         }
@@ -105,12 +106,10 @@ class StoreSeccionRules extends FormRequest
                     }
                 }
 
-                // === Validación de capacidad + clases compartidas ===
                 foreach ($bloques as $b) {
                     $aula = Aula::find($b['id_aula']);
                     if (!$aula) continue;
 
-                    // Buscar clase compartida existente para este bloque + docente
                     $clase = ClaseCompartida::query()
                         ->where('id_docente', $idDocente)
                         ->where('id_ciclo_lectivo', $idCiclo)
@@ -118,39 +117,23 @@ class StoreSeccionRules extends FormRequest
                         ->first();
 
                     if ($clase) {
-                        // Sumar cupos de las secciones existentes + la nueva
-                        $cupoExistente = $clase->cupo_total;
-                        $cupoTotal = $cupoExistente + $cupoMaximo;
-
+                        $cupoTotal = $clase->cupo_total + $cupoMaximo;
                         if ($cupoTotal > $aula->capacidad) {
-                            $v->errors()->add(
-                                'cupo_maximo',
-                                "La clase ya tiene {$cupoExistente} alumnos en el aula '{$aula->nombre_aula}' (cap. {$aula->capacidad}). Sumar {$cupoMaximo} excede la capacidad."
-                            );
+                            $v->errors()->add('cupo_maximo', "El aula excede su capacidad. Cupo de clase compartida excedido.");
                         }
-
-                        // Validar que la clase existente use la misma aula
                         if ((int) $clase->id_aula !== (int) $b['id_aula']) {
-                            $v->errors()->add(
-                                'aulas_por_horario',
-                                'El docente ya tiene una clase compartida en ese bloque con OTRA aula. Usá la misma aula para compartir.'
-                            );
+                            $v->errors()->add('aulas_por_horario', 'El docente ya tiene una clase en otra aula en este bloque.');
                         }
                     } else {
-                        // Clase nueva: solo validar que el aula alcance para el cupo nuevo
                         if ($aula->capacidad < $cupoMaximo) {
-                            $v->errors()->add(
-                                'cupo_maximo',
-                                "El aula '{$aula->nombre_aula}' tiene capacidad {$aula->capacidad} y el cupo es {$cupoMaximo}."
-                            );
+                            $v->errors()->add('cupo_maximo', "El aula '{$aula->nombre_aula}' tiene capacidad {$aula->capacidad}.");
                         }
                     }
                 }
 
-                // === Validación de choque de grupo ===
                 $horariosIds = array_column($bloques, 'id_horario');
                 if ($nombreGrupo && !empty($horariosIds)) {
-                    $choqueGrupo = \DB::table('seccion_horario as sh')
+                    $choqueGrupo = DB::table('seccion_horario as sh')
                         ->join('seccion as s', 's.seccion_id', '=', 'sh.id_seccion')
                         ->where('s.id_ciclo_lectivo', $idCiclo)
                         ->where('s.nombre_grupo', $nombreGrupo)
@@ -159,10 +142,7 @@ class StoreSeccionRules extends FormRequest
                         ->exists();
 
                     if ($choqueGrupo) {
-                        $v->errors()->add(
-                            'nombre_grupo',
-                            'El grupo ya tiene otra materia en uno de esos bloques horarios.'
-                        );
+                        $v->errors()->add('nombre_grupo', 'El grupo ya tiene otra materia en uno de esos bloques horarios.');
                     }
                 }
             }
@@ -178,8 +158,6 @@ class StoreSeccionRules extends FormRequest
             'nombre_grupo.required'     => 'El nombre del grupo es obligatorio.',
             'nombre_grupo.unique'       => 'Ya existe una sección de esta materia con ese grupo en este ciclo.',
             'nombre_grupo.regex'        => 'El nombre del grupo solo admite letras, números y guiones.',
-            'cupo_maximo.min'           => 'El cupo máximo debe ser mayor a 0.',
-            'cupo_extra_maximo.max'     => 'El cupo extra no puede superar 3 alumnos.',
         ];
     }
 }

@@ -10,12 +10,12 @@ use App\Models\CoordinadorFacultad\Grupo;
 use App\Models\CoordinadorFacultad\Horarios;
 use App\Models\CoordinadorFacultad\Seccion;
 use App\Models\Docente\Docentes;
+use App\Models\Academico\PensumMateria;
 use App\Actions\CoordinadorFacultad\CreateSeccionAction;
 use App\Actions\CoordinadorFacultad\UpdateSeccionAction;
 use App\Actions\CoordinadorFacultad\DeleteSeccionAction;
 use App\Rules\CoordinadorFacultad\StoreSeccionRules;
 use App\Enums\EstadoSeccion;
-use App\Models\Academico\PensumMateria;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -28,21 +28,21 @@ class SeccionesController extends Controller
     public function index(Request $request): View
     {
         $cicloActual = CicloLectivo::query()
-        ->orderByRaw("
-            CASE estado
-                WHEN 'MATRICULA_ABIERTA' THEN 1
-                WHEN 'ACTIVO' THEN 2
-                WHEN 'CONFIGURACION' THEN 3
-                WHEN 'CERRADO' THEN 4
-                ELSE 5
-            END
-        ")
-        ->orderByDesc('fecha_inicio')
-        ->first();
+            ->orderByRaw("
+                CASE estado
+                    WHEN 'MATRICULA_ABIERTA' THEN 1
+                    WHEN 'ACTIVO' THEN 2
+                    WHEN 'CONFIGURACION' THEN 3
+                    WHEN 'CERRADO' THEN 4
+                    ELSE 5
+                END
+            ")
+            ->orderByDesc('fecha_inicio')
+            ->first();
 
         $idCicloFiltro = $request->filled('id_ciclo_lectivo') ? (int) $request->input('id_ciclo_lectivo') : $cicloActual?->ciclo_lectivo_id;
 
-         $seccionesQuery = Seccion::query()
+        $seccionesQuery = Seccion::query()
             ->with([
                 'materia',
                 'cicloLectivo',
@@ -63,11 +63,21 @@ class SeccionesController extends Controller
 
         $ciclosLectivos     = CicloLectivo::orderByDesc('fecha_inicio')->get();
         $materias           = Materias::query()->where('estado', 'ACTIVO')->with(['pensumMaterias.pensum.carrera.facultad'])->orderBy('nombre')->get();
-        $pensumMaterias     = PensumMateria::query()->with([ 'materia', 'pensum.carrera.facultad', ])->whereHas('materia', function ($query) { $query->where('estado', 'ACTIVO'); })->orderBy('id_pensum')->orderBy('ciclo_sugerido')->get();
+        
+        $pensumMaterias     = PensumMateria::query()
+            ->with(['materia', 'pensum.carrera.facultad'])
+            ->whereHas('materia', function ($query) { 
+                $query->where('estado', 'ACTIVO'); 
+            })
+            ->orderBy('id_pensum')
+            ->orderBy('ciclo_sugerido')
+            ->get();
+            
         $materiasPorCarrera = $pensumMaterias->groupBy(fn ($pm) => $pm->pensum?->carrera?->nombre ?? 'Sin carrera');
         $docentes           = Docentes::with('user')->where('estado', 'ACTIVO')->get();
         $grupos             = Grupo::with('cicloLectivo')->orderByDesc('id_ciclo_lectivo')->orderBy('nombre')->get();
         $aulas              = Aula::with('edificio')->where('activo', true)->orderBy('id_edificio')->orderBy('nombre_aula')->get();
+        
         $horarios           = Horarios::with('cicloLectivo')
             ->orderBy('id_ciclo_lectivo', 'desc')
             ->orderByRaw("CASE dia
@@ -81,21 +91,20 @@ class SeccionesController extends Controller
             ->orderBy('hora_inicio')
             ->get();
 
-        // Horarios agrupados por ciclo para el JS de los modales
         $horariosPorCiclo = $horarios->groupBy('id_ciclo_lectivo');
 
         return view('coordinador-facultad.secciones', [
-            'secciones'        => $secciones,
-            'ciclosLectivos'   => $ciclosLectivos,
+            'secciones'          => $secciones,
+            'ciclosLectivos'     => $ciclosLectivos,
             'materiasPorCarrera' => $materiasPorCarrera,
-            'pensumMateria'     => $pensumMaterias,
-            'materias'         => $materias,
-            'docentes'         => $docentes,
-            'grupos'           => $grupos,
-            'aulas'            => $aulas,
-            'horarios'         => $horarios,
-            'horariosPorCiclo' => $horariosPorCiclo,
-            'estados'          => EstadoSeccion::cases(),
+            'pensumMateria'      => $pensumMaterias,
+            'materias'           => $materias,
+            'docentes'           => $docentes,
+            'grupos'             => $grupos,
+            'aulas'              => $aulas,
+            'horarios'           => $horarios,
+            'horariosPorCiclo'   => $horariosPorCiclo,
+            'estados'            => EstadoSeccion::cases(),
             'idCicloFiltro'      => $idCicloFiltro,
         ]);
     }
@@ -104,15 +113,17 @@ class SeccionesController extends Controller
     {
         try {
             $seccion = $action->execute($request->validated());
+            
+            Log::info("Sección creada exitosamente por Coordinador ID: " . auth()->id(), ['seccion_id' => $seccion->seccion_id]);
 
             return redirect()
                 ->route('coordinador-facultad.secciones.index')
                 ->with('success', "Sección creada: {$seccion->materia->nombre} — Grupo {$seccion->nombre_grupo}.");
         } catch (ValidationException $e) {
-            throw $e;
+            return back()->withErrors($e->validator)->withInput();
         } catch (Throwable $e) {
-            report($e);
-            return back()->withInput()->with('error', 'No se pudo crear: ' . $e->getMessage());
+            Log::error("Fallo crítico al crear sección: " . $e->getMessage());
+            return back()->withInput()->with('error', 'No se pudo crear la sección: ' . $e->getMessage());
         }
     }
 
@@ -120,14 +131,16 @@ class SeccionesController extends Controller
     {
         try {
             $action->execute($seccion, $request->validated());
+            
+            Log::info("Sección actualizada por Coordinador ID: " . auth()->id(), ['seccion_id' => $seccion->seccion_id]);
 
             return redirect()
                 ->route('coordinador-facultad.secciones.index')
                 ->with('success', 'Sección actualizada correctamente.');
         } catch (ValidationException $e) {
-            throw $e;
+            return back()->withErrors($e->validator)->withInput();
         } catch (Throwable $e) {
-            report($e);
+            Log::error("Fallo crítico al actualizar sección ID {$seccion->seccion_id}: " . $e->getMessage());
             return back()->withInput()->with('error', 'No se pudo actualizar: ' . $e->getMessage());
         }
     }
@@ -135,13 +148,16 @@ class SeccionesController extends Controller
     public function destroy(Seccion $seccion, DeleteSeccionAction $action): RedirectResponse
     {
         try {
+            $id = $seccion->seccion_id;
             $action->execute($seccion);
+            
+            Log::info("Sección eliminada por Coordinador ID: " . auth()->id(), ['seccion_id' => $id]);
 
             return redirect()
                 ->route('coordinador-facultad.secciones.index')
                 ->with('success', 'Sección eliminada correctamente.');
         } catch (Throwable $e) {
-            report($e);
+            Log::error("Fallo al eliminar sección: " . $e->getMessage());
             return back()->with('error', $e->getMessage());
         }
     }
