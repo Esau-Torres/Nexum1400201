@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class PuedeCursarMateriaRule implements Rule
 {
+    // ID del alumno para el que se está validando la materia
     protected $alumnoId;
     protected $mensaje;
 
