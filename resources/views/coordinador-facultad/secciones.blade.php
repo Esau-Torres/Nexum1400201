@@ -39,8 +39,7 @@
                             <option value="">Seleccione un ciclo</option>
                             @foreach($ciclosLectivos as $c)
                                 @php
-                                    // FIX 500: Verificación segura del Enum
-                                    $estado = is_object($c->estado) ? $c->estado->value : $c->estado;
+                                    $estado = $c->estado->value ?? $c->estado;
                                 @endphp
                                 <option value="{{ $c->ciclo_lectivo_id }}" {{ (string) $idCicloFiltro === (string) $c->ciclo_lectivo_id ? 'selected' : '' }}>
                                     {{ $c->nombre_ciclo }}
@@ -126,10 +125,7 @@
                                     @endif
                                 </div>
 
-                                @php 
-                                    // FIX 500: Verificación segura
-                                    $fase = is_object($seccion->fase_ciclo) ? $seccion->fase_ciclo->value : $seccion->fase_ciclo; 
-                                @endphp
+                                @php $fase = $seccion->fase_ciclo; @endphp
 
                                 @if($fase === 'CONFIGURACION')
                                     <small class="text-muted d-block">
@@ -160,13 +156,11 @@
                                     <div class="d-flex flex-wrap gap-1">
                                         @foreach($seccion->horarios as $sh)
                                             <span class="badge text-bg-light border small font-monospace">
-                                                {{-- FIX 500: Evita llamar a short() sobre un string --}}
-                                                {{ is_object($sh->horario->dia) ? $sh->horario->dia->short() : substr($sh->horario->dia, 0, 3) }} 
-                                                {{ substr($sh->horario->hora_inicio, 0, 5) }}
+                                                {{ $sh->horario->dia->short() }} {{ substr($sh->horario->hora_inicio, 0, 5) }}
                                                 · {{ $sh->aula->nombre_aula }}
                                                 @if($sh->claseCompartida && $sh->claseCompartida->seccionesHorario->count() > 1)
                                                     <span class="badge bg-info text-white ms-1" 
-                                                          title="Compartida con otras {{ $sh->claseCompartida->seccionesHorario->count() - 1 }} sección(es)">
+                                                        title="Compartida con otras {{ $sh->claseCompartida->seccionesHorario->count() - 1 }} sección(es)">
                                                         <i class="bi bi-people-fill"></i>
                                                     </span>
                                                 @endif
@@ -178,9 +172,8 @@
                                 @endif
                             </td>
                             <td>
-                                {{-- FIX 500: Evita llamar a badge() y label() sobre un string --}}
-                                <span class="badge {{ is_object($seccion->estado) ? $seccion->estado->badge() : 'bg-secondary' }}">
-                                    {{ is_object($seccion->estado) ? $seccion->estado->label() : $seccion->estado }}
+                                <span class="badge {{ $seccion->estado->badge() }}">
+                                    {{ $seccion->estado->label() }}
                                 </span>
                             </td>
                             <td class="text-end pe-4">
@@ -274,7 +267,7 @@
                                             <tr>
                                                 <td class="ps-3">
                                                     <span class="badge text-bg-light border font-monospace"
-                                                          x-text="h.etiqueta"></span>
+                                                        x-text="h.etiqueta"></span>
                                                 </td>
                                                 <td>
                                                     <select :name="`aulas_por_horario[${h.horario_id}]`"
@@ -460,8 +453,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <span class="badge text-bg-light border font-monospace">
-                                        {{-- FIX 500: Evita llamar a label() sobre un string --}}
-                                        {{ is_object($sh->horario->dia) ? $sh->horario->dia->label() : $sh->horario->dia }}
+                                        {{ $sh->horario->dia->label() }}
                                         {{ substr($sh->horario->hora_inicio, 0, 5) }}–{{ substr($sh->horario->hora_fin, 0, 5) }}
                                     </span>
                                     <span class="ms-2 small text-muted">
@@ -516,8 +508,7 @@
         $horariosJson = $horariosPorCiclo->map(fn($items) => $items->map(fn($h) => [
             'horario_id'  => $h->horario_id,
             'etiqueta'    => $h->etiqueta,
-            // FIX 500 CRÍTICO EN ALPINE: Verificación segura del Enum
-            'dia'         => is_object($h->dia) ? $h->dia->value : $h->dia,
+            'dia'         => $h->dia->value,
             'hora_inicio' => $h->hora_inicio,
         ])->values());
 
@@ -628,6 +619,7 @@
             },
 
             get capacidadMinima() {
+                // Calcula la capacidad mínima entre las aulas elegidas
                 let capacidades = [];
 
                 // Modo grupo
@@ -653,6 +645,9 @@
             ajustarCupo() {
                 const min = this.capacidadMinima;
                 if (min !== null && this.cupoMaximo > min) {
+                    // Opción A: no dejar avanzar (solo advertencia visual)
+                    // Opción B: auto-ajustar al mínimo
+                    // → Vamos con B: auto-ajustar y avisar
                     this.cupoMaximo = min;
                 }
             },
