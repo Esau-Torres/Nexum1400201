@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Estudiante\registroController;
+use App\Http\Controllers\Estudiante\RegistroController;
 use App\Http\Controllers\Users\HomeController;
 use App\Http\Controllers\Adfinanciero\AdminfinancieroController;
 use App\Http\Controllers\Cajero\CajeroController;
@@ -16,9 +16,9 @@ Route::view('/about', 'about')->name('about');
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
-Route::get('/register', [registroController::class, 'index'])->name('register');
+Route::get('/register', [RegistroController::class, 'index'])->name('register');
 
 // ============================================
 // RUTAS PROTEGIDAS (Auth + Verified)
