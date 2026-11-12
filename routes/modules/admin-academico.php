@@ -56,7 +56,7 @@
             
             // gestionamiento de pensum, materias y ciclo lectivo
 
-            Route::prefix('materias')->name('materias.')->group(function () {
+            Route::prefix('m')->name('materias.')->group(function () {
                 Route::get('/', [MateriaController::class, 'index'])->name('materias');
                 Route::post('/materia', [MateriaController::class, 'store'])->name('store');
                 Route::put('/materia/{materia}', [MateriaController::class, 'update'])->name('update');
