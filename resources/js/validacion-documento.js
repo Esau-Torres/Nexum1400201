@@ -56,7 +56,7 @@ export function registrarComponentesValidacion(Alpine) {
                 prevStep() {
                     if (this.step > 1) this.step--;
                 }
-            })),
+            }));
 
             Alpine.data('validation', () => ({
                     fechaLimite: '',
