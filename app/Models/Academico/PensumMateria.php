@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Academico\Materias;
-use App\Models\Academico\pensum;
 use App\Models\Academico\Prerequisito;
+use App\Models\Academico\Pensum;
 
 class PensumMateria extends Model
 {
@@ -30,16 +30,16 @@ class PensumMateria extends Model
         ];
     }
 
-    public function pensum(): BelongsTo
-    {
-        return $this->belongsTo(Pensum::class, 'id_pensum', 'pensum_id');
-    }
-
     public function materia(): BelongsTo
     {
         return $this->belongsTo(Materias::class, 'id_materia', 'materia_id');
     }
     
+    public function pensum(): BelongsTo
+    {
+        return $this->belongsTo(Pensum::class, 'id_pensum', 'pensum_id');
+    }
+
     public function prerequisitos(): HasMany
     {
         return $this->hasMany(Prerequisito::class, 'id_pensum_materia', 'pensum_materia_id');
