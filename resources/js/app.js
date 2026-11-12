@@ -6,18 +6,18 @@
  * allow your team to quickly build robust real-time web applications.
  */
 import * as bootstrap from 'bootstrap';
-import Alpine from 'alpinejs';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
+import Alpine from 'alpinejs';
+
+import './alpine-components';
 import { registrarComponentesValidacion } from './validacion-documento';
 import './toast';
+import './datatable';
+import './roles-modal';
 
 import $ from 'jquery';
 window.$ = window.jQuery = $;
-import './datatable';
-
-import './roles-modal'; 
-
 
 window.Pusher = Pusher;
 window.Alpine = Alpine;
