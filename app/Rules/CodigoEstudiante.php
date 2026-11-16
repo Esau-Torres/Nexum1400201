@@ -5,6 +5,7 @@ namespace App\Rules;
 class CodigoEstudiante {
     public static function generar(string $nombreCompleto, int $userId): string
     {
+        // genera un código de estudiante basado en las iniciales del apellido, el año actual y un número correlativo
         $palabras = array_values(array_filter(explode(' ', trim($nombreCompleto))));
         
         $apellido1 = $palabras[count($palabras) - 2] ?? $palabras[0] ?? 'X';

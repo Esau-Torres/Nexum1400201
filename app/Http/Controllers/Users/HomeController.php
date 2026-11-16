@@ -10,18 +10,12 @@ class HomeController extends Controller
 {
     public function index(): View|RedirectResponse
     {
+        // Obtener el usuario autenticado
         $usuario = auth()->user();
 
         // Redirecciones según el rol del usuario
         if ($usuario->hasRole('DOCENTE')) {
             return redirect()->route('docente.home');
-        }
-
-        // ==========================================
-        // REDIRECCIÓN HACIA EL NUEVO MÓDULO DIRECTIVO
-        // ==========================================
-        if ($usuario->hasRole('DIRECTIVO')) {
-            return redirect()->route('directivo.dashboard.index');
         }
 
         $relations = ['roles', 'regionalactivo'];

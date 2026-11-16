@@ -25,11 +25,6 @@
             Route::get('/createuser', [CreateUserController::class, 'index'])->name('createuser');
             Route::post('/createuser', [CreateUserController::class, 'store'])->name('users.store');
 
-            // gestion de reglas academicas globales 
-            Route::get('/manage-ruler', function () {
-                return view('superadmin.manage-ruler');
-            })->name('manage-ruler');
-
             // panel administrativo de usuarios del sistema
             Route::get('/panel-administrativo', [ModifyUserController::class, 'index'])->name('panel-administrativo');
             Route::put('/usuarios/{id}', [ModifyUserController::class, 'update'])->name('users.update');

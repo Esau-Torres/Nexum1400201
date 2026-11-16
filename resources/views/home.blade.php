@@ -351,7 +351,8 @@
                                                     'CAJERO' => 'Cajero',
                                                     'COORDINADOR_FACULTAD' => 'Coordinador de Facultad',
                                                     'ESTUDIANTE' => 'Estudiante',
-                                                    'DOCENTE' => 'Docente'
+                                                    'DOCENTE' => 'Docente',
+                                                    'DIRECTIVO' => 'Directivo'
                                                 ];
                                                 $rolAmigable = $nombresRoles[$rol->nombre] ?? $rol->nombre;
                                             @endphp
@@ -736,6 +737,37 @@
                                 <div>
                                     <span class="fw-bold d-block text-slate-800">Prueba de Notas</span>
                                     <span class="small text-slate-500">Evaluaciones</span>
+                                </div>
+                            </a>
+                        @endif
+                        @if(auth()->user()->hasRole('DIRECTIVO'))
+                            <a href="{{ route('directivo.dashboard.index') }}" class="btn flat-btn text-start p-3 d-flex align-items-center">
+                                <div class="bg-light rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fa-solid fa-chart-pie text-danger fs-6"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-bold d-block text-slate-800">Dashboard Financiero</span>
+                                    <span class="small text-slate-500">Métricas y estadísticas</span>
+                                </div>
+                            </a>
+
+                            <a href="{{ route('directivo.morosidad.index') }}" class="btn flat-btn text-start p-3 d-flex align-items-center">
+                                <div class="bg-light rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fa-solid fa-file-invoice-dollar text-danger fs-6"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-bold d-block text-slate-800">Morosidad y Cuentas</span>
+                                    <span class="small text-slate-500">Cobros y deuda estudiantil</span>
+                                </div>
+                            </a>
+
+                            <a href="{{ route('directivo.matricula.index') }}" class="btn flat-btn text-start p-3 d-flex align-items-center">
+                                <div class="bg-light rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fa-solid fa-user-graduate text-danger fs-6"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-bold d-block text-slate-800">Dashboard Académico</span>
+                                    <span class="small text-slate-500">Población y retención</span>
                                 </div>
                             </a>
                         @endif

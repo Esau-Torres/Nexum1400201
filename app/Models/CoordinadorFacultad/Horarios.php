@@ -62,13 +62,27 @@ class Horarios extends Model
         return \Carbon\Carbon::parse($this->hora_inicio)
             ->diffInMinutes(\Carbon\Carbon::parse($this->hora_fin));
     }
+    
+    //public function getEtiquetaAttribute(): string
+    //{
+    //    return sprintf(
+    //        '%s %s-%s',
+    //        $this->dia?->short() ?? '',
+    //        substr($this->hora_inicio, 0, 5),
+    //        substr($this->hora_fin, 0, 5)
+    //    );
+    //}
 
-    /** Etiqueta corta: "Lun 06:10-07:50" */
     public function getEtiquetaAttribute(): string
     {
+        // Verifica si es un objeto instanciado del Enum o un string crudo del caché
+        $diaStr = is_object($this->dia) && method_exists($this->dia, 'short') 
+            ? $this->dia->short() 
+            : substr(is_object($this->dia) ? $this->dia->value : $this->dia, 0, 3);
+
         return sprintf(
             '%s %s-%s',
-            $this->dia?->short() ?? '',
+            $diaStr,
             substr($this->hora_inicio, 0, 5),
             substr($this->hora_fin, 0, 5)
         );

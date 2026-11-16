@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Estudiante\registroController;
-use App\Http\Controllers\Users\homeController;
+use App\Http\Controllers\Estudiante\RegistroController;
+use App\Http\Controllers\Users\HomeController;
 use App\Http\Controllers\Adfinanciero\AdminfinancieroController;
 use App\Http\Controllers\Cajero\CajeroController;
 use App\Http\Controllers\Directivo\DirectivoController;
@@ -16,9 +16,9 @@ Route::view('/about', 'about')->name('about');
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
-Route::get('/register', [registroController::class, 'index'])->name('register');
+Route::get('/register', [RegistroController::class, 'index'])->name('register');
 
 // ============================================
 // RUTAS PROTEGIDAS (Auth + Verified)
@@ -26,7 +26,7 @@ Route::get('/register', [registroController::class, 'index'])->name('register');
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rutas comunes
-    Route::get('/home', [homeController::class, 'index'])->name('home');
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
 
     // estudiante
     Route::get('/profile', function () { $user = auth()->user();
@@ -36,10 +36,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('profile'); })->name('profile');
     Route::get('/mi-foto', [FotoPerfilController::class, 'show'])->name('estudiante.foto');
     Route::post('/profile/carnet', [CarnetController::class, 'store'])->name('estudiante.carnet.store');
-
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
 
     // ============================================
     // RUTAS ADMIN FINANCIERO
@@ -90,7 +86,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/deuda/{id}/liquidar', [CajeroController::class, 'deudaLiquidar'])->name('cajero.deuda.liquidar');
 
         Route::get('/cajero/ventanilla', [CajeroController::class, 'indexVentanilla'])->name('cajero.ventanilla.index');
-        Route::get('/ventanilla', [CajeroController::class, 'indexVentanilla'])->name('cajero.ventanilla.index');
+        //Route::get('/ventanilla', [CajeroController::class, 'indexVentanilla'])->name('cajero.ventanilla.index');
 
         Route::get('/promociones', [CajeroController::class, 'promociones'])->name('cajero.promociones.index');
 
