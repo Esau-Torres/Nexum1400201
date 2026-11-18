@@ -10,14 +10,14 @@
         <span class="badge bg-secondary">Modo Consulta Institucional</span>
     </div>
 
-    <!-- ================= FILTROS DE BÚSQUEDA ================= -->
+    <!-- ================= FILTROS DE BÚSQUEDA modificado 17/11 ================= -->
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body bg-light rounded-4">
-            <form action="{{ route('directivo.dashboard.index') }}" method="GET" class="row g-3">
+            <form action="{{ route('directivo.dashboard.index') }}" method="GET" class="row g-3" id="formFiltrosDirectivo">
                 <!-- Fila 1: Ciclo y Mes -->
                 <div class="col-md-6">
                     <label class="form-label fw-bold text-muted small">Ciclo Académico</label>
-                    <select name="ciclo_id" id="filtroCiclo" class="form-select shadow-none">
+                    <select name="ciclo_id" id="filtroCiclo" class="form-select shadow-none auto-filtro">
                         @foreach($ciclos as $c)
                             <option value="{{ $c->ciclo_lectivo_id }}" {{ $cicloId == $c->ciclo_lectivo_id ? 'selected' : '' }}>
                                 {{ $c->nombre_ciclo }} - {{ $c->anio }} ({{ $c->estado }})
@@ -27,7 +27,7 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold text-muted small">Mes</label>
-                    <select name="mes" id="filtroMes" class="form-select shadow-none">
+                    <select name="mes" id="filtroMes" class="form-select shadow-none auto-filtro">
                         <option value="">Todos los meses</option>
                     </select>
                 </div>
@@ -35,7 +35,7 @@
                 <!-- Fila 2: Facultad, Carrera y Botones -->
                 <div class="col-md-4">
                     <label class="form-label fw-bold text-muted small">Facultad</label>
-                    <select name="facultad_id" id="filtroFacultad" class="form-select shadow-none">
+                    <select name="facultad_id" id="filtroFacultad" class="form-select shadow-none auto-filtro">
                         <option value="">Todas las Facultades</option>
                         @foreach($todasLasFacultades as $facultad)
                             <option value="{{ $facultad->facultad_id }}" {{ request('facultad_id') == $facultad->facultad_id ? 'selected' : '' }}>
@@ -46,10 +46,9 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-bold text-muted small">Carrera</label>
-                    <select name="carrera_id" id="filtroCarrera" class="form-select shadow-none">
+                    <select name="carrera_id" id="filtroCarrera" class="form-select shadow-none auto-filtro">
                         <option value="">Todas las Carreras</option>
                         @foreach($todasLasCarreras as $carrera)
-                            <!-- AQUÍ ESTÁ EL TRUCO: data-facultad -->
                             <option value="{{ $carrera->carrera_id }}" data-facultad="{{ $carrera->id_facultad }}" {{ request('carrera_id') == $carrera->carrera_id ? 'selected' : '' }}>
                                 {{ $carrera->nombre }}
                             </option>
@@ -58,12 +57,9 @@
                 </div>
 
                 <div class="col-md-4 d-flex align-items-end gap-2">
-                    <button type="submit" class="btn btn-danger w-100 fw-bold shadow-sm">
-                        <i class="bi bi-filter me-2"></i> Aplicar Filtros
-                    </button>
                     <!-- Botón para Limpiar (redirige al dashboard sin parámetros GET) -->
-                    <a href="{{ route('directivo.dashboard.index') }}" class="btn btn-secondary w-50 fw-bold shadow-sm" title="Limpiar Filtros">
-                        <i class="bi bi-arrow-counterclockwise"></i>
+                    <a href="{{ route('directivo.dashboard.index') }}" class="btn btn-secondary w-100 fw-bold shadow-sm" title="Limpiar Filtros">
+                        <i class="bi bi-arrow-counterclockwise me-2"></i> Limpiar Filtros
                     </a>
                 </div>
             </form>
@@ -421,6 +417,22 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+
+    // ==============================================================
+    // 3. ENVÍO AUTOMÁTICO AL CAMBIAR CUALQUIER FILTRO
+    // ==============================================================
+    const filtrosAutomáticos = document.querySelectorAll('.auto-filtro');
+    const formularioFiltros = document.getElementById('formFiltrosDirectivo');
+
+    filtrosAutomáticos.forEach(function(filtro) {
+        filtro.addEventListener('change', function() {
+            // Un pequeño retraso (150ms) permite que funciones tuyas como actualizarCarreras()
+            // terminen de hacer su trabajo visual antes de enviar el formulario.
+            setTimeout(() => {
+                formularioFiltros.submit();
+            }, 150);
+        });
+    });
 
 });
 </script>

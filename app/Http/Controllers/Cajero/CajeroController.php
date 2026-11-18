@@ -30,8 +30,11 @@ class CajeroController extends Controller
                 'id_alumno.exists' => 'Error: El código ingresado no corresponde a ningún alumno registrado.'
             ]);
 
+            // cambio 17/11
             $alumno = \Illuminate\Support\Facades\DB::table('alumnos')
-                        ->where('codigo_estudiante', $request->id_alumno)
+                        ->join('users', 'alumnos.id_usuario', '=', 'users.id') // Asegúrate de que 'id_usuario' sea la llave foránea correcta
+                        ->where('alumnos.codigo_estudiante', $request->id_alumno)
+                        ->select('alumnos.alumno_id', 'users.name')
                         ->first();
 
             $cargos = CargoEstudiante::with('concepto')
@@ -88,7 +91,8 @@ class CajeroController extends Controller
             }
         }
 
-        return view('cajero.deuda.index', compact('cargos'));
+        //cambio 17/11
+        return view('cajero.deuda.index', compact('cargos', 'alumno'));
     }
 
     //Procesa el abono y cambia el estado del cargo a PAGADO.

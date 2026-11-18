@@ -175,7 +175,7 @@
                                                     <i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar Sesión
                                                 </button>
                                             </form>
-                                            <a href="{{ url('/adfinanciero/adfinanciero/cargosestudiante?autopay=') }}{{ $tipoAutopay }}" class="btn text-white fw-bold px-4 py-2 w-100" style="background-color: #dc3545; border-radius: 8px;">
+                                            <a href="{{ route('estudiante.cargos.index', ['autopay' => $tipoAutopay]) }}" class="btn text-white fw-bold px-4 py-2 w-100" style="background-color: #dc3545; border-radius: 8px;">
                                                 <i class="fa-solid fa-credit-card me-2"></i> Ir a Pagar
                                             </a>
                                         </div>
@@ -708,7 +708,7 @@
                                     <span class="small text-slate-500">Historial de notas</span>
                                 </div>
                             </a>
-                            <a href="{{ route('adfinanciero.cargos.index') }}" class="btn flat-btn text-start p-3 d-flex align-items-center">
+                            <a href="{{ route('estudiante.cargos.index') }}" class="btn flat-btn text-start p-3 d-flex align-items-center">
                                 <div class="bg-light rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                                     <i class="fa-solid fa-file-invoice-dollar text-danger fs-6"></i>
                                 </div>

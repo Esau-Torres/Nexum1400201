@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Models\Adfinanciero;
+namespace App\Models\Estudiante;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Adfinanciero\CicloLectivo;
+use App\Models\Adfinanciero\ConceptoPago;
 
 class CargoEstudiante extends Model
 {

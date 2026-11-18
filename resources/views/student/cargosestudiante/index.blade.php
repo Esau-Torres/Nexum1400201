@@ -143,7 +143,7 @@
         <!-- PESTAÑA 1: DEUDAS Y PAGO EN LÍNEA (Se oculta por completo para la Beca Completa) -->
         @if(!$esBecaCompleta)
             <div class="tab-pane fade show active" id="deuda" role="tabpanel" tabindex="0">
-                <form id="formPagoEnLinea" action="{{ route('adfinanciero.cargos.pagar') }}" method="POST" style="display: none;">
+                <form id="formPagoEnLinea" action="{{ route('estudiante.cargos.pagar') }}" method="POST" style="display: none;">
                     @csrf
                 </form>
 

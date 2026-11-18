@@ -288,7 +288,7 @@ class DirectivoController extends Controller
                     $varMatricula = $signo . number_format($porcentaje, 1) . '%';
                 }
             }
-        }
+
 
             // D) Estudiantes Activos e Inactivos (Tarjetas 4 y 5) Cambio
             $cicloActualObj = DB::table('ciclo_lectivo')->where('ciclo_lectivo_id', $cicloId)->first();

@@ -13,17 +13,17 @@
         <span class="badge bg-secondary px-3 py-2 rounded-2">Modo Consulta Institucional</span>
     </div>
 
-    <!-- ================= FILTROS ================= -->
+    <!-- ================= FILTROS cambio 17/11================= -->
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-4">
-            <form action="{{ route('directivo.morosidad.index') }}" method="GET">
+            <form action="{{ route('directivo.morosidad.index') }}" method="GET" id="formFiltrosMorosidad">
                 <!-- Fila 1: Los 4 Filtros Académicos/Tiempo (3 columnas cada uno = 12) -->
                 <div class="row g-3 align-items-end">
 
                     <!-- 1. Ciclo Académico -->
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-muted mb-1">Ciclo</label>
-                        <select name="ciclo_id" id="filtroCiclo" class="form-select border-light-subtle rounded-3">
+                        <select name="ciclo_id" id="filtroCiclo" class="form-select border-light-subtle rounded-3 auto-filtro">
                             @foreach($ciclos as $c)
                                 <option value="{{ $c->ciclo_lectivo_id }}" {{ $c->ciclo_lectivo_id == $cicloId ? 'selected' : '' }}>
                                     Ciclo {{ $c->numero_ciclo }}-{{ $c->anio }}
@@ -35,7 +35,7 @@
                     <!-- 2. Facultad -->
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-muted mb-1">Facultad</label>
-                        <select name="facultad_id" id="filtroFacultad" class="form-select border-light-subtle rounded-3">
+                        <select name="facultad_id" id="filtroFacultad" class="form-select border-light-subtle rounded-3 auto-filtro">
                             <option value="">Todas</option>
                             @foreach($todasLasFacultades as $f)
                                 <option value="{{ $f->facultad_id }}" {{ request('facultad_id') == $f->facultad_id ? 'selected' : '' }}>
@@ -48,7 +48,7 @@
                     <!-- 3. Carrera -->
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-muted mb-1">Carrera</label>
-                        <select name="carrera_id" id="filtroCarrera" class="form-select border-light-subtle rounded-3">
+                        <select name="carrera_id" id="filtroCarrera" class="form-select border-light-subtle rounded-3 auto-filtro">
                             <option value="">Todas las Carreras</option>
                             @foreach($todasLasCarreras as $c)
                                 <option value="{{ $c->carrera_id }}" {{ request('carrera_id') == $c->carrera_id ? 'selected' : '' }}>
@@ -57,6 +57,7 @@
                             @endforeach
                         </select>
                     </div>
+
 
                     <!-- 4. Rango de Fechas (Botón Elegante más ancho) -->
                     <div class="col-md-3">
@@ -94,9 +95,6 @@
                         <a href="{{ route('directivo.morosidad.index') }}" class="btn btn-light border-light-subtle rounded-3 px-4 d-flex align-items-center text-secondary fw-bold" title="Limpiar Filtros">
                             <i class="bi bi-arrow-clockwise me-2"></i> Limpiar
                         </a>
-                        <button type="submit" class="btn btn-danger rounded-3 px-4 d-flex align-items-center fw-bold shadow-sm">
-                            <i class="bi bi-funnel-fill me-2"></i> Aplicar Filtros
-                        </button>
                     </div>
                 </div>
             </form>
@@ -806,7 +804,36 @@
         // Ejecutar al cargar la página
         actualizarLimitesFechas();
     }
+</script>
 
 
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Identificamos el formulario y los filtros
+        const formularioMorosidad = document.getElementById('formFiltrosMorosidad');
+        const selectsFiltros = document.querySelectorAll('.auto-filtro');
+
+        if (formularioMorosidad) {
+            // 2. Evento para los selects (Ciclo, Facultad, Carrera)
+            selectsFiltros.forEach(function(filtro) {
+                filtro.addEventListener('change', function() {
+                    // Un pequeño retraso para que las animaciones o la cascada terminen
+                    setTimeout(() => {
+                        formularioMorosidad.submit();
+                    }, 200);
+                });
+            });
+
+            // 3. Evento para el rango de fechas (cuando se cierra el calendario)
+            const dropdownButton = document.querySelector('[data-bs-toggle="dropdown"]');
+            if (dropdownButton) {
+                dropdownButton.addEventListener('hidden.bs.dropdown', function () {
+                    setTimeout(() => {
+                        formularioMorosidad.submit();
+                    }, 200);
+                });
+            }
+        }
+    });
 </script>
 @endsection
