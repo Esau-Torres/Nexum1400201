@@ -175,7 +175,7 @@
                                                     <i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar Sesión
                                                 </button>
                                             </form>
-                                            <a href="{{ url('/adfinanciero/adfinanciero/cargosestudiante?autopay=') }}{{ $tipoAutopay }}" class="btn text-white fw-bold px-4 py-2 w-100" style="background-color: #dc3545; border-radius: 8px;">
+                                            <a href="{{ route('estudiante.cargos.index', ['autopay' => $tipoAutopay]) }}" class="btn text-white fw-bold px-4 py-2 w-100" style="background-color: #dc3545; border-radius: 8px;">
                                                 <i class="fa-solid fa-credit-card me-2"></i> Ir a Pagar
                                             </a>
                                         </div>
@@ -235,7 +235,7 @@
                                     <div class="text-center text-md-start">
                                         <h3 class="fw-bold mb-1 text-slate-800">{{ $usuario->name }}</h3>
                                         <p class="text-slate-500 mb-3">{{ $usuario->alumno->correo_institucional ?? $usuario->email }}</p>
-                                        
+
                                         <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2">
                                             <span class="badge bg-danger text-white flat-badge">
                                                 <i class="bi bi-mortarboard-fill me-1"></i> Estudiante
@@ -257,7 +257,7 @@
                             {{-- Cuadrícula de Información Clave --}}
                             <div class="p-4 p-md-5">
                                 <h5 class="fw-bold text-slate-800 mb-4">Información Académica</h5>
-                                
+
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="flat-info-box">
@@ -318,7 +318,7 @@
                                             @else
                                                 <span class="d-block text-slate-800 fw-medium fs-6">Sin Cargar</span>
                                             @endif
-                                            
+
                                             <span class="d-block text-slate-500 small mt-1">Carrera: {{ ucfirst(strtolower($usuario->alumno->estado_carrera)) }}</span>
                                         </div>
                                     </div>
@@ -380,7 +380,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <div class="flat-info-box d-flex align-items-center gap-3">
                                         <div class="rounded-circle bg-white shadow-sm d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -392,7 +392,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-6">
                                     <div class="flat-info-box d-flex align-items-center gap-3">
                                         <div class="rounded-circle bg-white shadow-sm d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -496,7 +496,7 @@
                     </p>
 
                     <div class="d-grid gap-3" style="max-height: 700px; overflow-y: auto; padding-right: 5px;">
-                        
+
                         {{-- SUPER_ADMIN --}}
                         @if(auth()->user()->hasRole('SUPER_ADMIN'))
                             <a href="{{ route('superadmin.createuser') }}" class="btn flat-btn text-start p-3 d-flex align-items-center">
@@ -708,7 +708,7 @@
                                     <span class="small text-slate-500">Historial de notas</span>
                                 </div>
                             </a>
-                            <a href="{{ route('adfinanciero.cargos.index') }}" class="btn flat-btn text-start p-3 d-flex align-items-center">
+                            <a href="{{ route('estudiante.cargos.index') }}" class="btn flat-btn text-start p-3 d-flex align-items-center">
                                 <div class="bg-light rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                                     <i class="fa-solid fa-file-invoice-dollar text-danger fs-6"></i>
                                 </div>

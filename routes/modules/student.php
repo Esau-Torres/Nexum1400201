@@ -8,6 +8,7 @@
     use App\Http\Controllers\Estudiante\RecordAcademicoController;
     use App\Http\Controllers\Estudiante\RetirarMateriaController;
     use App\Http\Controllers\Estudiante\DesempenoDocenteController;
+    use App\Http\Controllers\Estudiante\EstadoCuentaController;
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('role:'.Role::ESTUDIANTE)->group(function () {
@@ -72,5 +73,9 @@
 
             // desempeño docente
             Route::get('/desempeno-docente', [DesempenoDocenteController::class, 'index'])->name('desempeno-docente.index');
+
+            // rutas del estado de cuenta del estudiante
+            Route::get('/alumno/estado-cuenta', [EstadoCuentaController::class, 'cargosIndex'])->name('estudiante.cargos.index');
+            Route::post('/alumno/estado-cuenta/pagar', [EstadoCuentaController::class, 'procesarPagoEnLinea'])->name('estudiante.cargos.pagar');
         });
     });

@@ -279,7 +279,7 @@
                             </a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a href="{{ route('adfinanciero.cargos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('adfinanciero.cargos.index') ? 'active' : '' }}">
+                            <a href="{{ route('estudiante.cargos.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('estudiante.cargos.index') ? 'active' : '' }}">
                                 <i class="fa-solid fa-file-invoice-dollar nav-icon fs-5 me-3 text-muted"></i>
                                 <div>
                                     <div class="fw-medium">Record Financiero</div>

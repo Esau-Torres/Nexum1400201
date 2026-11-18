@@ -59,7 +59,12 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold"><i class="fa-solid fa-user-graduate me-2 text-muted"></i> Estado de cuenta</h5>
+            <h5 class="mb-0 fw-bold">
+                <i class="fa-solid fa-user-graduate me-2 text-muted"></i> Estado de cuenta
+                @if(isset($alumno))
+                    - <span class="text-primary ms-1">{{ $alumno->name }}</span>
+                @endif
+            </h5>
             <span class="badge bg-warning bg-opacity-10 text-warning border border-warning px-3 py-2">Solo Cargos PENDIENTES</span>
         </div>
         <div class="card-body p-0">
