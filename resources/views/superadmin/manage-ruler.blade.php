@@ -1,12 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid p-3 p-lg-4">
 
     <div class="mb-4">
         <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between gap-3 p-3 rounded-4 card">
             <div>
                 <h3 class="fw-semibold mb-1">
+                    <i class="fa fa-ruler me-2" style="color: var(--color-accent);"></i>
                     REGLAS ACADEMICAS
                 </h3>
                 <p class="text-muted mb-0 small">
@@ -14,7 +15,7 @@
                 </p>
             </div>
 
-            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+            <div class="bg-white py-3 d-flex justify-content-between align-items-center">
                 <button type="button"
                         class="btn bg-danger-subtle text-danger border border-danger px-3 py-2"
                         data-bs-toggle="modal"
@@ -28,11 +29,11 @@
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="card border-0 shadow-sm mb-4 px-4">
         
 
         <div>
-            <table class="table table-hover align-middle mb-0" id="reglas-table">
+            <table class="table table-hover align-middle mb-0 text-medium" id="reglas-table">
                 <thead class="table-light">
                     <tr>
                         <th>Carrera</th>
@@ -180,7 +181,11 @@
                 <div class="row g-3">
                     <div class="col-6">
                         <label for="inpNota" class="form-label small fw-semibold">Nota mínima aprobatoria</label>
-                        <input type="number" step="0.01" min="0" max="10"
+                        <input type="text" 
+                               inputmode="decimal" 
+                               pattern="^(10(\.0{1,2})?|[0-9](\.[0-9]{1,2})?)$" 
+                               maxlength="5" 
+                               placeholder="Ej. 8.5"  
                                name="nota_minima_aprobatoria" id="inpNota"
                                class="form-control @error('nota_minima_aprobatoria') is-invalid @enderror"
                                value="{{ old('nota_minima_aprobatoria') }}"
@@ -192,7 +197,11 @@
 
                     <div class="col-6">
                         <label for="inpReprob" class="form-label small fw-semibold">Máx. reprobaciones</label>
-                        <input type="number" min="1" max="10"
+                        <input type="text" 
+                               inputmode="decimal" 
+                               pattern="[0-9]{0,3}" 
+                               maxlength="1" 
+                               placeholder="max. 3"  
                                name="max_reprobaciones_materia" id="inpReprob"
                                class="form-control @error('max_reprobaciones_materia') is-invalid @enderror"
                                value="{{ old('max_reprobaciones_materia') }}"
@@ -204,7 +213,11 @@
 
                     <div class="col-6">
                         <label for="inpCum" class="form-label small fw-semibold">CUM mín. (materia extra)</label>
-                        <input type="number" step="0.01" min="0" max="10"
+                        <input type="text" 
+                               inputmode="decimal" 
+                               pattern="^(10(\.0{1,2})?|[0-9](\.[0-9]{1,2})?)$" 
+                               maxlength="5" 
+                               placeholder="Ej. 8.5"  
                                name="cum_minimo_materia_extra" id="inpCum"
                                class="form-control @error('cum_minimo_materia_extra') is-invalid @enderror"
                                value="{{ old('cum_minimo_materia_extra') }}"

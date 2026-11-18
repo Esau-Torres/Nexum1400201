@@ -74,6 +74,12 @@ class StudentBenefitController extends Controller
         BeneficioEstudiante $beneficio,
         ReassignStudentBenefitAction $action
     ): RedirectResponse {
+
+        $eval = $evaluator->execute($beneficio->alumno, $beneficio);
+         if (! $eval['cumple']) {
+            return back()->withInput()->with('error', 'No se puede reasignar: el estudiante incumple las reglas administrativas. ' . implode(' ', $eval['motivos']));
+        }
+
         try {
             $action->execute(
                 alumno: $beneficio->alumno,

@@ -27,7 +27,7 @@ class StoreGrupoRules extends FormRequest
             ],
             'nombre'    => [
                 'required', 'string', 'min:1', 'max:20',
-                'regex:/^[A-ZÑ0-9\-]+$/i',
+                'regex:/^[a-zA-Z0-9ñÑ\-]+$/',
                 Rule::unique('grupo', 'nombre')
                     ->where('id_ciclo_lectivo', $this->input('id_ciclo_lectivo'))
                     ->ignore($grupoId, 'grupo_id'),
@@ -97,7 +97,7 @@ class StoreGrupoRules extends FormRequest
             'id_ciclo_lectivo.required' => 'Seleccioná un ciclo lectivo.',
             'id_ciclo_lectivo.exists'   => 'El ciclo lectivo debe estar en Configuración o en Matricula Abierta.',
             'nombre.required'           => 'El nombre del grupo es obligatorio.',
-            'nombre.regex'              => 'El nombre solo puede contener letras, números y guiones.',
+            'nombre.regex'              => 'El nombre del grupo solo puede contener letras, números y guiones.',
             'nombre.unique'             => 'Ya existe un grupo con ese nombre en este ciclo.',
         ];
     }

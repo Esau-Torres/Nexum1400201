@@ -37,34 +37,13 @@
             </div>
         </div>
 
-    {{-- ============================================================
-         ALERTAS
-         ============================================================ --}}
-    @if ($errors->has('error_general'))
-        <div class="alert alert-danger d-flex align-items-start gap-2 border-0 shadow-sm mb-4" role="alert">
-            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-            <div>
-                <strong class="d-block mb-1">No se pudo crear el estudiante</strong>
-                <span class="small">{{ $errors->first('error_general') }}</span>
-            </div>
-        </div>
-    @endif
-
-    @if ($errors->any() && !$errors->has('error_general'))
-        <div class="alert alert-warning d-flex align-items-start gap-2 border-0 shadow-sm mb-4" role="alert">
-            <i class="bi bi-info-circle-fill fs-5"></i>
-            <div>
-                <strong class="d-block mb-1">Revisá los datos ingresados</strong>
-                <span class="small">Hay {{ $errors->count() }} campo(s) con errores.</span>
-            </div>
-        </div>
-    @endif
-
     <form action="{{ route('admin-academico.students.store') }}"
           id="form-crear-estudiante"
           method="POST"
           enctype="multipart/form-data"
-          x-data="validation">
+          x-data="validation"
+          x-ref="formulario"
+          data-check-email-url="{{ route('admin-academico.students.check-email') }}">
         @csrf
 
         <div class="row g-4">
@@ -92,14 +71,19 @@
                                     Nombre completo <span class="text-danger">*</span>
                                 </label>
                                 <input type="text"
-                                       name="name"
-                                       id="name"
-                                       class="form-control @error('name') is-invalid @enderror"
-                                       value="{{ old('name') }}"
-                                       placeholder="Ej: Juan Pérez López"
-                                       required>
+                                    name="name"
+                                    id="name"
+                                    x-ref="nombreInput"
+                                    x-on:input="validarNombre($event)"
+                                    x-on:blur="validarNombre($event, true)"
+                                    class="form-control @error('name') is-invalid @enderror"
+                                    value="{{ old('name') }}"
+                                    placeholder="Ej: Juan Pérez López"
+                                    maxlength="125"
+                                    required>
+                                <div class="invalid-feedback" id="name-feedback"></div>
                                 @error('name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                                 <div class="form-text small">
                                     El código de estudiante se genera automáticamente a partir de los apellidos.
@@ -112,12 +96,17 @@
                                     Correo personal <span class="text-danger">*</span>
                                 </label>
                                 <input type="email"
-                                       name="email"
-                                       id="email"
-                                       class="form-control @error('email') is-invalid @enderror"
-                                       value="{{ old('email') }}"
-                                       placeholder="usuario@ejemplo.com"
-                                       required>
+                                    name="email"
+                                    id="email"
+                                    x-ref="emailInput"
+                                    x-on:input.debounce.600ms="validarEmail($event)"
+                                    x-on:blur="validarEmail($event, true)"
+                                    class="form-control @error('email') is-invalid @enderror"
+                                    value="{{ old('email') }}"
+                                    placeholder="usuario@ejemplo.com"
+                                    maxlength="255"
+                                    required>
+                                <div class="invalid-feedback" id="email-feedback"></div>
                                 @error('email')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -198,12 +187,16 @@
                                     Fecha de nacimiento <span class="text-danger">*</span>
                                 </label>
                                 <input type="date"
-                                       name="fecha_nacimiento"
-                                       id="fecha_nacimiento"
-                                       class="form-control @error('fecha_nacimiento') is-invalid @enderror"
-                                       value="{{ old('fecha_nacimiento') }}"
-                                       :max="fechaLimite"
-                                       required>
+                                    name="fecha_nacimiento"
+                                    id="fecha_nacimiento"
+                                    x-ref="fechaInput"
+                                    x-on:change="validarFechaNacimiento($event)"
+                                    class="form-control @error('fecha_nacimiento') is-invalid @enderror"
+                                    value="{{ old('fecha_nacimiento') }}"
+                                    :max="fechaLimite"
+                                    :min="fechaLimiteAntiguedad"
+                                    required>
+                                <div class="invalid-feedback" id="fecha_nacimiento-feedback"></div>
                                 @error('fecha_nacimiento')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -273,7 +266,8 @@
                                        id="direccion"
                                        class="form-control @error('direccion') is-invalid @enderror"
                                        value="{{ old('direccion') }}"
-                                       placeholder="Ej: Col. Escalón, San Salvador">
+                                       placeholder="Ej: Col. Escalón, San Salvador"
+                                       maxlength="255">
                                 @error('direccion')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -643,13 +637,17 @@
                             {{-- Observaciones --}}
                             <div class="col-12">
                                 <label for="observaciones" class="form-label fw-medium small">
-                                    Observaciones <span class="text-muted">(opcional)</span>
+                                    Observaciones <span class="text-danger">*</span>
                                 </label>
                                 <textarea name="observaciones"
-                                          id="observaciones"
-                                          rows="3"
-                                          class="form-control @error('observaciones') is-invalid @enderror"
-                                          placeholder="Notas internas sobre este expediente...">{{ old('observaciones') }}</textarea>
+                                        id="observaciones"
+                                        rows="3"
+                                        x-ref="observacionesInput"
+                                        x-on:input="validarObservaciones($event)"
+                                        x-on:blur="validarObservaciones($event, true)"
+                                        class="form-control @error('observaciones') is-invalid @enderror"
+                                        placeholder="Notas internas sobre este expediente...">{{ old('observaciones') }}</textarea>
+                                <div class="invalid-feedback" id="observaciones-feedback"></div>
                                 @error('observaciones')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

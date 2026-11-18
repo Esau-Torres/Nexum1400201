@@ -34,7 +34,14 @@
 
     <div class="card-body p-3 p-md-4 p-xl-5">
 
-        <form action="{{ route('superadmin.users.store') }}" method="POST" novalidate  x-data="validation">
+        <form action="{{ route('superadmin.users.store') }}" 
+            method="POST" 
+            novalidate  
+            x-data="validation"  
+            x-ref="formulario"
+            data-check-email-url="{{ route('superadmin.users.check-email') }}"
+            x-on:input="tocarFormulario()"
+            x-on:change="tocarFormulario()">
             @csrf
             <div class="mb-4">
                 <div class="d-flex align-items-center mb-3">
@@ -60,14 +67,36 @@
                             Nombre completo <span class="text-danger">*</span>
                         </label>
 
-                        <input type="text" value="{{ old('name') }}" class="form-control @error('name') is-invalid @enderror" id="name" name="name" placeholder="Ingrese el nombre completo" required>
+                        <input type="text"
+                            value="{{ old('name') }}"
+                            class="form-control @error('name') is-invalid @enderror"
+                            id="name"
+                            name="name"
+                            placeholder="Ingrese el nombre completo"
+                            x-on:input="validarNombre($event)"
+                            x-on:blur="validarNombre($event, true)"
+                            x-ref="nombreInput"
+                            maxlength="100"
+                            required>
+                        <div class="invalid-feedback" id="name-feedback"></div>
                     </div>
 
                     <div class="col-12 col-md-6">
                         <label for="email" class="form-label fw-medium">
                             Correo electrónico <span class="text-danger">*</span>
                         </label>
-                        <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" placeholder="ejemplo@correo.com" required  value="{{ old('email') }}">
+
+                        <input type="email"
+                            class="form-control @error('email') is-invalid @enderror"
+                            id="email"
+                            name="email"
+                            placeholder="ejemplo@correo.com"
+                            x-on:input.debounce.600ms="validarEmail($event)"
+                            x-on:blur="validarEmail($event, true)"
+                            x-ref="emailInput"
+                            required
+                            value="{{ old('email') }}">
+                        <div class="invalid-feedback" id="email-feedback"></div>
                     </div>
 
                     <div class="col-12 col-md-6">
@@ -80,7 +109,18 @@
 
                     <div class="col-12 col-md-6 col-lg-4">
                         <label class="form-label small fw-semibold">Fecha de Nacimiento <span class="text-danger">*</span></label>
-                        <input type="date" name="fecha_nacimiento" id="fecha_nacimiento" class="form-control @error('fecha_nacimiento') is-invalid @enderror" value="{{ old('fecha_nacimiento') }}" :max="fechaLimite" required>
+
+                        <input type="date"
+                            name="fecha_nacimiento"
+                            id="fecha_nacimiento"
+                            class="form-control @error('fecha_nacimiento') is-invalid @enderror"
+                            value="{{ old('fecha_nacimiento') }}"
+                            x-on:change="validarFechaNacimiento($event)"
+                            x-ref="fechaInput"
+                            :min="fechaLimiteAntiguedad"
+                            :max="fechaLimite"
+                            required>
+                        <div class="invalid-feedback" id="fecha_nacimiento-feedback"></div>
                     </div>
 
                     <div class="col-12 col-md-6 col-lg-4">  
@@ -284,11 +324,22 @@
                         <i class="bi bi-arrow-left me-1"></i>
                         Cancelar
                     </a>
-                    <button type="submit" class="btn btn-danger px-4">
+                    <button type="submit"
+                            class="btn btn-danger px-4"
+                            :disabled="!formularioValido"
+                            x-bind:class="!formularioValido ? 'opacity-50' : ''"
+                            x-bind:disabled="!formularioValido"
+                            x-on:click="intentoEnvio = true">
                         <i class="bi bi-check-lg me-1"></i>
                         Guardar usuario
                     </button>
-                </div>
+                </div> 
+            </div>
+            <div class="alert alert-warning border-0 py-2 px-3 small mb-3"
+                x-show="!formularioValido && intentoEnvio"
+                x-transition>
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                Complete todos los campos obligatorios correctamente para guardar.
             </div>
         </form>
 

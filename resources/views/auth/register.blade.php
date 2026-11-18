@@ -43,31 +43,58 @@
                         </div>
 
                         <div class="card-body p-4 p-md-5">
-                            <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" id="registroForm">
+                            <form method="POST" action="{{ route('register') }}" 
+                                enctype="multipart/form-data" 
+                                id="registroForm"  
+                                x-ref="formulario"
+                                data-check-email-url="{{ route('register.check-email') }}">
                                 @csrf
 
                                 <!-- ==========================================
                                     PASO 1: DATOS PERSONALES
                                 =========================================== -->
-                                <div x-show="step === 1" x-transition.opacity>
+                                <div x-show="step === 1" x-transition.opacity x-data="validation">
                                     <h5 class="fw-bold mb-4" style="color: var(--color-accent);">1. Información Personal</h5>
                                     
                                     <div class="row g-3">
                                         <div class="col-12">
                                             <label class="form-label small fw-semibold">Nombre Completo <span class="text-danger">*</span></label>
-                                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>
-                                            @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            <input type="text" 
+                                                name="name" 
+                                                class="form-control @error('name') is-invalid @enderror" 
+                                                value="{{ old('name') }}" 
+                                                x-on:input="validarNombre($event)"
+                                                x-on:blur="validarNombre($event, true)"
+                                                maxlength="100"
+                                                required>
+                                            <div class="invalid-feedback" id="name-feedback">{{ $errors->first('name') }}</div>
                                         </div>
 
                                         <div class="col-md-6">
                                             <label class="form-label small fw-semibold">Correo Personal (Contacto) <span class="text-danger">*</span></label>
-                                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
-                                            @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            <input type="email"
+                                                name="email"
+                                                class="form-control @error('email') is-invalid @enderror"
+                                                value="{{ old('email') }}"
+                                                x-on:input.debounce.600ms="validarEmail($event)"
+                                                x-on:blur="validarEmail($event, true)"
+                                                maxlength="255"
+                                                required>
+                                            <div class="invalid-feedback" id="email-feedback">{{ $errors->first('email') }}</div>
                                         </div>
 
-                                        <div class="col-md-6" x-data="validation">
+                                        <div class="col-md-6">
                                             <label class="form-label small fw-semibold">Fecha de Nacimiento <span class="text-danger">*</span></label>
-                                            <input type="date" name="fecha_nacimiento" id="fecha_nacimiento" class="form-control @error('fecha_nacimiento') is-invalid @enderror" value="{{ old('fecha_nacimiento') }}" :max="fechaLimite" required>
+                                            <input type="date" 
+                                                name="fecha_nacimiento" 
+                                                id="fecha_nacimiento" 
+                                                class="form-control @error('fecha_nacimiento') is-invalid @enderror" 
+                                                value="{{ old('fecha_nacimiento') }}" 
+                                                x-on:change="validarFechaNacimiento($event)"
+                                                :max="fechaLimite"
+                                                :min="fechaLimiteAntiguedad" 
+                                                required>
+                                            <div class="invalid-feedback" id="fecha_nacimiento-feedback">{{ $errors->first('fecha_nacimiento') }}</div>
                                         </div>
 
                                         <div class="col-md-4">
@@ -90,11 +117,20 @@
                                             </select>
                                         </div>
 
-                                        <div class="col-md-4" x-data="validation">
+                                        <div class="col-md-4">
                                             <label class="form-label small fw-semibold">Celular <span class="text-danger">*</span></label>
                                             <div class="input-group">
                                                 <span class="input-group-text">+503</span>
-                                                <input type="text" name="celular" id="celular" class="form-control" value="{{ old('celular') }}" pattern="[0-9]{4}-[0-9]{4}" placeholder="0000-0000" maxlength="9" x-on:input="aplicarMascara($event)" required>
+                                                <input type="text" 
+                                                    name="celular" 
+                                                    id="celular" 
+                                                    class="form-control" 
+                                                    value="{{ old('celular') }}" 
+                                                    pattern="[0-9]{4}-[0-9]{4}" 
+                                                    placeholder="0000-0000" 
+                                                    maxlength="9" 
+                                                    x-on:input="aplicarMascara($event)" 
+                                                    required>
                                             </div>
                                         </div>
 
@@ -108,10 +144,10 @@
                                 <!-- ==========================================
                                     PASO 2: IDENTIDAD Y ACADEMIA
                                 =========================================== -->
-                                <div x-show="step === 2" x-transition.opacity style="display: none;">
+                                <div x-show="step === 2" x-transition.opacity style="display: none;" x-data="validation">
                                     <h5 class="fw-bold mb-4" style="color: var(--color-accent);">2. Identidad y Carrera</h5>
                                     
-                                    <div class="row g-3" x-data="validation">
+                                    <div class="row g-3">
                                         <div class="col-md-6">
                                             <label class="form-label small fw-semibold">Tipo de Documento <span class="text-danger">*</span></label>
                                             <select name="id_tipo_documento" id="id_tipo_documento" class="form-select @error('id_tipo_documento') is-invalid @enderror" required>
@@ -187,9 +223,16 @@
                                             <label class="form-label small fw-semibold">Constancia PAES / AVANZO </label>
                                             <input type="file" name="constancia_paes" class="form-control" accept=".pdf,.jpg,.png">
                                         </div>
-                                        <div class="col-12">
+                                        <div class="col-12" x-data="validation">
                                             <label class="form-label small fw-semibold">Observaciones <span class="text-danger">*</span></label>
-                                            <textarea name="observaciones" id="observaciones" class="form-control" rows="2">{{ old('observaciones') }}</textarea>
+                                            <textarea name="observaciones"
+                                                id="observaciones"
+                                                class="form-control @error('observaciones') is-invalid @enderror"
+                                                rows="3"
+                                                x-on:blur="validarObservaciones($event, true)"
+                                                x-on:input="validarObservaciones($event)"
+                                                required>{{ old('observaciones') }}</textarea>
+                                            <div class="invalid-feedback" id="observaciones-feedback">{{ $errors->first('observaciones') }}</div>
                                         </div>
                                     </div>
                                 </div>

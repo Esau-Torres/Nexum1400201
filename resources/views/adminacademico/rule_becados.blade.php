@@ -201,8 +201,11 @@
                                     <label for="cum-{{ $regla->regla_beneficio_id }}" class="form-label small fw-semibold">
                                         CUM mínimo <span class="text-danger">*</span>
                                     </label>
-                                    <input type="number"
-                                           step="0.01" min="0" max="10"
+                                    <input type="text" 
+                                           inputmode="decimal" 
+                                           pattern="^(10(\.0{1,2})?|[0-9](\.[0-9]{1,2})?)$" 
+                                           maxlength="5" 
+                                           placeholder="Ej. 8.5"  
                                            name="cum_minimo"
                                            id="cum-{{ $regla->regla_beneficio_id }}"
                                            class="form-control"
@@ -215,8 +218,11 @@
                                     <label for="nota-{{ $regla->regla_beneficio_id }}" class="form-label small fw-semibold">
                                         Nota mínima por materia <span class="text-danger">*</span>
                                     </label>
-                                    <input type="number"
-                                           step="0.01" min="0" max="10"
+                                    <input type="text" 
+                                           inputmode="decimal" 
+                                           pattern="^(10(\.0{1,2})?|[0-9](\.[0-9]{1,2})?)$" 
+                                           maxlength="5" 
+                                           placeholder="Ej. 6.00"  
                                            name="nota_minima_materia"
                                            id="nota-{{ $regla->regla_beneficio_id }}"
                                            class="form-control"
@@ -229,8 +235,11 @@
                                     <label for="rep-{{ $regla->regla_beneficio_id }}" class="form-label small fw-semibold">
                                         Máximo de reprobaciones permitidas <span class="text-danger">*</span>
                                     </label>
-                                    <input type="number"
-                                           min="0" max="20"
+                                    <input type="text" 
+                                           inputmode="decimal" 
+                                           pattern="[0-9]{0,3}" 
+                                           maxlength="1"
+                                           placeholder="Ej. 3" 
                                            name="max_reprobaciones_permitidas"
                                            id="rep-{{ $regla->regla_beneficio_id }}"
                                            class="form-control"
@@ -243,8 +252,11 @@
                                     <label for="matrep-{{ $regla->regla_beneficio_id }}" class="form-label small fw-semibold">
                                         Máximo de materias reprobadas por ciclo <span class="text-danger">*</span>
                                     </label>
-                                    <input type="number"
-                                           min="0" max="20"
+                                    <input type="text" 
+                                           inputmode="decimal" 
+                                           pattern="[0-9]{0,3}" 
+                                           maxlength="1"
+                                           placeholder="Ej. 3"
                                            name="max_materias_reprobadas_ciclo"
                                            id="matrep-{{ $regla->regla_beneficio_id }}"
                                            class="form-control"

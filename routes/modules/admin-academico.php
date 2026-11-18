@@ -29,6 +29,9 @@
             Route::post('/crear-estudiante/masivo', [ActiveStudentController::class, 'massiveStore'])->name('create-student.massive.store');
             Route::get('/crear-estudiante/masivo/plantilla', [ActiveStudentController::class, 'massiveTemplate'])->name('create-student.massive.template');
 
+            // verificacion web
+            Route::get('/admin-academico/students/check-email', [ActiveStudentController::class, 'checkEmail'])->name('students.check-email')->middleware('throttle:30,1');
+
             // aprobar o rechazar solicitudes de usuarios que quieren crear cuentas de estudiante
             Route::get('/documentos/{alumno}/{campo}', [StudentApplicationController::class, 'downloadDocument'] )->name('documentos.download');
             
