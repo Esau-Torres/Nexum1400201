@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid py-4" x-data="validation">
 
     {{-- HEADER --}}
     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
@@ -21,7 +21,7 @@
 
             <!-- Botón de Acción Principal (Modal) -->
             <div>
-                <button type="button" class="btn btn-danger btn-sm px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3"
+                <button type="button" class="btn btn-danger btn-sm px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm rounded-3 fs-6"
                         data-bs-toggle="modal" 
                         data-bs-target="#createMateriaModal"
                         style="transition: all 0.2s ease;">
@@ -81,7 +81,7 @@
     <div class="card border-0 shadow-sm">
         <div class="card-body p-0">
             <div>
-                <table class="table align-middle mb-0" style="font-size: 0.9rem;" id="materiasTable">
+                <table class="table align-middle mb-0 text-medium" id="materiasTable">
                     <thead style="background-color: #fafbfc; border-bottom: 2px solid #eef0f2;">
                         <tr>
                             <th class="px-4 py-3 text-secondary small fw-semibold text-uppercase">Código</th>
@@ -196,23 +196,29 @@
                                     Código <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control text-uppercase font-monospace"
-                                       id="create_codigo" name="codigo_materia"
-                                       value="{{ old('codigo_materia') }}"
-                                       maxlength="20" required
-                                       placeholder="Ej: MAT-001"
-                                       pattern="[A-Z0-9\-]{3,20}"
-                                       oninput="this.value = this.value.toUpperCase()">
-                                <div class="form-text small">Mayúsculas, números y guiones.</div>
+                                    id="create_codigo" name="codigo_materia"
+                                    value="{{ old('codigo_materia') }}"
+                                    maxlength="20" required
+                                    placeholder="Ej: MAT001"
+                                    pattern="[A-Z0-9]{3,20}"
+                                    oninput="this.value = this.value.toUpperCase()"
+                                    x-on:input="validarCodigoMateria($event)"
+                                    x-on:blur="validarCodigoMateria($event, true)">
+                                <div class="invalid-feedback" id="create-codigo-feedback"></div>
+                                <div class="form-text small">Mayúsculas y números</div>
                             </div>
                             <div class="col-7">
                                 <label for="create_nombre" class="form-label small fw-semibold">
                                     Nombre <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control"
-                                       id="create_nombre" name="nombre"
-                                       value="{{ old('nombre') }}"
-                                       maxlength="150" required
-                                       placeholder="Ej: Matemática I">
+                                    id="create_nombre" name="nombre"
+                                    value="{{ old('nombre') }}"
+                                    maxlength="150" required
+                                    placeholder="Ej: Matemática I"
+                                    x-on:input="validarNombre($event)"
+                                    x-on:blur="validarNombre($event, true)">
+                                <div class="invalid-feedback" id="create-nombre-feedback"></div>
                             </div>
                         </div>
 
@@ -275,32 +281,33 @@
                         </div>
                         <div class="modal-body pt-2">
 
-                            {{-- Info visual --}}
-                            <div class="p-3 rounded-3 mb-3" style="background-color: var(--color-special);">
-                                <div class="small text-secondary mb-1">ID interno</div>
-                                <div class="fw-bold font-monospace">#{{ $materia->materia_id }}</div>
-                            </div>
-
                             <div class="row g-3 mb-3">
                                 <div class="col-5">
                                     <label class="form-label small fw-semibold">
                                         Código <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" class="form-control text-uppercase font-monospace"
-                                           name="codigo_materia"
-                                           value="{{ old('codigo_materia', $materia->codigo_materia) }}"
-                                           maxlength="20" required
-                                           pattern="[A-Z0-9\-]{3,20}"
-                                           oninput="this.value = this.value.toUpperCase()">
+                                    <input type="text" class="form-control text-uppercase font-monospace bg-light"
+                                        name="codigo_materia"
+                                        value="{{ old('codigo_materia', $materia->codigo_materia) }}"
+                                        maxlength="20" required
+                                        readonly
+                                        aria-readonly="true"
+                                        title="El código no es editable">
+                                    <div class="form-text small">
+                                        <i class="bi bi-lock-fill"></i> El código no es editable.
+                                    </div>
                                 </div>
                                 <div class="col-7">
                                     <label class="form-label small fw-semibold">
                                         Nombre <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control"
-                                           name="nombre"
-                                           value="{{ old('nombre', $materia->nombre) }}"
-                                           maxlength="150" required>
+                                        name="nombre"
+                                        value="{{ old('nombre', $materia->nombre) }}"
+                                        maxlength="150" required
+                                        x-on:input="validarNombre($event)"
+                                        x-on:blur="validarNombre($event, true)">
+                                    <div class="invalid-feedback" id="edit-nombre-{{ $materia->materia_id }}-feedback"></div>
                                 </div>
                             </div>
 

@@ -113,7 +113,12 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 
-                <form action="{{ route('superadmin.users.update', $u->id) }}" method="POST">
+                <form action="{{ route('superadmin.users.update', $u->id) }}" 
+                    method="POST"
+                    x-data="validation"
+                    x-ref="formulario"
+                    data-check-email-url="{{ route('superadmin.users.check-email') }}"
+                    data-user-id="{{ $u->id }}">
                     @csrf
                     @method('PUT')
                     <div class="modal-body p-4">
@@ -123,7 +128,7 @@
                         </div>
 
                         {{-- Contenedor reactivo Alpine para heredar máscaras y validaciones --}}
-                        <div class="row g-3" x-data="validation">
+                        <div class="row g-3">
                             {{-- CAMPOS NO MODIFICABLES (Tipo Documento, Género, Estado Civil) --}}
                             <div class="col-12 col-md-4">
                                 <label class="form-label small fw-bold text-muted mb-1">Tipo de Documento</label>
@@ -156,7 +161,15 @@
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-dark mb-1">Nombre Completo <span class="text-danger">*</span></label>
-                                <input type="text" name="name" class="form-control form-control-sm @if($editandoEste) @error('name') is-invalid @enderror @endif" value="{{ $old('name', $u->name) }}" required>
+                                <input type="text" 
+                                    name="name" 
+                                    x-ref="nombreInput"
+                                    x-on:input="validarNombre($event)"
+                                    x-on:blur="validarNombre($event, true)"
+                                    class="form-control form-control-sm @if($editandoEste) @error('name') is-invalid @enderror @endif" 
+                                    value="{{ $old('name', $u->name) }}" 
+                                    maxlength="100"
+                                    required>
                                   @if($editandoEste)
                                     @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 @endif
@@ -164,7 +177,14 @@
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-dark mb-1">Correo Institucional <span class="text-danger">*</span></label>
-                                <input type="email" name="email" class="form-control form-control-sm @if($editandoEste) @error('email') is-invalid @enderror @endif" value="{{ $old('email', $u->email) }}" required>
+                                <input type="email"
+                                    name="email"
+                                    x-ref="emailInput"
+                                    x-on:input.debounce.600ms="validarEmail($event)"
+                                    x-on:blur="validarEmail($event, true)"
+                                    class="form-control form-control-sm @if($editandoEste) @error('email') is-invalid @enderror @endif"
+                                    value="{{ $old('email', $u->email) }}"
+                                    required>
                                 @if($editandoEste)
                                     @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 @endif
@@ -176,6 +196,13 @@
                                     type="text"
                                     name="documento_identidad"
                                     id="documento_identidad_{{ $u->id }}"
+                                    x-ref="documentoInput"
+                                    data-regex="{{ $u->tipodocumentoidentidad->formato_regex ?? '' }}"
+                                    data-place="{{ $u->tipodocumentoidentidad->formato ?? '' }}"
+                                    data-codigo="{{ $u->tipodocumentoidentidad->codigo ?? '' }}"
+                                    data-name="{{ $u->tipodocumentoidentidad->nombre ?? '' }}"
+                                    x-on:input="mascarasRequex($event)"
+                                    x-on:blur="validarDocumento($event, true)"
                                     class="form-control form-control-sm @if($editandoEste) @error('documento_identidad') is-invalid @enderror @endif"
                                     value="{{ $old('documento_identidad', $u->documento_identidad) }}"
                                     required>
@@ -192,11 +219,16 @@
                                         ? \Carbon\Carbon::parse($u->fecha_nacimiento)->format('Y-m-d')
                                         : '';
                                 @endphp
-                                <input type="date" name="fecha_nacimiento"
-                                       id="fecha_nacimiento_{{ $u->id }}"
-                                       class="form-control form-control-sm @if($editandoEste) @error('fecha_nacimiento') is-invalid @enderror @endif"
-                                       value="{{ $old('fecha_nacimiento', $fechaNac) }}"
-                                       :max="fechaLimite" required>
+                                <input type="date"
+                                    name="fecha_nacimiento"
+                                    id="fecha_nacimiento_{{ $u->id }}"
+                                    x-ref="fechaInput"
+                                    x-on:change="validarFechaNacimiento($event)"
+                                    class="form-control form-control-sm @if($editandoEste) @error('fecha_nacimiento') is-invalid @enderror @endif"
+                                    value="{{ $old('fecha_nacimiento', $fechaNac) }}"
+                                    :max="fechaLimite"
+                                    :min="fechaLimiteAntiguedad"
+                                    required>
                                 @if($editandoEste)
                                     @error('fecha_nacimiento') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 @endif
@@ -207,6 +239,7 @@
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text">+503</span>
                                     <input type="text" name="celular" id="celular_{{ $u->id }}" 
+                                            x-ref="celularInput"
                                             class="form-control form-control-sm @if($editandoEste) @error('celular') is-invalid @enderror @endif" 
                                             value="{{ $old('celular', $u->celular) }}" 
                                             pattern="[0-9]{4}-[0-9]{4}" 

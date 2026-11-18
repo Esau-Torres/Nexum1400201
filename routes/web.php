@@ -19,6 +19,7 @@ Route::get('/', function () {
 })->name('welcome');
 
 Route::get('/register', [RegistroController::class, 'index'])->name('register');
+Route::get('/register/check-email', [RegistroController::class, 'checkEmail'])->name('register.check-email')->middleware('throttle:30,1');
 
 // ============================================
 // RUTAS PROTEGIDAS (Auth + Verified)
@@ -36,11 +37,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('profile'); })->name('profile');
     Route::get('/mi-foto', [FotoPerfilController::class, 'show'])->name('estudiante.foto');
     Route::post('/profile/carnet', [CarnetController::class, 'store'])->name('estudiante.carnet.store');
+    Route::get('/user/profile/check-email', [CarnetController::class, 'checkEmail'])->name('user-profile.check-email')->middleware('throttle:30,1');
 
     // ============================================
     // RUTAS ADMIN FINANCIERO
     // ============================================
-    Route::prefix('adfinanciero')->group(function () {
+    Route::middleware(['auth', 'role:ADMIN_FINANCIERO'])->prefix('adfinanciero')->group(function () {
         Route::get('/conceptospagos', [AdminfinancieroController::class, 'conceptosIndex'])->name('adfinanciero.conceptospagos.index');
         Route::put('/conceptospagos/{id}', [AdminfinancieroController::class, 'update'])->name('adfinanciero.conceptospagos.update');
         Route::post('/conceptospagos', [AdminfinancieroController::class, 'store'])->name('adfinanciero.conceptospagos.store');
@@ -54,7 +56,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/adfinanciero/promociones/{id}', [AdminfinancieroController::class, 'promocionesUpdate'])->name('adfinanciero.promociones.update');
 
         // Gestion Cargos estudiantiles
-        Route::get('/adfinanciero/cargosestudiante', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'cargosIndex'])->name('adfinanciero.cargos.index');
 
         Route::post('/adfinanciero/cargosestudiante/batch', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'cargosBatch'])->name('adfinanciero.cargos.batch');
 
@@ -75,13 +76,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/adfinanciero/reglas-pago', [\App\Http\Controllers\Reglaspago\ReglasController::class, 'store'])->name('reglas.store');
         Route::put('/adfinanciero/reglas-pago/{id}', [\App\Http\Controllers\Reglaspago\ReglasController::class, 'update'])->name('reglas.update');
 
-        Route::post('/adfinanciero/cargosestudiante/pagar', [\App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'procesarPagoEnLinea'])->name('adfinanciero.cargos.pagar');
-
         Route::post('/adfinanciero/cargos/store-masivo', [App\Http\Controllers\Adfinanciero\AdminfinancieroController::class, 'cargosStoreMasivo'])->name('adfinanciero.cargos.storeMasivo');
     });
 
     // MODULO CAJERO
-    Route::prefix('cajero')->group(function () {
+    Route::middleware(['auth', 'role:CAJERO'])->prefix('cajero')->group(function () {
         Route::get('/deuda', [CajeroController::class, 'deudaIndex'])->name('cajero.deuda.index');
         Route::put('/deuda/{id}/liquidar', [CajeroController::class, 'deudaLiquidar'])->name('cajero.deuda.liquidar');
 
@@ -99,4 +98,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     require __DIR__.'/modules/directivo.php';
+
+    require __DIR__.'/modules/student.php';
 });

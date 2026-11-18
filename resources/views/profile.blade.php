@@ -231,7 +231,7 @@
                 <div class="col-12">
                     <div class="d-flex align-items-center gap-2 border-bottom pb-2">
                         <i class="bi bi-person-badge fs-4" style="color: var(--color-accent);"></i>
-                        <h4 class="fw-bold text-dark m-0">ACRUALIZACIPON DE DATOS Y CREDENCIALES</h4>
+                        <h4 class="fw-bold text-dark m-0">ACTUALIZACION DE DATOS Y CREDENCIALES</h4>
                     </div>
                 </div>
 
@@ -254,7 +254,10 @@
                         <div class="card-body px-4 pb-4">
                             <form method="POST"
                                 action="{{ route('user-profile-information.update') }}"
-                                class="d-flex flex-column h-100">
+                                class="d-flex flex-column h-100"
+                                x-data="validation"
+                                x-ref="formulario"
+                                data-check-email-url="{{ route('user-profile.check-email') }}">
                                 @csrf
                                 @method('PUT')
 
@@ -269,6 +272,9 @@
                                         <input type="text"
                                             name="name"
                                             id="name"
+                                            x-ref="nombreInput"
+                                            x-on:input="validarNombre($event)"
+                                            x-on:blur="validarNombre($event, true)"
                                             class="form-control border-start-0 fs-6 @error('name', 'updateProfileInformation') is-invalid @enderror"
                                             value="{{ old('name', auth()->user()->name) }}"
                                             placeholder="Tu nombre completo"
@@ -292,6 +298,9 @@
                                         <input type="email"
                                             name="email"
                                             id="email"
+                                            x-ref="emailInput"
+                                            x-on:input.debounce.600ms="validarEmail($event)"
+                                            x-on:blur="validarEmail($event, true)"
                                             class="form-control border-start-0 fs-6 @error('email', 'updateProfileInformation') is-invalid @enderror"
                                             value="{{ old('email', auth()->user()->email) }}"
                                             placeholder="usuario@ejemplo.com"

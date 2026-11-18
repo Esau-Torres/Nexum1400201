@@ -25,20 +25,6 @@
     </div>
 
     {{-- ============================================================
-         ALERTAS
-         ============================================================ --}}
-    @if(session('success'))
-        <div class="alert alert-success d-flex align-items-center gap-2 border-0 shadow-sm mb-4">
-            <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger d-flex align-items-center gap-2 border-0 shadow-sm mb-4">
-            <i class="bi bi-exclamation-triangle-fill"></i> {{ session('error') }}
-        </div>
-    @endif
-
-    {{-- ============================================================
          FILTROS
          ============================================================ --}}
     <div class="card border-0 shadow-sm mb-4">
@@ -364,20 +350,42 @@
                                     </h6>
                                 </div>
 
-                                <div class="d-grid gap-2 d-md-flex">
-                                    <button type="button"
-                                            class="btn btn-outline-danger flex-fill"
-                                            data-bs-toggle="collapse"
-                                            data-bs-target="#panel-revocar-{{ $beneficio->beneficio_id }}">
-                                        <i class="bi bi-x-circle me-1"></i> Revocar beneficio
-                                    </button>
-                                    <button type="button"
-                                            class="btn btn-outline-primary flex-fill"
-                                            data-bs-toggle="collapse"
-                                            data-bs-target="#panel-reasignar-{{ $beneficio->beneficio_id }}">
-                                        <i class="bi bi-arrow-repeat me-1"></i> Reasignar beneficio
-                                    </button>
-                                </div>
+                                @if ($eval['cumple'])
+                                    {{-- Cumple reglas: puede revocar o reasignar --}}
+                                    <div class="d-grid gap-2 d-md-flex">
+                                        <button type="button"
+                                                class="btn btn-outline-danger flex-fill"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#panel-revocar-{{ $beneficio->beneficio_id }}">
+                                            <i class="bi bi-x-circle me-1"></i> Revocar beneficio
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-outline-primary flex-fill"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#panel-reasignar-{{ $beneficio->beneficio_id }}">
+                                            <i class="bi bi-arrow-repeat me-1"></i> Reasignar beneficio
+                                        </button>
+                                    </div>
+                                @else
+                                    {{-- Incumple reglas: SOLO revocar --}}
+                                    <div class="alert alert-warning border-0 d-flex align-items-start gap-2 mb-3">
+                                        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                                        <div>
+                                            <strong>Reasignación bloqueada.</strong>
+                                            El estudiante no cumple las reglas administrativas para recibir un nuevo beneficio.
+                                            Solo es posible <strong>revocar</strong> el beneficio actual.
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid">
+                                        <button type="button"
+                                                class="btn btn-outline-danger"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#panel-revocar-{{ $beneficio->beneficio_id }}">
+                                            <i class="bi bi-x-circle me-1"></i> Revocar beneficio
+                                        </button>
+                                    </div>
+                                @endif
 
                                 {{-- Panel revocar --}}
                                 <div class="collapse mt-3" id="panel-revocar-{{ $beneficio->beneficio_id }}">
@@ -401,108 +409,110 @@
                                 </div>
 
                                 {{-- Panel reasignar --}}
-                                <div class="collapse mt-3" id="panel-reasignar-{{ $beneficio->beneficio_id }}">
-                                    <div class="border border-primary rounded-3 p-3 bg-primary bg-opacity-10">
-                                        <form action="{{ route('admin-academico.admin-academico.beneficios.reassign', $beneficio) }}"
-                                            method="POST"
-                                            onsubmit="return confirm('¿Confirmás reasignar el beneficio? Se revocará el actual y se notificará.');">
-                                            @csrf
-                                            <div class="row g-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label fw-medium small">Nuevo tipo de beneficio *</label>
-                                                    <select name="tipo_beneficio"
-                                                            class="form-select tipo-beneficio-select"
-                                                            data-modal="reasignar-{{ $beneficio->beneficio_id }}"
-                                                            required>
-                                                        <option value="">Seleccione...</option>
-                                                        @foreach(\App\Enums\TipoBeneficio::cases() as $t)
-                                                            <option value="{{ $t->value }}">{{ $t->label() }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label fw-medium small">Nombre del convenio *</label>
-                                                    <input type="text" name="nombre_convenio" class="form-control"
-                                                        required placeholder="Ej: Convenio UMA-FUSAL">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label fw-medium small">Resolución académica</label>
-                                                    <input type="text" name="resolucion_academica" class="form-control"
-                                                        placeholder="Ej: RA-2026-020">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label fw-medium small">Motivo del cambio</label>
-                                                    <input type="text" name="motivo_cambio" class="form-control"
-                                                        placeholder="Ej: Mejora de rendimiento académico">
-                                                </div>
+                                @if ($eval['cumple'])
+                                    <div class="collapse mt-3" id="panel-reasignar-{{ $beneficio->beneficio_id }}">
+                                        <div class="border border-primary rounded-3 p-3 bg-primary bg-opacity-10">
+                                            <form action="{{ route('admin-academico.admin-academico.beneficios.reassign', $beneficio) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('¿Confirmás reasignar el beneficio? Se revocará el actual y se notificará.');">
+                                                @csrf
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-medium small">Nuevo tipo de beneficio *</label>
+                                                        <select name="tipo_beneficio"
+                                                                class="form-select tipo-beneficio-select"
+                                                                data-modal="reasignar-{{ $beneficio->beneficio_id }}"
+                                                                required>
+                                                            <option value="">Seleccione...</option>
+                                                            @foreach(\App\Enums\TipoBeneficio::cases() as $t)
+                                                                <option value="{{ $t->value }}">{{ $t->label() }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-medium small">Nombre del convenio *</label>
+                                                        <input type="text" name="nombre_convenio" class="form-control"
+                                                            required placeholder="Ej: Convenio UMA-FUSAL">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-medium small">Resolución académica *</label>
+                                                        <input type="text" name="resolucion_academica" class="form-control required"
+                                                            placeholder="Ej: RA-2026-020">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-medium small">Motivo del cambio</label>
+                                                        <input type="text" name="motivo_cambio" class="form-control"
+                                                            placeholder="Ej: Mejora de rendimiento académico">
+                                                    </div>
 
-                                                {{-- Porcentajes (solo BECA_PARCIAL y CUOTA_ESPECIAL) --}}
-                                                <div class="col-md-4 campo-pct-reasignar" style="display:none;">
-                                                    <label class="form-label fw-medium small">% Estudiante</label>
-                                                    <input type="number"
-                                                        name="porcentaje_estudiante"
-                                                        step="0.01" min="0" max="100"
-                                                        class="form-control input-pct-est"
-                                                        placeholder="Ej: 50.00">
-                                                </div>
-                                                <div class="col-md-4 campo-pct-reasignar" style="display:none;">
-                                                    <label class="form-label fw-medium small">% Universidad</label>
-                                                    <input type="number"
-                                                        name="porcentaje_universidad"
-                                                        step="0.01" min="0" max="100"
-                                                        class="form-control input-pct-univ"
-                                                        placeholder="Ej: 50.00">
-                                                </div>
+                                                    {{-- Porcentajes (solo BECA_PARCIAL y CUOTA_ESPECIAL) --}}
+                                                    <div class="col-md-4 campo-pct-reasignar" style="display:none;">
+                                                        <label class="form-label fw-medium small">% Estudiante</label>
+                                                        <input type="number"
+                                                            name="porcentaje_estudiante"
+                                                            step="0.01" min="0" max="100"
+                                                            class="form-control input-pct-est"
+                                                            placeholder="Ej: 50.00">
+                                                    </div>
+                                                    <div class="col-md-4 campo-pct-reasignar" style="display:none;">
+                                                        <label class="form-label fw-medium small">% Universidad</label>
+                                                        <input type="number"
+                                                            name="porcentaje_universidad"
+                                                            step="0.01" min="0" max="100"
+                                                            class="form-control input-pct-univ"
+                                                            placeholder="Ej: 50.00">
+                                                    </div>
 
-                                                {{-- Monto fijo (solo FRANJA_BECARIA) --}}
-                                                <div class="col-md-4 campo-monto-reasignar" style="display:none;">
-                                                    <label class="form-label fw-medium small">Monto fijo ($)</label>
-                                                    <input type="number"
-                                                        name="monto_fijo_cuota"
-                                                        step="0.01" min="0"
-                                                        class="form-control input-monto-fijo"
-                                                        placeholder="Ej: 53.00">
-                                                </div>
+                                                    {{-- Monto fijo (solo FRANJA_BECARIA) --}}
+                                                    <div class="col-md-4 campo-monto-reasignar" style="display:none;">
+                                                        <label class="form-label fw-medium small">Monto fijo ($)</label>
+                                                        <input type="number"
+                                                            name="monto_fijo_cuota"
+                                                            step="0.01" min="0"
+                                                            class="form-control input-monto-fijo"
+                                                            placeholder="Ej: 53.00">
+                                                    </div>
 
-                                                {{-- Matrícula (solo BECA_PARCIAL y CUOTA_ESPECIAL) --}}
-                                                <div class="col-12 campo-matricula-reasignar" style="display:none;">
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input"
-                                                            type="checkbox"
-                                                            name="incluye_matricula"
-                                                            value="1"
-                                                            id="chk-matricula-{{ $beneficio->beneficio_id }}">
-                                                        <label class="form-check-label fw-medium small"
-                                                            for="chk-matricula-{{ $beneficio->beneficio_id }}">
-                                                            Incluir <strong>matrícula del ciclo</strong> en la cobertura
-                                                        </label>
+                                                    {{-- Matrícula (solo BECA_PARCIAL y CUOTA_ESPECIAL) --}}
+                                                    <div class="col-12 campo-matricula-reasignar" style="display:none;">
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input"
+                                                                type="checkbox"
+                                                                name="incluye_matricula"
+                                                                value="1"
+                                                                id="chk-matricula-{{ $beneficio->beneficio_id }}">
+                                                            <label class="form-check-label fw-medium small"
+                                                                for="chk-matricula-{{ $beneficio->beneficio_id }}">
+                                                                Incluir <strong>matrícula del ciclo</strong> en la cobertura
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    {{-- Laboratorio (solo BECA_COMPLETA) --}}
+                                                    <div class="col-12 campo-laboratorio-reasignar" style="display:none;">
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input"
+                                                                type="checkbox"
+                                                                name="incluye_laboratorio"
+                                                                value="1"
+                                                                id="chk-laboratorio-{{ $beneficio->beneficio_id }}">
+                                                            <label class="form-check-label fw-medium small"
+                                                                for="chk-laboratorio-{{ $beneficio->beneficio_id }}">
+                                                                Incluir <strong>laboratorio de informática</strong> en la cobertura
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                {{-- Laboratorio (solo BECA_COMPLETA) --}}
-                                                <div class="col-12 campo-laboratorio-reasignar" style="display:none;">
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input"
-                                                            type="checkbox"
-                                                            name="incluye_laboratorio"
-                                                            value="1"
-                                                            id="chk-laboratorio-{{ $beneficio->beneficio_id }}">
-                                                        <label class="form-check-label fw-medium small"
-                                                            for="chk-laboratorio-{{ $beneficio->beneficio_id }}">
-                                                            Incluir <strong>laboratorio de informática</strong> en la cobertura
-                                                        </label>
-                                                    </div>
+                                                <div class="mt-3">
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="bi bi-arrow-repeat me-1"></i> Confirmar reasignación
+                                                    </button>
                                                 </div>
-                                            </div>
-
-                                            <div class="mt-3">
-                                                <button type="submit" class="btn btn-primary">
-                                                    <i class="bi bi-arrow-repeat me-1"></i> Confirmar reasignación
-                                                </button>
-                                            </div>
-                                        </form>
+                                            </form>
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                             </section>
 
                         </div>

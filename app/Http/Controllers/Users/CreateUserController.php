@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Users;
     use App\Http\Controllers\Controller;
     use Illuminate\Support\Facades\DB;
     use App\Models\Users\Role;
+    use App\Models\Users\User;
     use App\Actions\User\AssignUserRoleAction;
     use App\Actions\Teacher\CreateDocenteProfileAction;
     use App\Actions\User\CreateUserAccountAction;
@@ -15,6 +16,8 @@ namespace App\Http\Controllers\Users;
     use Illuminate\View\View;
     use Illuminate\Support\Facades\Hash;
     use Illuminate\Support\Facades\Log;
+    use Illuminate\Http\JsonResponse;
+    use Illuminate\Http\Request;
 
 class CreateUserController extends Controller
 {
@@ -105,4 +108,23 @@ class CreateUserController extends Controller
         
     }
 
+    // Verificar la existencia de un correo electronico
+    public function checkEmail(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => ['required', 'string', 'email:rfc'],
+            'ignore_user_id'  => ['nullable', 'integer', 'exists:users,id']
+        ]);
+
+        $email = strtolower(trim($request->email));
+
+        $query = User::where('email', $email);
+
+        // Excluir al usuario que se está editando (si viene el parámetro)
+        if ($request->filled('ignore_user_id')) {
+            $query->where('id', '!=', $request->integer('ignore_user_id'));
+        }
+
+        return response()->json(['available' => ! $query->exists()]);
+    }
 }

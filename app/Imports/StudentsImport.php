@@ -19,6 +19,9 @@ class StudentsImport implements ToCollection, WithHeadingRow, WithChunkReading, 
 {
     public array $creados = [];
     public array $errores = [];
+    // contador de cant filas permitidas
+    private int $filasProcesadas = 0;
+    private const MAX_FILAS = 50;
 
     public function __construct(
         protected User $admin,
@@ -28,6 +31,15 @@ class StudentsImport implements ToCollection, WithHeadingRow, WithChunkReading, 
     public function collection(Collection $rows): void
     {
         foreach ($rows as $index => $row) {
+            
+            $this->filasProcesadas++;
+
+            if ($this->filasProcesadas > self::MAX_FILAS) {
+                throw new \RuntimeException(
+                    'El archivo excede el límite de ' . self::MAX_FILAS . ' filas permitidas.'
+                );
+            }
+            
             $fila = $index + 2;
 
             $email = strtolower(trim((string) ($row['email'] ?? '')));
@@ -45,15 +57,15 @@ class StudentsImport implements ToCollection, WithHeadingRow, WithChunkReading, 
             $data = [
                 'name'                => trim((string) ($row['name'] ?? '')),
                 'email'               => $email,
-                'id_tipo_documento'   => (int) ($row['id_tipo_documento'] ?? 0),
+                'id_tipo_documento'   => $this->extraerId($row['id_tipo_documento'] ?? null),
                 'documento_identidad' => trim((string) ($row['documento_identidad'] ?? '')),
                 'fecha_nacimiento'    => $this->parseFecha($row['fecha_nacimiento'] ?? null),
                 'genero'              => strtoupper(trim((string) ($row['genero'] ?? ''))),
                 'estado_civil'        => $row['estado_civil'] ?? null,
                 'celular'             => $row['celular'] ?? null,
                 'direccion'           => $row['direccion'] ?? null,
-                'id_regional_activo'  => (int) ($row['id_regional_activo'] ?? 0),
-                'id_carrera'          => (int) ($row['id_carrera'] ?? 0),
+                'id_regional_activo'  => $this->extraerId($row['id_regional_activo'] ?? null),
+                'id_carrera'          => $this->extraerId($row['id_carrera'] ?? null),
             ];
 
             try {
@@ -145,8 +157,41 @@ class StudentsImport implements ToCollection, WithHeadingRow, WithChunkReading, 
         return $valor;
     }
 
+    /**
+     * Extrae el ID numérico de una celda que puede venir como:
+     *  - "14 - Licenciatura en Medicina"  → 14
+     */
+    private function extraerId(mixed $valor): int
+    {
+        if (is_int($valor)) {
+            return $valor;
+        }
+
+        if (is_numeric($valor)) {
+            return (int) $valor;
+        }
+
+        $valor = trim((string) ($valor ?? ''));
+
+        if ($valor === '') {
+            return 0;
+        }
+
+        // Buscar el primer número al inicio de la cadena
+        if (preg_match('/^\s*(\d+)/', $valor, $m)) {
+            return (int) $m[1];
+        }
+
+        return 0;
+    }
+
     public function chunkSize(): int
     {
         return 50;
+    }
+
+    public function procesarFilas(Collection $rows): void
+    {
+        $this->collection($rows);
     }
 }

@@ -18,16 +18,16 @@
         </div>
     </div>
 
-    <!-- ================= FILTROS DE BÚSQUEDA ================= -->
+    <!-- ================= FILTROS DE BÚSQUEDA 17/11 ================= -->
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-4">
-            <form action="{{ route('directivo.matricula.index') }}" method="GET">
+            <form action="{{ route('directivo.matricula.index') }}" method="GET" id="formFiltrosMatricula">
                 <div class="row g-3 align-items-end">
 
                     <!-- Ciclo Académico -->
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-muted mb-1">Ciclo Académico</label>
-                        <select name="ciclo_id" id="filtroCiclo" class="form-select border-light-subtle rounded-3">
+                        <select name="ciclo_id" id="filtroCiclo" class="form-select border-light-subtle rounded-3 auto-filtro">
                             @foreach($ciclos as $c)
                                 <option value="{{ $c->ciclo_lectivo_id }}" {{ $cicloId == $c->ciclo_lectivo_id ? 'selected' : '' }}>
                                     Ciclo {{ $c->numero_ciclo }}-{{ $c->anio }} ({{ $c->estado }})
@@ -39,7 +39,7 @@
                     <!-- Facultad -->
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-muted mb-1">Facultad</label>
-                        <select name="facultad_id" id="filtroFacultad" class="form-select border-light-subtle rounded-3">
+                        <select name="facultad_id" id="filtroFacultad" class="form-select border-light-subtle rounded-3 auto-filtro">
                             <option value="">Todas las Facultades</option>
                             @foreach($todasLasFacultades as $facultad)
                                 <option value="{{ $facultad->facultad_id }}" {{ request('facultad_id') == $facultad->facultad_id ? 'selected' : '' }}>
@@ -52,7 +52,7 @@
                     <!-- Carrera -->
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted mb-1">Carrera</label>
-                        <select name="carrera_id" id="filtroCarrera" class="form-select border-light-subtle rounded-3">
+                        <select name="carrera_id" id="filtroCarrera" class="form-select border-light-subtle rounded-3 auto-filtro">
                             <option value="">Todas las Carreras</option>
                             @foreach($todasLasCarreras as $carrera)
                                 <option value="{{ $carrera->carrera_id }}" data-facultad="{{ $carrera->id_facultad }}" {{ request('carrera_id') == $carrera->carrera_id ? 'selected' : '' }}>
@@ -62,13 +62,10 @@
                         </select>
                     </div>
 
-                    <!-- Botones de Acción -->
+                    <!-- Botón para Limpiar (redirige al dashboard sin parámetros) -->
                     <div class="col-md-2 d-flex gap-2">
-                        <button type="submit" class="btn btn-danger w-100 rounded-3 d-flex align-items-center justify-content-center">
-                            <i class="bi bi-filter me-2"></i> Filtrar
-                        </button>
-                        <a href="{{ route('directivo.matricula.index') }}" class="btn btn-secondary rounded-3 px-3" title="Limpiar Filtros">
-                            <i class="bi bi-arrow-clockwise"></i>
+                        <a href="{{ route('directivo.matricula.index') }}" class="btn btn-secondary rounded-3 px-3 w-100 fw-bold d-flex align-items-center justify-content-center" title="Limpiar Filtros">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i> Limpiar
                         </a>
                     </div>
 
@@ -280,130 +277,66 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function() {
 
-    // 1. FILTRAR CARRERAS POR FACULTAD (Cascada automática)
-    const filtroFacultad = document.getElementById('filtroFacultad');
-    const filtroCarrera = document.getElementById('filtroCarrera');
+        // 1. FILTRAR CARRERAS POR FACULTAD (Cascada automática)
+        const filtroFacultad = document.getElementById('filtroFacultad');
+        const filtroCarrera = document.getElementById('filtroCarrera');
 
-    function actualizarCarreras() {
-        if (!filtroFacultad || !filtroCarrera) return;
-        const facultadSeleccionada = filtroFacultad.value;
-        const opcionesCarrera = filtroCarrera.querySelectorAll('option');
+        function actualizarCarreras() {
+            if (!filtroFacultad || !filtroCarrera) return;
+            const facultadSeleccionada = filtroFacultad.value;
+            const opcionesCarrera = filtroCarrera.querySelectorAll('option');
 
-        opcionesCarrera.forEach(option => {
-            if (option.value === "") { option.style.display = 'block'; return; }
-            const idFacultadDeLaCarrera = option.getAttribute('data-facultad');
-            if (facultadSeleccionada === "" || facultadSeleccionada === idFacultadDeLaCarrera) {
-                option.style.display = 'block';
-            } else {
-                option.style.display = 'none';
-            }
-        });
-
-        const opcionSeleccionada = filtroCarrera.options[filtroCarrera.selectedIndex];
-        if (opcionSeleccionada && opcionSeleccionada.style.display === 'none') {
-            filtroCarrera.value = "";
-        }
-    }
-
-    if (filtroFacultad) {
-        actualizarCarreras();
-        filtroFacultad.addEventListener('change', actualizarCarreras);
-    }
-
-    // ================= CONFIGURACIÓN GLOBAL CHART.JS =================
-    Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif";
-    Chart.defaults.color = '#6c757d';
-
-    // 2. GRÁFICO: Evolución Histórica (Con cantidad de estudiantes abajo)
-    const labelsEvo = {!! $labelsEvolucion ?? '[]' !!};
-    const datosEvo = {!! $datosEvolucion ?? '[]' !!}.map(n => parseInt(n) || 0);
-
-    if(labelsEvo.length > 0) {
-        const ctxEvo = document.getElementById('chartEvolucionAcademica').getContext('2d');
-
-        new Chart(ctxEvo, {
-            type: 'bar',
-            data: {
-                labels: labelsEvo,
-                datasets: [{
-                    label: 'Estudiantes Matriculados',
-                    data: datosEvo,
-                    backgroundColor: '#e63946', // Rojo institucional UMA
-                    borderRadius: 6,
-                    barPercentage: 0.5,
-                    borderSkipped: false
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: { padding: { top: 15 } },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 12,
-                        bodyFont: { size: 14, weight: 'bold' },
-                        callbacks: {
-                            label: function(context) {
-                                return ' ' + context.raw + ' estudiantes';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { borderDash: [4, 4], color: '#e9ecef' },
-                        ticks: {
-                            precision: 0,
-                            font: { weight: '500' }
-                        }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            font: { weight: '600', size: 11 },
-                            color: '#495057',
-                            callback: function(val, index) {
-                                let cicloNombre = labelsEvo[index];
-                                let totalEstudiantes = datosEvo[index];
-
-                                // Retorna el nombre del ciclo arriba y los estudiantes abajo
-                                return [cicloNombre, `${totalEstudiantes} estudiantes`];
-                            }
-                        }
-                    }
+            opcionesCarrera.forEach(option => {
+                if (option.value === "") { option.style.display = 'block'; return; }
+                const idFacultadDeLaCarrera = option.getAttribute('data-facultad');
+                if (facultadSeleccionada === "" || facultadSeleccionada === idFacultadDeLaCarrera) {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
                 }
+            });
+
+            const opcionSeleccionada = filtroCarrera.options[filtroCarrera.selectedIndex];
+            if (opcionSeleccionada && opcionSeleccionada.style.display === 'none') {
+                filtroCarrera.value = "";
             }
-        });
-    }
+        }
 
-    // ================= GRÁFICO: Volumen Estudiantil por Carrera (Barras Verticales) =================
-    const ctxCarreras = document.getElementById('chartCarrerasAcademico');
-    if (ctxCarreras) {
-        const labelsCarrera = {!! $labelsCarrera ?? '[]' !!};
-        const datosCarrera = {!! $datosCarrera ?? '[]' !!}.map(n => parseInt(n) || 0);
+        if (filtroFacultad) {
+            actualizarCarreras();
+            filtroFacultad.addEventListener('change', actualizarCarreras);
+        }
 
-        if (labelsCarrera.length > 0) {
-            new Chart(ctxCarreras, {
-                type: 'bar', // Barras verticales principales
+        // ================= CONFIGURACIÓN GLOBAL CHART.JS =================
+        Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif";
+        Chart.defaults.color = '#6c757d';
+
+        // 2. GRÁFICO: Evolución Histórica (Con cantidad de estudiantes abajo)
+        const labelsEvo = {!! $labelsEvolucion ?? '[]' !!};
+        const datosEvo = {!! $datosEvolucion ?? '[]' !!}.map(n => parseInt(n) || 0);
+
+        if(labelsEvo.length > 0) {
+            const ctxEvo = document.getElementById('chartEvolucionAcademica').getContext('2d');
+
+            new Chart(ctxEvo, {
+                type: 'bar',
                 data: {
-                    labels: labelsCarrera,
+                    labels: labelsEvo,
                     datasets: [{
-                        label: 'Estudiantes',
-                        data: datosCarrera,
+                        label: 'Estudiantes Matriculados',
+                        data: datosEvo,
                         backgroundColor: '#e63946', // Rojo institucional UMA
-                        borderRadius: 8, // Puntas superiores redondeadas modernas
-                        barPercentage: 0.6,
+                        borderRadius: 6,
+                        barPercentage: 0.5,
                         borderSkipped: false
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: { padding: { top: 15 } },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
@@ -418,136 +351,131 @@ document.addEventListener("DOMContentLoaded", function() {
                         }
                     },
                     scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { borderDash: [4, 4], color: '#e9ecef' },
+                            ticks: {
+                                precision: 0,
+                                font: { weight: '500' }
+                            }
+                        },
                         x: {
                             grid: { display: false },
                             ticks: {
                                 font: { weight: '600', size: 11 },
                                 color: '#495057',
                                 callback: function(val, index) {
-                                    let nombre = labelsCarrera[index];
-                                    let total = datosCarrera[index];
+                                    let cicloNombre = labelsEvo[index];
+                                    let totalEstudiantes = datosEvo[index];
 
-                                    // Recortamos el nombre si es muy largo
-                                    let nombreCortado = nombre.length > 18 ? nombre.substring(0, 18) + '...' : nombre;
+                                    // Retorna el nombre del ciclo arriba y los estudiantes abajo
+                                    return [cicloNombre, `${totalEstudiantes} estudiantes`];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
-                                    // Retorna el nombre en la primera línea y la cantidad de estudiantes en la segunda
-                                    return [nombreCortado, `${total} estudiantes`];
+        // ================= GRÁFICO: Volumen Estudiantil por Carrera (Barras Verticales) =================
+        const ctxCarreras = document.getElementById('chartCarrerasAcademico');
+        if (ctxCarreras) {
+            const labelsCarrera = {!! $labelsCarrera ?? '[]' !!};
+            const datosCarrera = {!! $datosCarrera ?? '[]' !!}.map(n => parseInt(n) || 0);
+
+            if (labelsCarrera.length > 0) {
+                new Chart(ctxCarreras, {
+                    type: 'bar', // Barras verticales principales
+                    data: {
+                        labels: labelsCarrera,
+                        datasets: [{
+                            label: 'Estudiantes',
+                            data: datosCarrera,
+                            backgroundColor: '#e63946', // Rojo institucional UMA
+                            borderRadius: 8, // Puntas superiores redondeadas modernas
+                            barPercentage: 0.6,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                bodyFont: { size: 14, weight: 'bold' },
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' ' + context.raw + ' estudiantes';
+                                    }
                                 }
                             }
                         },
-                        y: {
-                            beginAtZero: true,
-                            grid: { borderDash: [4, 4], color: '#f8f9fa' },
-                            ticks: {
-                                precision: 0,
-                                font: { weight: '500' }
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: {
+                                    font: { weight: '600', size: 11 },
+                                    color: '#495057',
+                                    callback: function(val, index) {
+                                        let nombre = labelsCarrera[index];
+                                        let total = datosCarrera[index];
+
+                                        // Recortamos el nombre si es muy largo
+                                        let nombreCortado = nombre.length > 18 ? nombre.substring(0, 18) + '...' : nombre;
+
+                                        // Retorna el nombre en la primera línea y la cantidad de estudiantes en la segunda
+                                        return [nombreCortado, `${total} estudiantes`];
+                                    }
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { borderDash: [4, 4], color: '#f8f9fa' },
+                                ticks: {
+                                    precision: 0,
+                                    font: { weight: '500' }
+                                }
                             }
                         }
                     }
-                }
-            });
-        }
-    }
-
-    // 4. GRÁFICO: Composición por Facultad (Dona Ejecutiva con Total Central)
-    const labelsFacultad = {!! $labelsFacultad ?? '[]' !!};
-    const datosFacultad = {!! $datosFacultad ?? '[]' !!}.map(n => parseInt(n) || 0);
-
-    if(labelsFacultad.length > 0) {
-        const totalFacultades = datosFacultad.reduce((acc, val) => acc + val, 0);
-
-        // Actualizamos el número central de la dona en el HTML
-        const totalEl = document.getElementById('totalAlumnosDona');
-        if (totalEl) totalEl.innerText = totalFacultades;
-
-        const backgroundColors = ['#dc3545', '#0d6efd', '#20c997', '#ffc107', '#6f42c1', '#0dcaf0'];
-
-        new Chart(document.getElementById('chartFacultadesAcademico'), {
-            type: 'doughnut',
-            data: {
-                labels: labelsFacultad,
-                datasets: [{
-                    data: datosFacultad,
-                    backgroundColor: backgroundColors,
-                    borderWidth: 0,
-                    cutout: '75%', // Anillo delgado y moderno
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }, // Ocultamos la leyenda lateral de Chart.js
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 12,
-                        bodyFont: { size: 14, weight: 'bold' },
-                        callbacks: {
-                            label: function(context) {
-                                const val = context.raw;
-                                const porcentaje = totalFacultades > 0 ? ((val / totalFacultades) * 100).toFixed(1) : 0;
-                                return ` ${val} estudiantes (${porcentaje}%)`;
-                            }
-                        }
-                    }
-                }
+                });
             }
-        });
-
-        // Construcción de la leyenda personalizada inferior con cantidad y porcentaje
-        const legendContainer = document.getElementById('customLegendFacultades');
-        if (legendContainer) {
-            let htmlList = '<div class="d-flex flex-column gap-2">';
-            labelsFacultad.forEach((label, index) => {
-                const valor = datosFacultad[index] || 0;
-                const porcentaje = totalFacultades > 0 ? ((valor / totalFacultades) * 100).toFixed(1) : 0;
-                const color = backgroundColors[index % backgroundColors.length];
-
-                htmlList += `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center pe-2">
-                            <span class="rounded-circle me-2 flex-shrink-0" style="width: 10px; height: 10px; background-color: ${color};"></span>
-                            <span class="text-dark small text-truncate" style="max-width: 180px;" title="${label}">${label}</span>
-                        </div>
-                        <div class="text-end flex-shrink-0">
-                            <span class="fw-bold text-dark small">${valor}</span>
-                            <span class="text-muted small ms-1">(${porcentaje}%)</span>
-                        </div>
-                    </div>
-                `;
-            });
-            htmlList += '</div>';
-            legendContainer.innerHTML = htmlList;
         }
-    }
 
-    // GRÁFICO: Composición Poblacional (Nuevo Ingreso vs Continuos)
-    const ctxComposicion = document.getElementById('chartComposicionPoblacional');
-    if (ctxComposicion) {
-        const labelsComp = {!! $labelsComposicionJson ?? '[]' !!};
-        const datosComp = {!! $datosComposicionJson ?? '[]' !!}.map(n => parseInt(n) || 0);
-        const totalComp = datosComp.reduce((a, b) => a + b, 0);
+        // 4. GRÁFICO: Composición por Facultad (Dona Ejecutiva con Total Central)
+        const labelsFacultad = {!! $labelsFacultad ?? '[]' !!};
+        const datosFacultad = {!! $datosFacultad ?? '[]' !!}.map(n => parseInt(n) || 0);
 
-        if (labelsComp.length > 0) {
-            new Chart(ctxComposicion, {
-                type: 'bar',
+        if(labelsFacultad.length > 0) {
+            const totalFacultades = datosFacultad.reduce((acc, val) => acc + val, 0);
+
+            // Actualizamos el número central de la dona en el HTML
+            const totalEl = document.getElementById('totalAlumnosDona');
+            if (totalEl) totalEl.innerText = totalFacultades;
+
+            const backgroundColors = ['#dc3545', '#0d6efd', '#20c997', '#ffc107', '#6f42c1', '#0dcaf0'];
+
+            new Chart(document.getElementById('chartFacultadesAcademico'), {
+                type: 'doughnut',
                 data: {
-                    labels: labelsComp,
+                    labels: labelsFacultad,
                     datasets: [{
-                        label: 'Estudiantes',
-                        data: datosComp,
-                        backgroundColor: ['#198754', '#0d6efd'], // Verde para nuevos, Azul para continuos
-                        borderRadius: 6,
-                        barPercentage: 0.5,
-                        borderSkipped: false
+                        data: datosFacultad,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 0,
+                        cutout: '75%', // Anillo delgado y moderno
+                        hoverOffset: 4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false },
+                        legend: { display: false }, // Ocultamos la leyenda lateral de Chart.js
                         tooltip: {
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
                             padding: 12,
@@ -555,27 +483,117 @@ document.addEventListener("DOMContentLoaded", function() {
                             callbacks: {
                                 label: function(context) {
                                     const val = context.raw;
-                                    const porcentaje = totalComp > 0 ? ((val / totalComp) * 100).toFixed(1) : 0;
+                                    const porcentaje = totalFacultades > 0 ? ((val / totalFacultades) * 100).toFixed(1) : 0;
                                     return ` ${val} estudiantes (${porcentaje}%)`;
                                 }
                             }
                         }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { borderDash: [4, 4], color: '#f8f9fa' },
-                            ticks: { precision: 0, font: { weight: '500' } }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { weight: '600', size: 11 } }
-                        }
                     }
                 }
             });
+
+            // Construcción de la leyenda personalizada inferior con cantidad y porcentaje
+            const legendContainer = document.getElementById('customLegendFacultades');
+            if (legendContainer) {
+                let htmlList = '<div class="d-flex flex-column gap-2">';
+                labelsFacultad.forEach((label, index) => {
+                    const valor = datosFacultad[index] || 0;
+                    const porcentaje = totalFacultades > 0 ? ((valor / totalFacultades) * 100).toFixed(1) : 0;
+                    const color = backgroundColors[index % backgroundColors.length];
+
+                    htmlList += `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center pe-2">
+                                <span class="rounded-circle me-2 flex-shrink-0" style="width: 10px; height: 10px; background-color: ${color};"></span>
+                                <span class="text-dark small text-truncate" style="max-width: 180px;" title="${label}">${label}</span>
+                            </div>
+                            <div class="text-end flex-shrink-0">
+                                <span class="fw-bold text-dark small">${valor}</span>
+                                <span class="text-muted small ms-1">(${porcentaje}%)</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                htmlList += '</div>';
+                legendContainer.innerHTML = htmlList;
+            }
         }
-    }
-});
+
+        // GRÁFICO: Composición Poblacional (Nuevo Ingreso vs Continuos)
+        const ctxComposicion = document.getElementById('chartComposicionPoblacional');
+        if (ctxComposicion) {
+            const labelsComp = {!! $labelsComposicionJson ?? '[]' !!};
+            const datosComp = {!! $datosComposicionJson ?? '[]' !!}.map(n => parseInt(n) || 0);
+            const totalComp = datosComp.reduce((a, b) => a + b, 0);
+
+            if (labelsComp.length > 0) {
+                new Chart(ctxComposicion, {
+                    type: 'bar',
+                    data: {
+                        labels: labelsComp,
+                        datasets: [{
+                            label: 'Estudiantes',
+                            data: datosComp,
+                            backgroundColor: ['#198754', '#0d6efd'], // Verde para nuevos, Azul para continuos
+                            borderRadius: 6,
+                            barPercentage: 0.5,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                bodyFont: { size: 14, weight: 'bold' },
+                                callbacks: {
+                                    label: function(context) {
+                                        const val = context.raw;
+                                        const porcentaje = totalComp > 0 ? ((val / totalComp) * 100).toFixed(1) : 0;
+                                        return ` ${val} estudiantes (${porcentaje}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { borderDash: [4, 4], color: '#f8f9fa' },
+                                ticks: { precision: 0, font: { weight: '500' } }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { font: { weight: '600', size: 11 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    });
+</script>
+
+<script>
+    // ==========================================
+    // ENVÍO AUTOMÁTICO AL CAMBIAR FILTROS
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", function() {
+        const formularioMatricula = document.getElementById('formFiltrosMatricula');
+        const selectsFiltrosMat = document.querySelectorAll('.auto-filtro');
+
+        if (formularioMatricula) {
+            selectsFiltrosMat.forEach(function(filtro) {
+                filtro.addEventListener('change', function() {
+                    // Retraso ligero para que termine la animación de cascada de carrera
+                    setTimeout(() => {
+                        formularioMatricula.submit();
+                    }, 150);
+                });
+            });
+        }
+    });
 </script>
 @endsection

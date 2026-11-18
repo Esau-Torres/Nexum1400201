@@ -18,7 +18,7 @@ class StoreUserRule extends FormRequest
     {
         return [
             'name'                => ['required', 'string', 'max:255'],
-            'email'               => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users,email'],
+            'email'               => ['required', 'string', 'email:rfc,dns', 'max:255', Rule::unique('users', 'email')->ignore($this->route('user'))],
             'celular'             => ['required', 'string', 'regex:/^[0-9]{4}-[0-9]{4}$/'],
             'fecha_nacimiento'    => ['required', 'date', 'before:today'],
             'genero'              => ['required', 'string', Rule::in(['M', 'F'])],

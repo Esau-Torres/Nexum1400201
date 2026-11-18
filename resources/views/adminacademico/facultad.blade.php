@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid p-3 p-lg-4" x-data="validation">
 
  <!-- NAVEGACIÓN POR PESTAÑAS (TABS) -->
     @php
@@ -90,7 +90,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-0">
                     <div>
-                        <table class="table align-middle mb-0" style="font-size: 0.9rem;" id="facultadesTable">
+                        <table class="table align-middle mb-0 text-medium" id="facultadesTable">
                             <thead style="background-color: #fafbfc; border-bottom: 2px solid #eef0f2;">
                                 <tr>
                                     <th class="px-4 py-3 text-secondary small fw-semibold text-uppercase">Facultad</th>
@@ -153,9 +153,12 @@
                                     Nombre <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control" name="nombre"
-                                       value="{{ old('nombre') }}"
-                                       maxlength="150" required
-                                       placeholder="Ej: Facultad de Medicina">
+                                    value="{{ old('nombre') }}"
+                                    maxlength="150" required
+                                    placeholder="Ej: Facultad de Medicina"
+                                    x-on:input="validarNombre($event)"
+                                    x-on:blur="validarNombre($event, true)">
+                                <div class="invalid-feedback" id="facultad-create-nombre-feedback"></div>
                             </div>
                             <div class="modal-footer border-0 pt-0">
                                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
@@ -187,8 +190,11 @@
                                         Nombre <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control" name="nombre"
-                                           value="{{ $facultad->nombre }}"
-                                           maxlength="150" required>
+                                        value="{{ $facultad->nombre }}"
+                                        maxlength="150" required
+                                        x-on:input="validarNombre($event)"
+                                        x-on:blur="validarNombre($event, true)">
+                                    <div class="invalid-feedback" id="facultad-edit-{{ $facultad->facultad_id }}-nombre-feedback"></div>
                                 </div>
                                 <div class="modal-footer border-0 pt-0">
                                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
@@ -300,7 +306,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-0">
                     <div>
-                        <table class="table align-middle mb-0" style="font-size: 0.9rem;" id="carrerasTable">
+                        <table class="table align-middle mb-0 text-medium" id="carrerasTable">
                             <thead style="background-color: #fafbfc; border-bottom: 2px solid #eef0f2;">
                                 <tr>
                                     <th class="px-4 py-3 text-secondary small fw-semibold text-uppercase">Carrera</th>
@@ -407,8 +413,11 @@
                                         Nombre <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control" name="nombre"
-                                           maxlength="150" required
-                                           placeholder="Ej: Licenciatura en Medicina">
+                                        maxlength="150" required
+                                        placeholder="Ej: Licenciatura en Medicina"
+                                        x-on:input="validarNombre($event)"
+                                        x-on:blur="validarNombre($event, true)">
+                                    <div class="invalid-feedback" id="carrera-create-nombre-feedback"></div>
                                 </div>
                                 <div class="mb-0">
                                     <label class="form-label small fw-semibold">
@@ -503,8 +512,11 @@
                                             Nombre <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" class="form-control" name="nombre"
-                                               value="{{ $carrera->nombre }}"
-                                               maxlength="150" required>
+                                            value="{{ $carrera->nombre }}"
+                                            maxlength="150" required
+                                            x-on:input="validarNombre($event)"
+                                            x-on:blur="validarNombre($event, true)">
+                                        <div class="invalid-feedback" id="carrera-edit-{{ $carrera->carrera_id }}-nombre-feedback"></div>
                                     </div>
 
                                     <div class="mb-0">
