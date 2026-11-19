@@ -618,6 +618,49 @@
                 });
             },
 
+            /* =========================================================
+            *  Solo MAYÚSCULAS, números y guiones (1–20 caracteres).
+            * ========================================================= */
+            validarNombreGrupo(event, alBlur = false) {
+                const input = event.target;
+                const valorOriginal = input.value;
+
+                // Limpieza en vivo: mayúsculas + solo A-Z 0-9 -
+                const limpio = valorOriginal
+                    .toUpperCase()
+                    .replace(/[^A-ZÑ0-9\-]/g, '')
+                    .slice(0, 20);
+
+                if (limpio !== valorOriginal) {
+                    input.value = limpio;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+
+                const valor = input.value.trim();
+                const feedback = input.closest('.col-md-6, .col-12')?.querySelector('.invalid-feedback');
+
+                let error = '';
+
+                if (valor === '') {
+                    error = 'El nombre del grupo es obligatorio.';
+                } else if (!/^[A-ZÑ0-9\-]{1,20}$/.test(valor)) {
+                    error = 'Solo se permiten mayúsculas, números y guiones (máx. 20).';
+                }
+
+                if (error) {
+                    input.setCustomValidity(error);
+                    if (alBlur || valor.length > 0) {
+                        input.classList.add('is-invalid');
+                        if (feedback) feedback.textContent = error;
+                    }
+                } else {
+                    input.setCustomValidity('');
+                    input.classList.remove('is-invalid');
+                    if (feedback) feedback.textContent = '';
+                }
+            },
+
+
             get capacidadMinima() {
                 // Calcula la capacidad mínima entre las aulas elegidas
                 let capacidades = [];
@@ -666,6 +709,47 @@
                 this.filtrarGrupos();
                 if (!this.permiteSobrecupo) {
                     this.cupoExtra = 0;
+                }
+            },
+
+            /* =========================================================
+            *  validar nombre del grupo (idéntico al de crear)
+            * ========================================================= */
+            validarNombreGrupo(event, alBlur = false) {
+                const input = event.target;
+                const valorOriginal = input.value;
+
+                const limpio = valorOriginal
+                    .toUpperCase()
+                    .replace(/[^A-ZÑ0-9\-]/g, '')
+                    .slice(0, 20);
+
+                if (limpio !== valorOriginal) {
+                    input.value = limpio;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+
+                const valor = input.value.trim();
+                const feedback = input.closest('.col-md-6, .col-12')?.querySelector('.invalid-feedback');
+
+                let error = '';
+
+                if (valor === '') {
+                    error = 'El nombre del grupo es obligatorio.';
+                } else if (!/^[A-ZÑ0-9\-]{1,20}$/.test(valor)) {
+                    error = 'Solo se permiten mayúsculas, números y guiones (máx. 20).';
+                }
+
+                if (error) {
+                    input.setCustomValidity(error);
+                    if (alBlur || valor.length > 0) {
+                        input.classList.add('is-invalid');
+                        if (feedback) feedback.textContent = error;
+                    }
+                } else {
+                    input.setCustomValidity('');
+                    input.classList.remove('is-invalid');
+                    if (feedback) feedback.textContent = '';
                 }
             },
 

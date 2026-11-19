@@ -91,13 +91,18 @@
     <div class="col-md-6">
         <label class="form-label small fw-medium">Nombre de grupo *</label>
         <input type="text" name="nombre_grupo" class="form-control"
-               value="{{ $sel('nombre_grupo') }}"
-               maxlength="20" required
-               x-model="nombreGrupo">
+            value="{{ $sel('nombre_grupo') }}"
+            maxlength="20" required
+            x-model="nombreGrupo"
+            x-on:input="validarNombreGrupo($event)"
+            x-on:blur="validarNombreGrupo($event, true)"
+            pattern="[A-ZÑ0-9\-]{1,20}"
+            placeholder="Ej: A, B, K1">
+        <div class="invalid-feedback"></div>
 
         <div class="form-text small">
             <span x-show="grupoId">Se autocompletó desde el grupo seleccionado.</span>
-            <span x-show="!grupoId">Ej: A, B, K, Ñ.</span>
+            <span x-show="!grupoId">Solo MAYÚSCULAS, números y guiones.</span>
         </div>
     </div>
 

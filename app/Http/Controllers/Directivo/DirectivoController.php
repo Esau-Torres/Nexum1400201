@@ -19,8 +19,12 @@ class DirectivoController extends Controller
         $todasLasFacultades = DB::table('facultades')->orderBy('nombre')->get();
         $todasLasCarreras = DB::table('carreras')->orderBy('nombre')->get();
 
-        $cicloActivo = $ciclos->whereIn('estado', ['ACTIVO', 'MATRICULA_ABIERTA', 'CONFIGURACION'])->first();
-        $cicloId = $request->input('ciclo_id', $cicloActivo->ciclo_lectivo_id ?? null);
+        // 1. Respaldo al último ciclo registrado aunque todos estén CERRADO
+        $cicloActivo = $ciclos->whereIn('estado', ['ACTIVO', 'MATRICULA_ABIERTA', 'CONFIGURACION'])->first()
+            ?? $ciclos->first();
+
+        // Usar ?: garantiza el respaldo incluso si la URL trae ?ciclo_id= vacío
+        $cicloId = $request->input('ciclo_id') ?: $cicloActivo?->ciclo_lectivo_id;
         $mesSeleccionado = $request->input('mes');
 
         // Nuevos filtros capturados de la URL
@@ -95,10 +99,12 @@ class DirectivoController extends Controller
         // =========================================================
         // NUEVO: CÁLCULO DE COMPARATIVAS (vs Ciclo Anterior)
         // =========================================================
-        $cicloAnterior = DB::table('ciclo_lectivo')
-            ->where('ciclo_lectivo_id', '<', $cicloId)
-            ->orderBy('ciclo_lectivo_id', 'desc')
-            ->first();
+        $cicloAnterior = $cicloId
+            ? DB::table('ciclo_lectivo')
+                ->where('ciclo_lectivo_id', '<', $cicloId)
+                ->orderBy('ciclo_lectivo_id', 'desc')
+                ->first()
+            : null;
 
         $ingresosAnterior = 0;
         $transaccionesAnterior = 0;

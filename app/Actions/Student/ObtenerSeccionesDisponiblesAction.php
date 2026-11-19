@@ -60,16 +60,33 @@ class ObtenerSeccionesDisponiblesAction
                 $alumno,
                 $cicloLectivoId
             ) {
-                // Filtrar solo materias que tengan al menos una sección activa
-                $materiasConSecciones = $materias->filter(function ($pm) use ($seccionesPorMateria) {
-                    return $seccionesPorMateria->has($pm->id_materia)
-                        && $seccionesPorMateria->get($pm->id_materia)->isNotEmpty();
+                // Filtrar materias que:
+                //   - Tengan al menos una sección activa
+                //   - El alumno NO las haya aprobado
+                //   - El alumno NO las esté cursando actualmente
+                $materiasConSecciones = $materias->filter(function ($pm) use ($seccionesPorMateria, $historial) {
+                    if (!$seccionesPorMateria->has($pm->id_materia)
+                        || $seccionesPorMateria->get($pm->id_materia)->isEmpty()) {
+                        return false;
+                    }
+
+                    $estado = $this->resolverEstado($historial->get($pm->id_materia));
+
+                    if ($estado === 'APROBADA') {
+                        return false;
+                    }
+
+                    if ($estado === 'ACTUAL') {
+                        return false;
+                    }
+
+                    return true;
                 });
 
-                // Si el ciclo no tiene materias con secciones, devolvemos null y luego lo limpiamos
                 if ($materiasConSecciones->isEmpty()) {
                     return null;
                 }
+
                 return [
                     'ciclo'           => (int) $ciclo,
                     'es_ciclo_actual' => $ciclo == $cicloActual,
@@ -81,6 +98,7 @@ class ObtenerSeccionesDisponiblesAction
                     ) {
                         $record = $historial->get($pm->id_materia);
                         $estado = $this->resolverEstado($record);
+
                         $seccionesInscritas = DB::table('detalle_inscripcion as di')
                             ->join('inscripciones as i', 'di.id_inscripcion', '=', 'i.inscripcion_id')
                             ->where('i.id_alumno', $alumno->alumno_id)
@@ -89,8 +107,7 @@ class ObtenerSeccionesDisponiblesAction
                             ->whereIn('di.estado_materia', ['CURSANDO', 'APROBADA'])
                             ->pluck('di.id_seccion')
                             ->flip();
-                            
-                        // Secciones + validación por cada una
+
                         $secciones = $seccionesPorMateria->get($pm->id_materia, collect())
                             ->map(function ($s) use ($alumno, $cicloLectivoId, $seccionesInscritas) {
                                 $validacion = $this->validarAction->execute(
@@ -129,9 +146,10 @@ class ObtenerSeccionesDisponiblesAction
                         ];
                     }),
                 ];
-            })    
+            })
             ->filter()
             ->values();
+
     }
 
     /* ==========================================================

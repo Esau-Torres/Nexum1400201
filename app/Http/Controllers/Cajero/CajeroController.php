@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Cajero;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Adfinanciero\CargoEstudiante;
+use App\Models\Estudiante\CargoEstudiante;
 use App\Models\Adfinanciero\ConceptoPago;
-use Illuminate\Support\Facades\DB; // Para actualizar el estado y guardar el pago
+use Illuminate\Support\Facades\DB;
 use App\Mail\ReciboPagoMail;
-use Illuminate\Support\Facades\Mail; // Para el correo
-use Illuminate\Support\Facades\Auth; // Para saber qué cajero cobró
+use Illuminate\Support\Facades\Mail; 
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class CajeroController extends Controller
 {
@@ -18,6 +19,7 @@ class CajeroController extends Controller
     public function deudaIndex(Request $request)
     {
         $cargos = collect();
+        $alumno = null;
 
         if ($request->filled('id_alumno')) {
             $request->merge([
@@ -31,67 +33,69 @@ class CajeroController extends Controller
             ]);
 
             // cambio 17/11
-            $alumno = \Illuminate\Support\Facades\DB::table('alumnos')
-                        ->join('users', 'alumnos.id_usuario', '=', 'users.id') // Asegúrate de que 'id_usuario' sea la llave foránea correcta
-                        ->where('alumnos.codigo_estudiante', $request->id_alumno)
-                        ->select('alumnos.alumno_id', 'users.name')
-                        ->first();
+            $alumno = DB::table('alumnos')
+                ->leftJoin('users', 'alumnos.id_usuario', '=', 'users.id')
+                ->where('alumnos.codigo_estudiante', $request->id_alumno)
+                ->select('alumnos.alumno_id', 'users.name')
+                ->first();
 
-            $cargos = CargoEstudiante::with('concepto')
-                ->where('id_alumno', $alumno->alumno_id)
-                ->where('estado_cargo', 'PENDIENTE')
-                ->orderBy('fecha_vencimiento', 'asc')
-                ->get();
+            if ($alumno) {
+                $cargos = CargoEstudiante::with('concepto')
+                    ->where('id_alumno', $alumno->alumno_id)
+                    ->where('estado_cargo', 'PENDIENTE')
+                    ->orderBy('fecha_vencimiento', 'asc')
+                    ->get();
 
-            // ==========================================
-            // NUEVO: APLICACIÓN DE REGLAS DE MORA
-            // ==========================================
-            $hoy = now()->startOfDay();
+                // ==========================================
+                // NUEVO: APLICACIÓN DE REGLAS DE MORA
+                // ==========================================
+                $hoy = now()->startOfDay();
 
-            // 1. Unimos reglas_pago con concepto_pago para obtener los $5 o $10 dinámicamente
-            $reglasActivas = \Illuminate\Support\Facades\DB::table('reglas_pago')
-                ->join('concepto_pago', 'reglas_pago.id_concepto_recargo', '=', 'concepto_pago.concepto_pago_id')
-                ->select('reglas_pago.tipo', 'concepto_pago.monto_base', 'concepto_pago.nombre as nombre_recargo')
-                ->where('reglas_pago.estado', 'ACTIVO')
-                ->get();
+                // 1. Unimos reglas_pago con concepto_pago para obtener los $5 o $10 dinámicamente
+                $reglasActivas = DB::table('reglas_pago')
+                    ->join('concepto_pago', 'reglas_pago.id_concepto_recargo', '=', 'concepto_pago.concepto_pago_id')
+                    ->select('reglas_pago.tipo', 'concepto_pago.monto_base', 'concepto_pago.nombre as nombre_recargo')
+                    ->where('reglas_pago.estado', 'ACTIVO')
+                    ->get();
 
-            $reglaMensualidad = $reglasActivas->firstWhere('tipo', 'Mensualidad');
-            $reglaInscripcion = $reglasActivas->firstWhere('tipo', 'Inscripción');
+                $reglaMensualidad = $reglasActivas->firstWhere('tipo', 'Mensualidad');
+                $reglaInscripcion = $reglasActivas->firstWhere('tipo', 'Inscripción');
 
-            // 2. Evaluamos cargo por cargo si ya está vencido
-            foreach ($cargos as $cargo) {
-                // Valores base (por si el cargo no está vencido)
-                $cargo->tiene_mora = false;
-                $cargo->monto_mora = 0;
-                $cargo->total_con_mora = $cargo->monto_neto_estudiante ?? $cargo->monto_original;
+                // 2. Evaluamos cargo por cargo si ya está vencido
+                foreach ($cargos as $cargo) {
+                    // Valores base (por si el cargo no está vencido)
+                    $cargo->tiene_mora = false;
+                    $cargo->monto_mora = 0;
+                    $cargo->total_con_mora = $cargo->monto_neto_estudiante ?? $cargo->monto_original;
 
-                $fechaVencimiento = \Carbon\Carbon::parse($cargo->fecha_vencimiento)->startOfDay();
+                    $fechaVencimiento = Carbon::parse($cargo->fecha_vencimiento)->startOfDay();
 
-                // Si hoy es mayor a la fecha de vencimiento (está en rojo)
-                if ($hoy->gt($fechaVencimiento)) {
-                    $nombreCargo = strtoupper($cargo->concepto->nombre);
-                    $reglaAplicable = null;
+                    // Si hoy es mayor a la fecha de vencimiento (está en rojo)
+                    if ($hoy->gt($fechaVencimiento)) {
+                        $nombreCargo = strtoupper($cargo->concepto?->nombre ?? '');
+                        $reglaAplicable = null;
 
-                    // Asignar regla según el texto del concepto
-                    if (str_contains($nombreCargo, 'MENSUAL')) {
-                        $reglaAplicable = $reglaMensualidad;
-                    } elseif (str_contains($nombreCargo, 'MATRICULA') || str_contains($nombreCargo, 'INSCRIPCI')) {
-                        $reglaAplicable = $reglaInscripcion;
-                    }
+                        // Asignar regla según el texto del concepto
+                        if (str_contains($nombreCargo, 'MENSUAL')) {
+                            $reglaAplicable = $reglaMensualidad;
+                        } elseif (str_contains($nombreCargo, 'MATRICULA') || str_contains($nombreCargo, 'INSCRIPCI')) {
+                            $reglaAplicable = $reglaInscripcion;
+                        }
 
-                    // Si se encontró una regla válida, inyectamos la mora al objeto
-                    if ($reglaAplicable) {
-                        $cargo->tiene_mora = true;
-                        $cargo->monto_mora = $reglaAplicable->monto_base;
-                        $cargo->nombre_mora = $reglaAplicable->nombre_recargo;
-                        // Se suma la mora al monto con beneficio
-                        $cargo->total_con_mora = ($cargo->monto_neto_estudiante ?? $cargo->monto_original) + $reglaAplicable->monto_base;
+                        // Si se encontró una regla válida, inyectamos la mora al objeto
+                        if ($reglaAplicable) {
+                            $cargo->tiene_mora = true;
+                            $cargo->monto_mora = $reglaAplicable->monto_base;
+                            $cargo->nombre_mora = $reglaAplicable->nombre_recargo;
+                            // Se suma la mora al monto con beneficio
+                            $cargo->total_con_mora = ($cargo->monto_neto_estudiante ?? $cargo->monto_original) + $reglaAplicable->monto_base;
+                        }
                     }
                 }
             }
         }
 
-        //cambio 17/11
+        // cambio 17/11
         return view('cajero.deuda.index', compact('cargos', 'alumno'));
     }
 

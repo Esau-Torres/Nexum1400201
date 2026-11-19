@@ -33,7 +33,7 @@ public function rules(): array
 
             'nombre_grupo'     => [
                 'required', 'string', 'max:20',
-                'regex:/^[A-ZÑ0-9\-]+$/i',
+                'regex:/^[A-ZÑ0-9\-]+$/',
                 Rule::unique('seccion', 'nombre_grupo')
                     ->where('id_materia', $this->input('id_materia'))
                     ->where('id_ciclo_lectivo', $this->input('id_ciclo_lectivo'))
