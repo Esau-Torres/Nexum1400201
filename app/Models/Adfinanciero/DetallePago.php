@@ -3,6 +3,8 @@
 namespace App\Models\Adfinanciero;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Adfinanciero\Pago;
+use App\Models\Adfinanciero\ConceptoPago;
 
 class DetallePago extends Model
 {
@@ -37,5 +39,9 @@ class DetallePago extends Model
     public function cargo()
     {
         return $this->belongsTo(\App\Models\Estudiante\CargoEstudiante::class, 'id_cargo', 'cargo_id');
+    }
+    public function pago()
+    {
+        return $this->belongsTo(Pago::class, 'id_pago', 'pago_id');
     }
 }

@@ -178,7 +178,8 @@ class RequisitosEgresoController extends Controller
         return \Storage::disk('local')->download($path);
     }
 
-    public function marcarSolvencia( int $alumnoId, MarcarSolvenciaFinancieraAction $action) {
+    public function marcarSolvencia(int $alumnoId, MarcarSolvenciaFinancieraAction $action)
+    {
         $alumno = Alumnos::findOrFail($alumnoId);
 
         try {
@@ -195,7 +196,7 @@ class RequisitosEgresoController extends Controller
             report($e);
             return redirect()
                 ->route('admin-academico.egresos.index')
-                ->with('error', 'Error al calcular la solvencia financiera.');
+                ->with('error', 'Error al calcular la solvencia financiera: ' . $e->getMessage());
         }
     }
 }

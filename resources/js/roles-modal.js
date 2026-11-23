@@ -30,6 +30,34 @@ function parseJsonArray(value, label) {
         console.error(`[NEXUM_RBAC] Error al interpretar ${label}:`, error);
         return [];
     }
+
+}
+
+function fixModalFocus(modalElement) {
+    if (!modalElement) return;
+
+    let openerElement = null;
+
+    // Identificar el elemento que abrió el modal.
+    modalElement.addEventListener('show.bs.modal', (event) => {
+        openerElement = event.relatedTarget || document.activeElement;
+    });
+
+    // Sacar el foco del modal antes de que Bootstrap lo oculte.
+    modalElement.addEventListener('hide.bs.modal', () => {
+        if (modalElement.contains(document.activeElement)) {
+            document.activeElement.blur();
+        }
+    });
+
+    // Restaurar el foco cuando el modal ya esté cerrado.
+    modalElement.addEventListener('hidden.bs.modal', () => {
+        if (openerElement && document.contains(openerElement)) {
+            openerElement.focus();
+        }
+
+        openerElement = null;
+    });
 }
 
 /**
@@ -53,6 +81,7 @@ function initRoleStatusModal() {
     }
 
     const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+    fixModalFocus(modalElement);
 
     // Abrir modal.
     document.addEventListener('click', (event) => {
@@ -202,6 +231,7 @@ function initUserRolesModal() {
     }
 
     const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+    fixModalFocus(modalElement);
 
     /**
      * Obtiene el prefijo desde Blade.
@@ -381,11 +411,6 @@ function initUserRolesModal() {
         } else {
             selfRoleWarning?.classList.add('d-none');
         }
-
-        console.log('[NEXUM_RBAC] Modal de usuario preparado:', {
-            userId: id,
-            action: form.action
-        });
 
         modal.show();
     });
