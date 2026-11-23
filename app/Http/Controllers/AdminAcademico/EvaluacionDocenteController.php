@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\AdminAcademico;
 
-use App\Enums\EstadoCiclo;
 use App\Http\Controllers\Controller;
 use App\Models\Academico\CicloLectivo;
 use App\Models\Academico\EvaluacionDocente;
@@ -72,31 +71,17 @@ class EvaluacionDocenteController extends Controller
                 ])->values();
         });
 
-        $cicloFiltrado = $idCicloFiltro ? $ciclosLectivos->firstWhere('ciclo_lectivo_id', $idCicloFiltro) : null;
-        
-        $puedeGestionar = $cicloFiltrado && $cicloFiltrado->estado === EstadoCiclo::ACTIVO;
-
-
         return view('adminacademico.registro_evaluacion_docente', [
             'evaluaciones'      => $evaluaciones,
             'ciclosLectivos'    => $ciclosLectivos,
             'seccionesPorCiclo' => $seccionesPorCiclo,
             'idCicloFiltro'     => $idCicloFiltro,
-            'cicloDefault'      => $cicloActual,
-            'puedeGestionar'    => $puedeGestionar,
+            'cicloDefault'      => $cicloActual
         ]);
     }
 
     public function store(StoreEvaluacionDocenteRules $request): RedirectResponse
     {
-        $ciclo = CicloLectivo::find($request->input('id_ciclo_lectivo'));
-
-        if (!$ciclo || $ciclo->estado !== EstadoCiclo::ACTIVO) {
-            return back()
-                ->withInput()
-                ->with('error', 'Solo se pueden registrar encuestas en ciclos con estado ACTIVO.');
-        }
-
         try {
             EvaluacionDocente::create([
                 'id_seccion'       => $request->input('id_seccion'),
@@ -123,14 +108,6 @@ class EvaluacionDocenteController extends Controller
         StoreEvaluacionDocenteRules $request,
         EvaluacionDocente $evaluacion
     ): RedirectResponse {
-
-        $ciclo = $evaluacion->cicloLectivo;
-
-        if (!$ciclo || $ciclo->estado !== EstadoCiclo::ACTIVO) {
-            return back()
-                ->with('error', 'Solo se pueden modificar encuestas de ciclos con estado ACTIVO.');
-        }
-
         try {
             $evaluacion->update([
                 'url' => $request->input('url'),
@@ -151,13 +128,6 @@ class EvaluacionDocenteController extends Controller
 
     public function destroy(Request $request, EvaluacionDocente $evaluacion): RedirectResponse
     {
-    
-        $ciclo = $evaluacion->cicloLectivo;
-
-        if (!$ciclo || $ciclo->estado !== EstadoCiclo::ACTIVO) {
-            return back()->with('error', 'Solo se pueden eliminar encuestas de ciclos con estado ACTIVO.');
-        }
-
         try {
             $idCiclo = $evaluacion->id_ciclo_lectivo;
             $evaluacion->delete();

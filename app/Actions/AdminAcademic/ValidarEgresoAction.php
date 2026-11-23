@@ -16,8 +16,6 @@ use App\Rules\Egreso\PasantiaAprobadaRule;
 use App\Rules\Egreso\SolvenciaFinancieraRule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use App\Enums\EstadoCiclo;
-use App\Models\Academico\CicloLectivo;
 
 class ValidarEgresoAction
 {
@@ -48,16 +46,11 @@ class ValidarEgresoAction
         $req = RequisitosEgreso::paraAlumno($alumno->alumno_id);
         $detalles = $this->construirDetalles($alumno, $req);
 
-        // Elegibilidad para egreso (independiente de solvencia)
-        $elegibilidad = $this->evaluarElegibilidad($alumno);
-
         return [
             'puede'        => empty($bloqueadores),
             'bloqueadores' => $bloqueadores,
             'detalles'     => $detalles,
             'req'          => $req,
-            'elegible_academico'    => $elegibilidad['elegible'],
-            'motivos_elegibilidad'  => $elegibilidad['motivos'], 
         ];
     }
 
@@ -145,69 +138,5 @@ class ValidarEgresoAction
             ->where('p.id_alumno', $alumno->alumno_id)
             ->where('cp.codigo_concepto', $codigo)
             ->exists();
-    }
-
-    private function evaluarElegibilidad(Alumnos $alumno): array
-    {
-        $motivos = [];
-
-        // 1. Sin materias en curso
-        $cicloVigente = CicloLectivo::whereIn('estado', [
-            EstadoCiclo::ACTIVO,
-            EstadoCiclo::MATRICULA_ABIERTA,
-        ])->orderByDesc('fecha_inicio')->first();
-
-        if ($cicloVigente) {
-            $tieneCursando = DB::table('detalle_inscripcion as di')
-                ->join('inscripciones as i', 'di.id_inscripcion', '=', 'i.inscripcion_id')
-                ->where('i.id_alumno', $alumno->alumno_id)
-                ->where('i.id_ciclo_lectivo', $cicloVigente->ciclo_lectivo_id)
-                ->whereIn('di.estado_materia', ['CURSANDO', 'RETIRADA', 'REPROBADA'])
-                ->exists();
-
-            if ($tieneCursando) {
-                $motivos[] = 'El alumno tiene materias en curso en el ciclo vigente.';
-            }
-        }
-
-        // 2. Al menos un ciclo cerrado con materias aprobadas
-        $tieneCicloCerrado = DB::table('inscripciones as i')
-            ->join('ciclo_lectivo as cl', 'i.id_ciclo_lectivo', '=', 'cl.ciclo_lectivo_id')
-            ->join('detalle_inscripcion as di', 'di.id_inscripcion', '=', 'i.inscripcion_id')
-            ->where('i.id_alumno', $alumno->alumno_id)
-            ->where('cl.estado', 'CERRADO')
-            ->where('di.estado_materia', 'APROBADA')
-            ->exists();
-
-        if (!$tieneCicloCerrado) {
-            $motivos[] = 'El alumno no tiene ciclos cerrados con materias aprobadas.';
-        }
-
-        // 3. Pensum completo (esto ya lo hace MateriasAprobadasRule, pero lo reforzamos)
-        $pensum = Pensum::where('id_carrera', $alumno->id_carrera)
-            ->where('estado', 'ACTIVO')->first();
-
-        if ($pensum) {
-            $total = $pensum->pensumMaterias()->count();
-            $aprobadas = DB::table('detalle_inscripcion as di')
-                ->join('inscripciones as i', 'di.id_inscripcion', '=', 'i.inscripcion_id')
-                ->join('seccion as s', 'di.id_seccion', '=', 's.seccion_id')
-                ->join('pensum_materia as pm', 's.id_materia', '=', 'pm.id_materia')
-                ->where('i.id_alumno', $alumno->alumno_id)
-                ->where('pm.id_pensum', $pensum->pensum_id)
-                ->where('di.estado_materia', 'APROBADA')
-                ->distinct()->count('pm.id_materia');
-
-            if ($aprobadas < $total) {
-                $motivos[] = "El alumno no ha aprobado todas las materias del pensum ({$aprobadas}/{$total}).";
-            }
-        } else {
-            $motivos[] = 'El alumno no tiene un pensum activo.';
-        }
-
-        return [
-            'elegible' => empty($motivos),
-            'motivos'  => $motivos,
-        ];
     }
 }
