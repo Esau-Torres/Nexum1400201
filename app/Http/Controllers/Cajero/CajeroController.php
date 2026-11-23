@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Mail\ReciboPagoMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class CajeroController extends Controller
 {
@@ -67,7 +68,7 @@ class CajeroController extends Controller
                     $cargo->monto_mora = 0;
                     $cargo->total_con_mora = $cargo->monto_neto_estudiante ?? $cargo->monto_original;
 
-                    $fechaVencimiento = \Carbon\Carbon::parse($cargo->fecha_vencimiento)->startOfDay();
+                    $fechaVencimiento = Carbon::parse($cargo->fecha_vencimiento)->startOfDay();
 
                     // Si hoy es mayor a la fecha de vencimiento (está en rojo)
                     if ($hoy->gt($fechaVencimiento)) {

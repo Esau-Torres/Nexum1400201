@@ -18,18 +18,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success border-0 shadow-sm">
-            <i class="bi bi-check-circle-fill me-1"></i>{{ session('success') }}
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger border-0 shadow-sm">
-            <i class="bi bi-x-circle-fill me-1"></i>{{ session('error') }}
-        </div>
-    @endif
-
     {{-- ═══════════════════════════════════════════════════════════ --}}
     {{-- TABS                                                        --}}
     {{-- ═══════════════════════════════════════════════════════════ --}}

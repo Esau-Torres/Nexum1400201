@@ -155,42 +155,50 @@
                             </div>
                         @endif
 
-                        <div class="mt-auto d-flex gap-2">
-                            <button type="button" class="btn btn-sm btn-outline-danger flex-grow-1"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#editCicloModal-{{ $ciclo->ciclo_lectivo_id }}">
-                                <i class="bi bi-pencil-square me-1"></i>Editar
-                            </button>
-
-                            @if ($ciclo->estado !== \App\Enums\EstadoCiclo::CERRADO)
-                                <form action="{{ route('admin-academico.ciclolectivo.changeStatus', $ciclo) }}"
-                                      method="POST" class="d-inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    @if($ciclo->estado === \App\Enums\EstadoCiclo::CONFIGURACION)
-                                        <input type="hidden" name="nuevo_estado" value="{{ \App\Enums\EstadoCiclo::MATRICULA_ABIERTA->value }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-warning" title="Abrir Matrícula">
-                                            <i class="bi bi-unlock-fill"></i>
-                                        </button>
-                                    @elseif($ciclo->estado === \App\Enums\EstadoCiclo::MATRICULA_ABIERTA)
-                                        <input type="hidden" name="nuevo_estado" value="{{ \App\Enums\EstadoCiclo::ACTIVO->value }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Iniciar Clases">
-                                            <i class="bi bi-play-fill"></i>
-                                        </button>
-                                    @elseif($ciclo->estado === \App\Enums\EstadoCiclo::ACTIVO)
-                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Cerrar Ciclo"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#closeCicloModal-{{ $ciclo->ciclo_lectivo_id }}">
-                                            <i class="bi bi-lock-fill"></i>
-                                        </button>
-                                    @endif
-                                </form>
-                            @elseif ($esCerradoReabrible)
-                                <button type="button" class="btn btn-sm btn-outline-warning" title="Reabrir Ciclo"
+                       <div class="mt-auto d-flex gap-2">
+                            @if ($esCerradoTerminal)
+                                {{-- Ciclo cerrado definitivamente: sin edición --}}
+                                <div class="alert border border-danger p-3 small py-2 px-3 mb-0 flex-grow-1 d-flex align-items-center gap-2 bg-succes">
+                                    <i class="bi bi-lock-fill me-3 text-medium"></i>
+                                    <span>Este ciclo ha sido <strong>cerrado correctamente</strong> y ya no admite modificaciones.</span>
+                                </div>
+                            @else
+                                <button type="button" class="btn btn-sm btn-outline-danger flex-grow-1"
                                         data-bs-toggle="modal"
-                                        data-bs-target="#reopenCicloModal-{{ $ciclo->ciclo_lectivo_id }}">
-                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                        data-bs-target="#editCicloModal-{{ $ciclo->ciclo_lectivo_id }}">
+                                    <i class="bi bi-pencil-square me-1"></i>Editar
                                 </button>
+
+                                @if ($ciclo->estado !== \App\Enums\EstadoCiclo::CERRADO)
+                                    <form action="{{ route('admin-academico.ciclolectivo.changeStatus', $ciclo) }}"
+                                        method="POST" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        @if($ciclo->estado === \App\Enums\EstadoCiclo::CONFIGURACION)
+                                            <input type="hidden" name="nuevo_estado" value="{{ \App\Enums\EstadoCiclo::MATRICULA_ABIERTA->value }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-warning" title="Abrir Matrícula">
+                                                <i class="bi bi-unlock-fill"></i>
+                                            </button>
+                                        @elseif($ciclo->estado === \App\Enums\EstadoCiclo::MATRICULA_ABIERTA)
+                                            <input type="hidden" name="nuevo_estado" value="{{ \App\Enums\EstadoCiclo::ACTIVO->value }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-success" title="Iniciar Clases">
+                                                <i class="bi bi-play-fill"></i>
+                                            </button>
+                                        @elseif($ciclo->estado === \App\Enums\EstadoCiclo::ACTIVO)
+                                            <button type="button" class="btn btn-sm btn-outline-danger" title="Cerrar Ciclo"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#closeCicloModal-{{ $ciclo->ciclo_lectivo_id }}">
+                                                <i class="bi bi-lock-fill"></i>
+                                            </button>
+                                        @endif
+                                    </form>
+                                @elseif ($esCerradoReabrible)
+                                    <button type="button" class="btn btn-sm btn-outline-warning" title="Reabrir Ciclo"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#reopenCicloModal-{{ $ciclo->ciclo_lectivo_id }}">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </button>
+                                @endif
                             @endif
                         </div>
                     </div>
@@ -200,99 +208,101 @@
             {{-- ============================================= --}}
             {{-- MODAL EDITAR CICLO --}}
             {{-- ============================================= --}}
-            <div class="modal fade" id="editCicloModal-{{ $ciclo->ciclo_lectivo_id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content border-0 shadow">
-                        <form action="{{ route('admin-academico.ciclolectivo.update', $ciclo) }}" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <div class="modal-header border-0 pb-0">
-                                <h5 class="modal-title fw-bold">
-                                    <i class="bi bi-pencil-square text-danger me-2"></i>Editar Ciclo
-                                </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body pt-2">
-                                {{-- Datos visuales (no editables) --}}
-                                <div class="p-3 rounded-3 mb-3" style="background-color: var(--color-special);">
-                                    <div class="row text-center">
-                                        <div class="col-6 border-end">
-                                            <div class="stat-label-small">Año</div>
-                                            <div class="fw-bold fs-5">{{ $ciclo->anio }}</div>
+            @if (!$esCerradoTerminal)
+                <div class="modal fade" id="editCicloModal-{{ $ciclo->ciclo_lectivo_id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow">
+                            <form action="{{ route('admin-academico.ciclolectivo.update', $ciclo) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <div class="modal-header border-0 pb-0">
+                                    <h5 class="modal-title fw-bold">
+                                        <i class="bi bi-pencil-square text-danger me-2"></i>Editar Ciclo
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body pt-2">
+                                    {{-- Datos visuales (no editables) --}}
+                                    <div class="p-3 rounded-3 mb-3" style="background-color: var(--color-special);">
+                                        <div class="row text-center">
+                                            <div class="col-6 border-end">
+                                                <div class="stat-label-small">Año</div>
+                                                <div class="fw-bold fs-5">{{ $ciclo->anio }}</div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="stat-label-small">Nº Ciclo</div>
+                                                <div class="fw-bold fs-5">{{ $ciclo->numero_ciclo->label() }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold">
+                                            Nombre del Ciclo <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" name="nombre_ciclo"
+                                            value="{{ old('nombre_ciclo', $ciclo->nombre_ciclo) }}"
+                                            maxlength="50" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold">
+                                            Número de Ciclo <span class="text-danger">*</span>
+                                        </label>
+                                        <select name="numero_ciclo" class="form-select" required>
+                                            @foreach ($tiposCiclo as $tipo)
+                                                <option value="{{ $tipo->value }}" @selected($ciclo->numero_ciclo === $tipo)>
+                                                    {{ $tipo->label() }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label small fw-semibold">
+                                                Fecha Inicio <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="date" class="form-control" name="fecha_inicio"
+                                                value="{{ old('fecha_inicio', $ciclo->fecha_inicio->format('Y-m-d')) }}" required>
                                         </div>
                                         <div class="col-6">
-                                            <div class="stat-label-small">Nº Ciclo</div>
-                                            <div class="fw-bold fs-5">{{ $ciclo->numero_ciclo->label() }}</div>
+                                            <label class="form-label small fw-semibold">
+                                                Fecha Fin <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="date" class="form-control" name="fecha_fin"
+                                                value="{{ old('fecha_fin', $ciclo->fecha_fin->format('Y-m-d')) }}" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-semibold">
+                                            Estado <span class="text-danger">*</span>
+                                        </label>
+                                        <select name="estado" class="form-select" required>
+                                            @foreach ($estados as $estado)
+                                                <option value="{{ $estado->value }}" @selected($ciclo->estado === $estado)>
+                                                    {{ $estado->label() }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <div class="form-text small">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Solo se puede marcar como <strong>Cerrado</strong> si la fecha de fin ya pasó.
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label small fw-semibold">
-                                        Nombre del Ciclo <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text" class="form-control" name="nombre_ciclo"
-                                           value="{{ old('nombre_ciclo', $ciclo->nombre_ciclo) }}"
-                                           maxlength="50" required>
+                                <div class="modal-footer border-0 pt-0">
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="bi bi-check-circle me-1"></i>Guardar Cambios
+                                    </button>
                                 </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label small fw-semibold">
-                                        Número de Ciclo <span class="text-danger">*</span>
-                                    </label>
-                                    <select name="numero_ciclo" class="form-select" required>
-                                        @foreach ($tiposCiclo as $tipo)
-                                            <option value="{{ $tipo->value }}" @selected($ciclo->numero_ciclo === $tipo)>
-                                                {{ $tipo->label() }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="row g-3 mb-3">
-                                    <div class="col-6">
-                                        <label class="form-label small fw-semibold">
-                                            Fecha Inicio <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="date" class="form-control" name="fecha_inicio"
-                                               value="{{ old('fecha_inicio', $ciclo->fecha_inicio->format('Y-m-d')) }}" required>
-                                    </div>
-                                    <div class="col-6">
-                                        <label class="form-label small fw-semibold">
-                                            Fecha Fin <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="date" class="form-control" name="fecha_fin"
-                                               value="{{ old('fecha_fin', $ciclo->fecha_fin->format('Y-m-d')) }}" required>
-                                    </div>
-                                </div>
-
-                                <div class="mb-2">
-                                    <label class="form-label small fw-semibold">
-                                        Estado <span class="text-danger">*</span>
-                                    </label>
-                                    <select name="estado" class="form-select" required>
-                                        @foreach ($estados as $estado)
-                                            <option value="{{ $estado->value }}" @selected($ciclo->estado === $estado)>
-                                                {{ $estado->label() }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <div class="form-text small">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        Solo se puede marcar como <strong>Cerrado</strong> si la fecha de fin ya pasó.
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer border-0 pt-0">
-                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-danger">
-                                    <i class="bi bi-check-circle me-1"></i>Guardar Cambios
-                                </button>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
 
             {{-- ============================================= --}}
             {{-- MODAL CERRAR CICLO --}}

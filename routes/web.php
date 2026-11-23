@@ -19,6 +19,7 @@ Route::get('/', function () {
 })->name('welcome');
 
 Route::get('/register', [RegistroController::class, 'index'])->name('register');
+Route::get('/register/check-email', [RegistroController::class, 'checkEmail'])->name('register.check-email')->middleware('throttle:30,1');
 
 // ============================================
 // RUTAS PROTEGIDAS (Auth + Verified)
@@ -36,6 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('profile'); })->name('profile');
     Route::get('/mi-foto', [FotoPerfilController::class, 'show'])->name('estudiante.foto');
     Route::post('/profile/carnet', [CarnetController::class, 'store'])->name('estudiante.carnet.store');
+    Route::get('/user/profile/check-email', [CarnetController::class, 'checkEmail'])->name('user-profile.check-email')->middleware('throttle:30,1');
 
     // ============================================
     // RUTAS ADMIN FINANCIERO

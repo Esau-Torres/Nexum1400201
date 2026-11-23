@@ -52,10 +52,56 @@ try {
 }
 
 try {
+
+    // ─────────────────────────────────────────────────────────────
+    // 2.5. Helpers compartidos de validación (para grupos y otros)
+    // ─────────────────────────────────────────────────────────────
+    const ValidacionesGrupo = {
+
+        validarNombreGrupo(event, alBlur = false) {
+            const input = event.target;
+            const valorOriginal = input.value;
+
+            // Limpieza en vivo: solo letras, números, guiones, ñ/Ñ
+            const limpio = valorOriginal
+                .replace(/[^a-zA-Z0-9ñÑ\-]/g, '')
+                .slice(0, 20);
+
+            if (limpio !== valorOriginal) {
+                input.value = limpio;
+            }
+
+            const valor = input.value.trim();
+            const feedback = input.closest('.col-md-6, .col-12, .mb-3, .mb-0')
+                ?.querySelector('.invalid-feedback');
+
+            let error = '';
+
+            if (valor === '') {
+                error = 'El nombre del grupo es obligatorio.';
+            } else if (!/^[a-zA-Z0-9ñÑ\-]{1,20}$/.test(valor)) {
+                error = 'Solo se permiten letras, números y guiones (máx. 20 caracteres).';
+            }
+
+            if (error) {
+                input.setCustomValidity(error);
+                if (alBlur || valor.length > 0) {
+                    input.classList.add('is-invalid');
+                    if (feedback) feedback.textContent = error;
+                }
+            } else {
+                input.setCustomValidity('');
+                input.classList.remove('is-invalid');
+                if (feedback) feedback.textContent = '';
+            }
+        },
+    };
+
     // ─────────────────────────────────────────────────────────────
     // 3. Registrar TODOS los componentes Alpine (ANTES de start)
     // ─────────────────────────────────────────────────────────────
     Alpine.data('grupoForm', () => ({
+        ...ValidacionesGrupo, 
         cicloId: '',
         horariosFiltrados: [],
         filtrarHorarios() {
@@ -64,6 +110,7 @@ try {
     }));
 
     Alpine.data('grupoFormEditar', (cicloInicial, seleccionados) => ({
+         ...ValidacionesGrupo,
         cicloId: String(cicloInicial),
         seleccionados: (seleccionados || []).map(Number),
         horariosFiltrados: [],

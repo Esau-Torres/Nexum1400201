@@ -1,0 +1,1579 @@
+
+/* ==========================================================================
+   NEXUM — GESTIÓN DE ROLES Y PERMISOS
+   Diseño institucional, responsive y accesible
+   Archivo: resources/css/roles-permisos.css
+   ========================================================================== */
+
+/* ==========================================================================
+   1. VARIABLES Y CONTENEDOR PRINCIPAL
+   ========================================================================== */
+
+.roles-view {
+    --rp-primary: var(--color-accent, #dc3545);
+    --rp-primary-dark: #b02a37;
+    --rp-primary-soft: #fff1f2;
+
+    --rp-text: #1f2937;
+    --rp-muted: #6b7280;
+    --rp-border: #e5e7eb;
+    --rp-surface: #ffffff;
+    --rp-surface-soft: #f8fafc;
+
+    --rp-success: #15803d;
+    --rp-success-soft: #ecfdf3;
+
+    --rp-danger: #b42318;
+    --rp-danger-soft: #fff1f2;
+
+    --rp-blue: #2563eb;
+    --rp-blue-soft: #eff6ff;
+
+    --rp-warning: #92400e;
+    --rp-warning-soft: #fff7ed;
+
+    min-width: 0;
+    color: var(--rp-text);
+}
+
+/* ==========================================================================
+   2. HEADER
+   ========================================================================== */
+
+.roles-view .rp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--rp-surface);
+    border: 1px solid var(--rp-border);
+    border-radius: 20px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+}
+
+.roles-view .rp-header-main {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    min-width: 0;
+}
+
+.roles-view .rp-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    color: var(--rp-primary);
+    background: var(--rp-primary-soft);
+    border-radius: 18px;
+    font-size: 1.65rem;
+}
+
+.roles-view .rp-header-content {
+    min-width: 0;
+}
+
+.roles-view .rp-eyebrow {
+    margin-bottom: 0.45rem;
+    color: var(--rp-primary);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1.1px;
+}
+
+.roles-view .rp-header h1 {
+    margin: 0;
+    color: var(--rp-text);
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+}
+
+.roles-view .rp-header p {
+    margin: 0.45rem 0 0;
+    color: var(--rp-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.roles-view .rp-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+/* ==========================================================================
+   3. BOTONES
+   ========================================================================== */
+
+.roles-view .btn {
+    border-radius: 10px;
+    font-weight: 600;
+    transition:
+        transform 0.2s ease,
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.roles-view .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.roles-view .rp-btn-primary {
+    padding: 0.7rem 1rem;
+    color: #fff;
+    background: var(--rp-primary);
+    border: 1px solid var(--rp-primary);
+    box-shadow: 0 3px 8px rgba(220, 53, 69, 0.12);
+}
+
+.roles-view .rp-btn-primary:hover {
+    color: #fff;
+    background: var(--rp-primary-dark);
+    border-color: var(--rp-primary-dark);
+    box-shadow: 0 5px 14px rgba(220, 53, 69, 0.18);
+}
+
+.roles-view .rp-btn-secondary {
+    padding: 0.7rem 1rem;
+    color: #475569;
+    background: #fff;
+    border: 1px solid #d1d5db;
+}
+
+.roles-view .rp-btn-secondary:hover {
+    color: #1f2937;
+    background: #f8fafc;
+    border-color: #b8c1cc;
+}
+
+/* ==========================================================================
+   4. BANNER DE SEGURIDAD
+   ========================================================================== */
+
+.roles-view .rp-security-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 1.1rem 1.25rem;
+    background: #f5f9ff;
+    border: 1px solid #dbeafe;
+    border-radius: 14px;
+}
+
+.roles-view .rp-security-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    color: #2563eb;
+    background: #e0edff;
+    border-radius: 12px;
+    font-size: 1.1rem;
+}
+
+.roles-view .rp-security-content strong {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: #1e3a8a;
+    font-size: 0.95rem;
+}
+
+.roles-view .rp-security-content p {
+    margin: 0;
+    color: #475569;
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+
+/* ==========================================================================
+   5. PESTAÑAS
+   ========================================================================== */
+
+.roles-view .rp-tabs-container {
+    width: 100%;
+    min-width: 0;
+}
+
+.roles-view .rp-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.4rem;
+    margin: 0;
+    background: #f8fafc;
+    border: 1px solid var(--rp-border);
+    border-radius: 14px 14px 0 0;
+}
+
+.roles-view .rp-tabs .nav-item {
+    margin: 0;
+}
+
+.roles-view .rp-tabs .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.8rem 1.1rem;
+    color: #64748b;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.roles-view .rp-tabs .nav-link:hover {
+    color: var(--rp-primary);
+    background: #fff;
+}
+
+.roles-view .rp-tabs .nav-link.active {
+    color: var(--rp-primary);
+    background: #fff;
+    border-color: var(--rp-border);
+    box-shadow: 0 2px 7px rgba(15, 23, 42, 0.05);
+}
+
+.roles-view .rp-tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 0.4rem;
+    margin-left: 0.35rem;
+    color: #475569;
+    background: #f1f5f9;
+    border-radius: 7px;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.roles-view .rp-tabs .nav-link.active .rp-tab-count {
+    color: var(--rp-primary);
+    background: var(--rp-primary-soft);
+}
+
+.roles-view .rp-tab-content {
+    min-width: 0;
+    padding-top: 1.25rem;
+}
+
+.roles-view .rp-tab-content > .tab-pane {
+    min-width: 0;
+}
+
+/* ==========================================================================
+   6. PANELES
+   ========================================================================== */
+
+.roles-view .rp-panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--rp-border);
+    border-radius: 18px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+}
+
+.roles-view .rp-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.4rem;
+    background: #fff;
+    border-bottom: 1px solid var(--rp-border);
+}
+
+.roles-view .rp-panel-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-width: 0;
+}
+
+.roles-view .rp-panel-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    color: var(--rp-primary);
+    background: var(--rp-primary-soft);
+    border-radius: 13px;
+    font-size: 1.2rem;
+}
+
+.roles-view .rp-panel-icon-users {
+    color: var(--rp-blue);
+    background: var(--rp-blue-soft);
+}
+
+.roles-view .rp-panel-header h2 {
+    margin: 0;
+    color: var(--rp-text);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.roles-view .rp-panel-header p {
+    margin: 0.3rem 0 0;
+    color: var(--rp-muted);
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.roles-view .rp-panel-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 0.65rem;
+    color: var(--rp-text);
+    background: var(--rp-surface-soft);
+    border: 1px solid var(--rp-border);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.roles-view .rp-panel-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    padding: 0.8rem 1rem 1rem;
+}
+
+.roles-view .rp-table-wrapper {
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ==========================================================================
+   7. TABLAS
+   ========================================================================== */
+
+.roles-view .rp-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.95rem;
+}
+
+/* Encabezados */
+.roles-view .rp-table thead th {
+    padding: 1rem 0.85rem;
+    color: #475569;
+    background: #f8fafc;
+    border-bottom: 1px solid var(--rp-border);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.45px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* Celdas */
+.roles-view .rp-table tbody td {
+    padding: 1.05rem 0.85rem;
+    color: #374151;
+    background: #fff;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.94rem;
+    vertical-align: middle;
+}
+
+.roles-view .rp-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.roles-view .rp-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.roles-view .rp-table tbody tr:hover td {
+    background: #fafbfc;
+}
+
+/* Catálogo de roles */
+.roles-view #rolesTable {
+    width: 100%;
+    min-width: 680px;
+    table-layout: fixed;
+}
+
+.roles-view #rolesTable th:nth-child(1),
+.roles-view #rolesTable td:nth-child(1) {
+    width: 21%;
+}
+
+.roles-view #rolesTable th:nth-child(2),
+.roles-view #rolesTable td:nth-child(2) {
+    width: 55%;
+}
+
+.roles-view #rolesTable th:nth-child(3),
+.roles-view #rolesTable td:nth-child(3) {
+    width: 13%;
+}
+
+.roles-view #rolesTable th:nth-child(4),
+.roles-view #rolesTable td:nth-child(4) {
+    width: 11%;
+}
+
+/* Tabla de usuarios */
+.roles-view .rp-users-table {
+    min-width: 900px;
+}
+
+/* ==========================================================================
+   8. CELDA DE ROL Y DESCRIPCIÓN
+   ========================================================================== */
+
+.roles-view .rp-role-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-width: 0;
+}
+
+.roles-view .rp-role-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    color: var(--rp-primary);
+    background: var(--rp-primary-soft);
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+.roles-view .rp-role-name {
+    color: #1f2937;
+    font-family: monospace;
+    font-size: 0.92rem;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+/* Descripción: utiliza todo el ancho de su columna */
+.roles-view .rp-description {
+    display: block;
+    width: 100%;
+    max-width: none;
+    color: #475569;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   9. USUARIOS
+   ========================================================================== */
+
+.roles-view .rp-user-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-width: 185px;
+}
+
+.roles-view .rp-user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    color: var(--rp-primary);
+    background: var(--rp-primary-soft);
+    border-radius: 13px;
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+
+.roles-view .rp-user-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 0.2rem;
+}
+
+.roles-view .rp-user-name {
+    color: #1f2937;
+    font-size: 0.93rem;
+    font-weight: 750;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.roles-view .rp-user-email {
+    display: block;
+    color: #64748b;
+    font-family: monospace;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   10. ROLES ASIGNADOS
+   ========================================================================== */
+
+.roles-view .rp-user-roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    min-width: 120px;
+    max-width: 250px;
+}
+
+.roles-view .rp-role-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.6rem;
+    color: #1d4ed8;
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 7px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.roles-view .rp-no-role {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.6rem;
+    color: #6b7280;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+    font-size: 0.82rem;
+}
+
+/* ==========================================================================
+   11. SEDE
+   ========================================================================== */
+
+.roles-view .rp-location {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    min-width: 110px;
+    color: #475569;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.roles-view .rp-location i {
+    margin-top: 0.15rem;
+    color: var(--rp-primary);
+}
+
+/* ==========================================================================
+   12. ESTADOS
+   ========================================================================== */
+
+.roles-view .rp-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.roles-view .rp-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.roles-view .rp-status-active {
+    color: #15803d;
+    background: #ecfdf3;
+    border: 1px solid #bbf7d0;
+}
+
+.roles-view .rp-status-active .rp-status-dot {
+    background: #16a34a;
+}
+
+.roles-view .rp-status-inactive {
+    color: #b42318;
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+}
+
+.roles-view .rp-status-inactive .rp-status-dot {
+    background: #dc3545;
+}
+
+/* ==========================================================================
+   13. BOTONES DE TABLA
+   ========================================================================== */
+
+.roles-view .rp-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    color: #2563eb;
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 9px;
+    transition: all 0.2s ease;
+}
+
+.roles-view .rp-icon-button:hover {
+    color: #fff;
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+.roles-view .rp-manage-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.6rem 0.8rem;
+    color: #fff;
+    background: var(--rp-primary);
+    border: 1px solid var(--rp-primary);
+    border-radius: 9px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.roles-view .rp-manage-button:hover {
+    color: #fff;
+    background: var(--rp-primary-dark);
+    border-color: var(--rp-primary-dark);
+}
+
+/* ==========================================================================
+   14. PIE DE PANEL
+   ========================================================================== */
+
+.roles-view .rp-panel-footnote {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 1rem 0.4rem 0.2rem;
+    margin-top: auto;
+    color: #64748b;
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+
+.roles-view .rp-panel-footnote i {
+    margin-top: 0.1rem;
+    color: var(--rp-primary);
+    font-size: 0.95rem;
+}
+
+/* ==========================================================================
+   15. MODALES — ESTRUCTURA GENERAL
+   ========================================================================== */
+
+/* Modal de asignación y otros modales de la vista */
+.roles-view .rp-modal .modal-dialog {
+    display: flex;
+    align-items: stretch;
+    width: calc(100% - 1.5rem);
+    max-width: 520px;
+    height: calc(100% - 1rem);
+    margin: 0.5rem auto;
+}
+
+/* Modal de asignación de roles */
+.roles-view #modalManageUserRoles .modal-dialog {
+    max-width: 850px;
+}
+
+.roles-view .rp-modal .modal-content {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    width: 100%;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+}
+
+/* El formulario permite que el cuerpo tenga desplazamiento */
+.roles-view .rp-modal form {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Encabezado fijo */
+.roles-view .rp-modal .modal-header {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Cuerpo desplazable */
+.roles-view .rp-modal .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 1.5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+.roles-view .rp-modal .modal-body::-webkit-scrollbar {
+    width: 7px;
+}
+
+.roles-view .rp-modal .modal-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.roles-view .rp-modal .modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Pie fijo */
+.roles-view .rp-modal .modal-footer {
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.65rem;
+    padding: 1rem 1.5rem;
+    background: #f8fafc;
+    border-top: 1px solid #e5e7eb;
+}
+
+.roles-view .rp-modal .modal-footer .btn {
+    margin: 0;
+}
+
+.roles-view .rp-modal .btn-close {
+    flex: 0 0 auto;
+    margin-left: auto;
+    opacity: 0.7;
+}
+
+.roles-view .rp-modal .btn-close:hover {
+    opacity: 1;
+}
+
+/* ==========================================================================
+   16. MODAL DE EDICIÓN DE ESTADO — ALTURA DINÁMICA
+   ========================================================================== */
+
+/*
+ * Este modal no debe ocupar toda la altura de la pantalla.
+ * Se adapta al contenido y solo activa scroll si realmente lo necesita.
+ */
+
+.roles-view #modalEditRoleStatus .modal-dialog {
+    display: flex;
+    align-items: center;
+    width: calc(100% - 1.5rem);
+    max-width: 540px;
+    height: auto;
+    min-height: 0;
+    max-height: calc(100% - 2rem);
+    margin: 1rem auto;
+}
+
+.roles-view #modalEditRoleStatus .modal-content {
+    flex: 0 1 auto;
+    height: auto;
+    min-height: 0;
+    max-height: calc(100vh - 2rem);
+}
+
+.roles-view #modalEditRoleStatus form {
+    flex: 0 1 auto;
+    min-height: 0;
+}
+
+.roles-view #modalEditRoleStatus .modal-header,
+.roles-view #modalEditRoleStatus .modal-footer {
+    flex: 0 0 auto;
+}
+
+.roles-view #modalEditRoleStatus .modal-body {
+    flex: 0 1 auto;
+    min-height: 0;
+    max-height: calc(100vh - 18rem);
+    padding: 1.25rem 1.4rem;
+    overflow-y: auto;
+}
+
+.roles-view #modalEditRoleStatus .modal-footer {
+    padding: 0.9rem 1.4rem;
+}
+
+.roles-view #modalEditRoleStatus .rp-selected-role {
+    margin-bottom: 1.15rem;
+}
+
+.roles-view #modalEditRoleStatus .rp-form-help {
+    margin-bottom: 0;
+}
+
+.roles-view #modalEditRoleStatus .rp-impact-alert {
+    margin-top: 1rem !important;
+}
+
+/* ==========================================================================
+   17. CABECERAS INTERNAS DE LOS MODALES
+   ========================================================================== */
+
+.roles-view .rp-modal-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-width: 0;
+}
+
+.roles-view .rp-modal-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    color: var(--rp-primary);
+    background: var(--rp-primary-soft);
+    border-radius: 13px;
+    font-size: 1.2rem;
+}
+
+.roles-view .rp-modal-heading .modal-title {
+    color: var(--rp-text);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.roles-view .rp-modal-heading p {
+    margin: 0.3rem 0 0;
+    color: var(--rp-muted);
+    font-size: 0.82rem;
+}
+
+/* ==========================================================================
+   18. ROL SELECCIONADO
+   ========================================================================== */
+
+.roles-view .rp-selected-role {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1rem;
+    margin-bottom: 1.4rem;
+    background: #fff5f6;
+    border: 1px solid #f3c7cc;
+    border-radius: 13px;
+}
+
+.roles-view .rp-selected-role-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    color: var(--rp-primary);
+    background: #ffe4e6;
+    border-radius: 12px;
+    font-size: 1.2rem;
+}
+
+.roles-view .rp-modal-label {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: #6b7280;
+    font-size: 0.8rem;
+}
+
+.roles-view .rp-selected-role strong {
+    display: block;
+    color: #1f2937;
+    font-family: monospace;
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   19. FORMULARIOS
+   ========================================================================== */
+
+.roles-view .rp-form-label {
+    color: #374151;
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.roles-view .rp-modal .form-select,
+.roles-view .rp-modal .form-control {
+    min-height: 44px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.roles-view .rp-modal .form-select:focus,
+.roles-view .rp-modal .form-control:focus {
+    border-color: var(--rp-primary);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+}
+
+.roles-view .rp-form-help {
+    margin-top: 0.65rem;
+    color: #64748b;
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+
+/* ==========================================================================
+   20. ALERTA DE IMPACTO
+   ========================================================================== */
+
+.roles-view .rp-impact-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    max-width: 100%;
+    padding: 1rem;
+    margin-bottom: 0;
+    overflow-wrap: anywhere;
+    color: #92400e;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 13px;
+}
+
+.roles-view .rp-impact-icon {
+    flex: 0 0 auto;
+    font-size: 1.1rem;
+}
+
+.roles-view .rp-impact-content {
+    min-width: 0;
+}
+
+.roles-view .rp-impact-content strong {
+    font-size: 0.9rem;
+}
+
+.roles-view .rp-impact-content p {
+    color: #78350f;
+    line-height: 1.55;
+}
+
+.roles-view .rp-orphan-badge {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0.4rem 0.65rem;
+    color: #b42318;
+    background: #fff1f2;
+    border: 1px solid #fecaca;
+    border-radius: 9px;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.roles-view .rp-collapse-button {
+    color: #92400e;
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.roles-view .rp-collapse-button:hover {
+    color: #78350f;
+    text-decoration: underline;
+}
+
+.roles-view .rp-orphan-list {
+    max-height: 180px;
+    padding-left: 1.2rem;
+    margin: 0;
+    overflow-y: auto;
+    color: #78350f;
+    font-size: 0.86rem;
+    line-height: 1.7;
+}
+
+/* ==========================================================================
+   21. ASIGNACIÓN DE ROLES
+   ========================================================================== */
+
+.roles-view .rp-modal-info-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    color: #1e40af;
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    line-height: 1.55;
+}
+
+.roles-view .rp-modal-info-banner i {
+    flex: 0 0 auto;
+    margin-top: 0.1rem;
+    font-size: 1.1rem;
+}
+
+.roles-view .rp-self-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    color: #92400e;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    line-height: 1.55;
+}
+
+.roles-view .rp-self-warning i {
+    flex: 0 0 auto;
+    margin-top: 0.15rem;
+}
+
+.roles-view .rp-roles-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.9rem;
+    margin: 1.5rem 0 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.roles-view .rp-roles-section-header h6 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.roles-view .rp-roles-section-header p {
+    margin: 0.3rem 0 0;
+    color: #64748b;
+    font-size: 0.84rem;
+}
+
+.roles-view .rp-roles-section-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    color: #64748b;
+    background: #f3f4f6;
+    border-radius: 11px;
+}
+
+/* ==========================================================================
+   22. TARJETAS DE ROLES
+   ========================================================================== */
+
+.roles-view .rp-role-option {
+    height: 100%;
+    min-width: 0;
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.roles-view .rp-role-option:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+
+.roles-view .rp-role-option-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.8rem;
+    min-width: 0;
+}
+
+.roles-view .rp-role-option-info {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: flex-start;
+    gap: 0.7rem;
+    min-width: 0;
+}
+
+.roles-view .rp-role-option-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    color: var(--rp-primary);
+    background: var(--rp-primary-soft);
+    border-radius: 11px;
+}
+
+.roles-view .rp-role-option-text {
+    min-width: 0;
+}
+
+.roles-view .rp-role-option-name {
+    display: block;
+    color: #1f2937;
+    font-family: monospace;
+    font-size: 0.88rem;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.roles-view .rp-role-option-text p {
+    margin: 0.35rem 0 0;
+    color: #64748b;
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+
+/* ==========================================================================
+   23. SWITCH DE ROLES
+   ========================================================================== */
+
+.roles-view .rp-role-switch {
+    flex: 0 0 auto;
+    padding-left: 0;
+    margin: 0;
+}
+
+.roles-view .rp-role-switch .form-check-input {
+    width: 2.4rem;
+    height: 1.25rem;
+    margin: 0;
+    cursor: pointer;
+    background-color: #e5e7eb;
+    border: 1px solid #cbd5e1;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.roles-view .rp-role-switch .form-check-input:checked {
+    background-color: var(--rp-primary);
+    border-color: var(--rp-primary);
+}
+
+.roles-view .rp-role-switch .form-check-input:focus {
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+}
+
+/* ==========================================================================
+   24. ROLES INACTIVOS
+   ========================================================================== */
+
+.roles-view .rp-inactive-role-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.6rem;
+    margin-top: 0.75rem;
+    color: #92400e;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   25. ALERTAS Y ACCESIBILIDAD
+   ========================================================================== */
+
+.roles-view .rp-modal .alert {
+    border-radius: 12px;
+}
+
+.roles-view button:focus-visible,
+.roles-view a:focus-visible,
+.roles-view input:focus-visible,
+.roles-view select:focus-visible {
+    outline: 3px solid rgba(220, 53, 69, 0.25);
+    outline-offset: 2px;
+}
+
+/* ==========================================================================
+   26. TABLET
+   ========================================================================== */
+
+@media (max-width: 1199.98px) {
+    .roles-view .rp-panel-header {
+        padding: 1.1rem;
+    }
+
+    .roles-view .rp-panel-body {
+        padding: 0.7rem 0.8rem 0.9rem;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .roles-view .rp-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .roles-view .rp-header-actions {
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .roles-view .rp-header-actions .btn {
+        flex: 1 1 auto;
+    }
+}
+
+/* ==========================================================================
+   27. MÓVILES
+   ========================================================================== */
+
+@media (max-width: 767.98px) {
+    .roles-view {
+        padding: 1rem !important;
+    }
+
+    .roles-view .rp-header {
+        padding: 1.1rem;
+        border-radius: 16px;
+    }
+
+    .roles-view .rp-header-main {
+        align-items: flex-start;
+        gap: 0.9rem;
+    }
+
+    .roles-view .rp-header-icon {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 13px;
+        font-size: 1.25rem;
+    }
+
+    .roles-view .rp-eyebrow {
+        font-size: 0.7rem;
+    }
+
+    .roles-view .rp-header h1 {
+        font-size: 1.2rem;
+        line-height: 1.4;
+    }
+
+    .roles-view .rp-header p {
+        font-size: 0.88rem;
+    }
+
+    .roles-view .rp-header-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .roles-view .rp-header-actions .btn {
+        width: 100%;
+        flex: unset;
+        justify-content: center;
+    }
+
+    .roles-view .rp-security-banner {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    .roles-view .rp-security-content p {
+        font-size: 0.84rem;
+    }
+
+    .roles-view .rp-panel {
+        border-radius: 15px;
+    }
+
+    .roles-view .rp-panel-header {
+        padding: 1rem;
+    }
+
+    .roles-view .rp-panel-icon {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        font-size: 1rem;
+    }
+
+    .roles-view .rp-panel-header h2 {
+        font-size: 0.98rem;
+    }
+
+    .roles-view .rp-panel-header p {
+        font-size: 0.82rem;
+    }
+
+    .roles-view .rp-panel-count {
+        min-width: 32px;
+        height: 32px;
+        font-size: 0.85rem;
+    }
+
+    /* Las tablas conservan su legibilidad y permiten scroll horizontal */
+    .roles-view #rolesTable {
+        min-width: 720px;
+    }
+
+    .roles-view .rp-users-table {
+        min-width: 900px;
+    }
+
+    .roles-view .rp-table thead th {
+        padding: 0.9rem 0.7rem;
+        font-size: 0.75rem;
+    }
+
+    .roles-view .rp-table tbody td {
+        padding: 0.9rem 0.7rem;
+        font-size: 0.9rem;
+    }
+
+    .roles-view .rp-role-name {
+        font-size: 0.88rem;
+    }
+
+    .roles-view .rp-description {
+        font-size: 0.88rem;
+    }
+
+    .roles-view .rp-panel-footnote {
+        padding-top: 0.9rem;
+        font-size: 0.82rem;
+    }
+
+    .roles-view .rp-tabs {
+        gap: 0.35rem;
+    }
+
+    .roles-view .rp-tabs .nav-link {
+        padding: 0.7rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .roles-view .rp-tab-content {
+        padding-top: 0.9rem;
+    }
+
+    /* Modal de asignación: ocupa el espacio disponible */
+    .roles-view #modalManageUserRoles .modal-dialog {
+        width: calc(100% - 1rem);
+        max-width: none;
+        height: calc(100% - 1rem);
+        max-height: none;
+        margin: 0.5rem;
+    }
+
+    .roles-view #modalManageUserRoles .modal-content {
+        max-height: 100%;
+        border-radius: 15px;
+    }
+
+    .roles-view .rp-modal .modal-header {
+        padding: 1rem;
+    }
+
+    .roles-view .rp-modal .modal-body {
+        padding: 1rem;
+    }
+
+    .roles-view .rp-modal .modal-footer {
+        padding: 1rem;
+    }
+
+    .roles-view .rp-modal-heading .modal-title {
+        font-size: 0.98rem;
+    }
+
+    .roles-view .rp-modal-heading p {
+        font-size: 0.82rem;
+    }
+
+    .roles-view .rp-modal-icon {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        font-size: 1rem;
+    }
+
+    .roles-view .rp-role-option {
+        padding: 0.85rem;
+    }
+
+    .roles-view .rp-role-option-text p {
+        font-size: 0.82rem;
+    }
+
+    /* Modal de estado: mantiene altura dinámica en móvil */
+    .roles-view #modalEditRoleStatus .modal-dialog {
+        width: calc(100% - 1.5rem);
+        max-width: 540px;
+        height: auto;
+        max-height: calc(100% - 1.5rem);
+        margin: 0.75rem auto;
+    }
+
+    .roles-view #modalEditRoleStatus .modal-content {
+        max-height: calc(100vh - 1.5rem);
+        border-radius: 15px;
+    }
+
+    .roles-view #modalEditRoleStatus .modal-body {
+        max-height: calc(100vh - 16rem);
+        padding: 1rem;
+    }
+}
+
+/* ==========================================================================
+   28. MÓVILES PEQUEÑOS
+   ========================================================================== */
+
+@media (max-width: 575.98px) {
+    .roles-view .rp-header-actions .btn {
+        font-size: 0.88rem;
+    }
+
+    .roles-view .rp-panel-title-wrap {
+        gap: 0.65rem;
+    }
+
+    .roles-view .rp-panel-header h2 {
+        font-size: 0.92rem;
+    }
+
+    .roles-view .rp-panel-header p {
+        font-size: 0.78rem;
+    }
+
+    .roles-view .rp-modal .modal-content {
+        border-radius: 15px;
+    }
+
+    .roles-view .rp-modal .modal-footer {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .roles-view .rp-modal .modal-footer .btn {
+        width: 100%;
+    }
+
+    .roles-view #modalEditRoleStatus .modal-footer {
+        flex-direction: column-reverse;
+    }
+}
+
+/* ==========================================================================
+   29. PANTALLAS MUY PEQUEÑAS
+   ========================================================================== */
+
+@media (max-width: 420px) {
+    .roles-view .rp-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .roles-view .rp-tabs .nav-link {
+        justify-content: center;
+        width: 100%;
+        padding: 0.7rem 0.35rem;
+        font-size: 0.78rem;
+    }
+
+    .roles-view .rp-tab-count {
+        min-width: 20px;
+        height: 20px;
+        margin-left: 0.1rem;
+    }
+
+    .roles-view .rp-header h1 {
+        font-size: 1.08rem;
+    }
+}
+
+/* ==========================================================================
+   30. MOVIMIENTO REDUCIDO
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .roles-view *,
+    .roles-view *::before,
+    .roles-view *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

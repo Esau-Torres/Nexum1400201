@@ -251,7 +251,11 @@
                             </div>
 
                             <form action="{{ route('admin-academico.alumnos.update', $alumno) }}"
-                                  method="POST">
+                                  method="POST"
+                                  x-data="validation"
+                                  x-ref="formulario"
+                                  data-check-email-url="{{ route('superadmin.users.check-email') }}"
+                                  data-user-id="{{ $usuario->id }}">
                                 @csrf
                                 @method('PUT')
 
@@ -263,8 +267,11 @@
                                             Nombre completo <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" name="name" id="{{ $prefijo }}-name"
-                                               class="form-control @error('name') is-invalid @enderror"
-                                               value="{{ old('name', $usuario->name) }}" required>
+                                            x-ref="nombreInput"
+                                            x-on:input="validarNombre($event)"
+                                            x-on:blur="validarNombre($event, true)"
+                                            class="form-control @error('name') is-invalid @enderror"
+                                            value="{{ old('name', $usuario->name) }}" required>
                                         @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
 
@@ -274,8 +281,12 @@
                                             Email <span class="text-danger">*</span>
                                         </label>
                                         <input type="email" name="email" id="{{ $prefijo }}-email"
-                                               class="form-control @error('email') is-invalid @enderror"
-                                               value="{{ old('email', $usuario->email) }}" required>
+                                            x-ref="emailInput"
+                                            x-on:input.debounce.600ms="validarEmail($event)"
+                                            x-on:blur="validarEmail($event, true)"
+                                            class="form-control @error('email') is-invalid @enderror"
+                                            value="{{ old('email', $usuario->email) }}" required>
+                                        <div class="invalid-feedback" id="{{ $prefijo }}-email-feedback"></div>
                                         @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
 
@@ -329,9 +340,17 @@
                                             Número de documento <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" name="documento_identidad" id="{{ $prefijo }}-doc"
-                                               class="form-control doc-input @error('documento_identidad') is-invalid @enderror"
-                                               value="{{ old('documento_identidad', $usuario->documento_identidad) }}"
-                                               required>
+                                            x-ref="documentoInput"
+                                            data-regex="{{ $usuario->tipodocumentoidentidad->formato_regex ?? '' }}"
+                                            data-place="{{ $usuario->tipodocumentoidentidad->formato ?? '' }}"
+                                            data-codigo="{{ $usuario->tipodocumentoidentidad->codigo ?? '' }}"
+                                            data-name="{{ $usuario->tipodocumentoidentidad->nombre ?? '' }}"
+                                            x-on:input="mascarasRequex($event)"
+                                            x-on:blur="validarDocumento($event, true)"
+                                            class="form-control doc-input @error('documento_identidad') is-invalid @enderror"
+                                            value="{{ old('documento_identidad', $usuario->documento_identidad) }}"
+                                            required>
+                                        <div class="invalid-feedback" id="{{ $prefijo }}-doc-feedback"></div>
                                         @error('documento_identidad') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                         <div class="form-text small doc-hint" id="{{ $prefijo }}-hint"></div>
                                     </div>
@@ -342,10 +361,13 @@
                                             Fecha de nacimiento <span class="text-danger">*</span>
                                         </label>
                                         <input type="date" name="fecha_nacimiento" id="{{ $prefijo }}-fnac"
-                                               class="form-control @error('fecha_nacimiento') is-invalid @enderror"
-                                               value="{{ old('fecha_nacimiento', optional($usuario->fecha_nacimiento)->format('Y-m-d')) }}"
-                                               max="{{ now()->subYears(17)->format('Y-m-d') }}"
-                                               required>
+                                            x-ref="fechaInput"
+                                            x-on:change="validarFechaNacimiento($event)"
+                                            class="form-control @error('fecha_nacimiento') is-invalid @enderror"
+                                            value="{{ old('fecha_nacimiento', optional($usuario->fecha_nacimiento)->format('Y-m-d')) }}"
+                                            :max="fechaLimite"
+                                            :min="fechaLimiteAntiguedad"
+                                            required>
                                         @error('fecha_nacimiento') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
 
@@ -508,7 +530,9 @@
                             </h6>
 
                             <form action="{{ route('admin-academico.alumnos.documentos.upload', $alumno) }}"
-                                  method="POST" enctype="multipart/form-data">
+                                  method="POST" enctype="multipart/form-data"
+                                  x-data="validation"
+                                  x-ref="formDocumentos">
                                 @csrf
                                 <div class="row g-3">
                                     <div class="col-md-6">
@@ -530,7 +554,9 @@
                                     <div class="col-12">
                                         <label class="form-label small fw-medium">Observaciones</label>
                                         <textarea name="observaciones" rows="2" class="form-control"
-                                                  placeholder="Notas del expediente...">{{ $docs->observaciones ?? '' }}</textarea>
+                                            x-on:input="validarObservaciones($event, false, false)"
+                                            x-on:blur="validarObservaciones($event, true, false)"
+                                            placeholder="Notas del expediente...">{{ $docs->observaciones ?? '' }}</textarea>
                                     </div>
                                 </div>
                                 <div class="text-end mt-4">
@@ -821,17 +847,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 input.removeAttribute('placeholder');
                 if (hint) hint.textContent = '';
             }
-        };
 
-        // Máscara simple para celular
-        const celInput = document.getElementById(inputId.replace('-doc', '-cel'));
-        if (celInput) {
-            celInput.addEventListener('input', e => {
-                let v = e.target.value.replace(/\D/g, '');
-                if (v.length > 4) v = v.substring(0, 4) + '-' + v.substring(4, 8);
-                e.target.value = v;
-            });
-        }
+            // espejar los data-* al input para que Alpine valide con el tipo nuevo
+            if (input.dataset) {
+                input.dataset.regex  = opt?.dataset.regex  ?? '';
+                input.dataset.place  = opt?.dataset.place  ?? '';
+                input.dataset.codigo = opt?.dataset.codigo ?? '';
+                input.dataset.name   = opt?.dataset.name   ?? '';
+            }
+
+            // recompilar máscara en Alpine si el componente está montado
+            const alpineData = Alpine.$data(input);
+            if (alpineData && typeof alpineData.compilarMascara === 'function') {
+                alpineData.mascara = regex ? alpineData.compilarMascara(regex.replace(/\\\\/g, '\\')) : null;
+            }
+
+            // limpiar estado de Alpine si cambió el tipo
+            input.classList.remove('is-invalid');
+            input.setCustomValidity('');
+            const fb = input.closest('.col-12, .col, [class*="col-"]')?.querySelector('.invalid-feedback');
+            if (fb) fb.textContent = '';
+        };
 
         select.addEventListener('change', actualizar);
         actualizar();

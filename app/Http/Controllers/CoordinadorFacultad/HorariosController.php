@@ -20,6 +20,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use App\Enums\EstadoCiclo;
 use Throwable;
 
 class HorariosController extends Controller
@@ -28,10 +29,24 @@ class HorariosController extends Controller
     {
         $ciclosLectivos = CicloLectivo::orderByDesc('fecha_inicio')->get();
 
-        // Filtro por ciclo (nullable si "Todos")
-        $idCicloFiltro = $request->filled('id_ciclo_lectivo')
-            ? (int) $request->input('id_ciclo_lectivo')
-            : null;
+        if ($request->has('id_ciclo_lectivo')) {
+            // El usuario eligió explícitamente (puede ser "" para "Todos")
+            $idCicloFiltro = $request->filled('id_ciclo_lectivo')
+                ? (int) $request->input('id_ciclo_lectivo')
+                : null;
+        } else {
+            // Primera carga: usar el ciclo actual (activo, matrícula o configuración)
+            $cicloActual = CicloLectivo::query()
+                ->whereIn('estado', [
+                    EstadoCiclo::ACTIVO,
+                    EstadoCiclo::MATRICULA_ABIERTA,
+                    EstadoCiclo::CONFIGURACION,
+                ])
+                ->orderByDesc('fecha_inicio')
+                ->first();
+
+            $idCicloFiltro = $cicloActual?->ciclo_lectivo_id;
+        }
 
         // ============================================================
         // HORARIOS
@@ -87,10 +102,12 @@ class HorariosController extends Controller
                 ->get();
 
         $horariosPorCiclo = $horariosParaModal->groupBy('id_ciclo_lectivo');
+        $ciclosParaCrear = $ciclosLectivos->filter(fn ($c) => $c->estado !== EstadoCiclo::CERRADO)->values();
 
         return view('coordinador-facultad.horarios-grupohorario', [
             'ciclosLectivos'   => $ciclosLectivos,
             'horarios'         => $horarios,
+            'ciclosParaCrear'  => $ciclosParaCrear, 
             'grupos'           => $grupos,
             'horariosPorCiclo' => $horariosPorCiclo,
             'dias'             => DiaSemana::ordenados(),

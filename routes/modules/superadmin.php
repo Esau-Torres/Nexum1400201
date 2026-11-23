@@ -35,5 +35,7 @@
             Route::put('/academico/configuracion/{idCarrera}', [ConfiguracionAcademicaController::class, 'update'])->whereNumber('idCarrera')->name('configuracion.update');
             Route::post('/academico/ciclo/{id}/cerrar', [ConfiguracionAcademicaController::class, 'cerrar'])->whereNumber('id')->name('academico.ciclo.cerrar');
         });
-   
+
+            // ckeck correo electronico
+            Route::get('/users/check-email', [CreateUserController::class, 'checkEmail'])->name('users.check-email');
     });

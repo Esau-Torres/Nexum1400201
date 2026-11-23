@@ -57,4 +57,18 @@ enum DiaSemana: string
             self::JUEVES, self::VIERNES, self::SABADO,
         ];
     }
+
+    public function getDiaLabelAttribute(): string
+    {
+        return $this->dia instanceof DiaSemana
+            ? $this->dia->label()
+            : (string) $this->dia;
+    }
+
+    public function getDiaShortAttribute(): string
+    {
+        return $this->dia instanceof DiaSemana
+            ? $this->dia->short()
+            : (string) $this->dia;
+    }
 }

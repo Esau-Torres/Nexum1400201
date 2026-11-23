@@ -29,22 +29,20 @@
                             class="form-select form-select-sm"
                             style="min-width: 220px;"
                             onchange="this.form.submit()">
-                        <option value="">Todos los ciclos</option>
+                        <option value="" {{ is_null($idCicloFiltro) ? 'selected' : '' }}>
+                            Todos los ciclos
+                        </option>
                         @foreach($ciclosLectivos as $c)
                             <option value="{{ $c->ciclo_lectivo_id }}"
                                 {{ $idCicloFiltro == $c->ciclo_lectivo_id ? 'selected' : '' }}>
                                 {{ $c->nombre_ciclo }}
+                                @if($idCicloFiltro == $c->ciclo_lectivo_id)
+                                    (actual)
+                                @endif
                             </option>
                         @endforeach
                     </select>
                 </div>
-                @if($idCicloFiltro)
-                    <a href="{{ route('coordinador-facultad.horarios-grupohorario.index') }}"
-                    class="btn btn-outline-secondary btn-sm"
-                    title="Quitar filtro">
-                        <i class="bi bi-x-lg"></i>
-                    </a>
-                @endif
             </form>
 
             <a href="{{ route('coordinador-facultad.infraestructura-horarios.index') }}"
@@ -72,13 +70,13 @@
     <ul class="nav nav-tabs mb-4" role="tablist">
         <li class="nav-item">
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-horarios">
-                <i class="bi bi-clock-history me-1"></i> Horarios
+                <i class="bi bi-clock-history me-1"></i> Bloques-Horarios
                 <span class="badge bg-secondary ms-1">{{ $horarios->count() }}</span>
             </button>
         </li>
         <li class="nav-item">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-grupos">
-                <i class="bi bi-people me-1"></i> Grupos-horarios
+                <i class="bi bi-people me-1"></i> Grupo-Bloques-horarios
                 <span class="badge bg-secondary ms-1">{{ $grupos->count() }}</span>
             </button>
         </li>
@@ -142,16 +140,22 @@
                                         </span>
                                     </td>
                                     <td class="text-end pe-4">
-                                        <button class="btn btn-sm btn-outline-primary me-1"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#modalEditarHorario{{ $horario->horario_id }}">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#modalEliminarHorario{{ $horario->horario_id }}">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        @if($horario->cicloLectivo && $horario->cicloLectivo->estado !== \App\Enums\EstadoCiclo::CERRADO)
+                                            <button class="btn btn-sm btn-outline-primary me-1"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalEditarHorario{{ $horario->horario_id }}">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalEliminarHorario{{ $horario->horario_id }}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        @else
+                                            <span class="badge bg-secondary-subtle text-secondary border small">
+                                                <i class="bi bi-lock-fill me-1"></i> Ciclo cerrado
+                                            </span>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty
@@ -234,16 +238,22 @@
                                         </span>
                                     </td>
                                     <td class="text-end pe-4">
-                                        <button class="btn btn-sm btn-outline-primary me-1"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#modalEditarGrupo{{ $grupo->grupo_id }}">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#modalEliminarGrupo{{ $grupo->grupo_id }}">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        @if($grupo->cicloLectivo && $grupo->cicloLectivo->estado !== \App\Enums\EstadoCiclo::CERRADO)
+                                            <button class="btn btn-sm btn-outline-primary me-1"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalEditarGrupo{{ $grupo->grupo_id }}">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalEliminarGrupo{{ $grupo->grupo_id }}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        @else
+                                            <span class="badge bg-secondary-subtle text-secondary border small">
+                                                <i class="bi bi-lock-fill me-1"></i> Ciclo cerrado
+                                            </span>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty
@@ -282,8 +292,11 @@
                         </label>
                         <select name="id_ciclo_lectivo" class="form-select" required>
                             <option value="">Seleccione...</option>
-                            @foreach($ciclosLectivos as $c)
-                                <option value="{{ $c->ciclo_lectivo_id }}">{{ $c->nombre_ciclo }}</option>
+                            @foreach($ciclosParaCrear as $c)
+                                <option value="{{ $c->ciclo_lectivo_id }}"
+                                    {{ $idCicloFiltro == $c->ciclo_lectivo_id ? 'selected' : '' }}>
+                                    {{ $c->nombre_ciclo }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -361,8 +374,11 @@
                             <select name="id_ciclo_lectivo" class="form-select"
                                     x-model="cicloId" @change="filtrarHorarios()" required>
                                 <option value="">Seleccione...</option>
-                                @foreach($ciclosLectivos as $c)
-                                    <option value="{{ $c->ciclo_lectivo_id }}">{{ $c->nombre_ciclo }}</option>
+                                @foreach($ciclosParaCrear as $c)
+                                    <option value="{{ $c->ciclo_lectivo_id }}"
+                                        {{ $idCicloFiltro == $c->ciclo_lectivo_id ? 'selected' : '' }}>
+                                        {{ $c->nombre_ciclo }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -370,9 +386,13 @@
                             <label class="form-label small fw-medium">
                                 Nombre del grupo <span class="text-danger">*</span>
                             </label>
-                            <input type="text" name="nombre" class="form-control"
-                                   placeholder="Ej: A, B, K, Ñ" maxlength="20" required>
-                            <div class="form-text small">Solo letras, números y guiones.</div>
+                                <input type="text" name="nombre" class="form-control"
+                                    placeholder="Ej: A, B, K, Ñ" maxlength="20" required
+                                    pattern="[a-zA-Z0-9ñÑ\-]{1,20}"
+                                    x-on:input="validarNombreGrupo($event)"
+                                    x-on:blur="validarNombreGrupo($event, true)">
+                                <div class="invalid-feedback"></div>
+                                <div class="form-text small">Solo letras, números y guiones.</div>
                         </div>
                     </div>
 
@@ -448,12 +468,9 @@
                         <div class="mb-3">
                             <label class="form-label small fw-medium">Ciclo lectivo *</label>
                             <select name="id_ciclo_lectivo" class="form-select" required>
-                                @foreach($ciclosLectivos as $c)
-                                    <option value="{{ $c->ciclo_lectivo_id }}"
-                                        {{ $horario->id_ciclo_lectivo == $c->ciclo_lectivo_id ? 'selected' : '' }}>
-                                        {{ $c->nombre_ciclo }}
-                                    </option>
-                                @endforeach
+                                <option value="{{ $horario->id_ciclo_lectivo }}" selected>
+                                    {{ $horario->cicloLectivo->nombre_ciclo ?? '—' }}
+                                </option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -555,16 +572,12 @@
                                 <select name="id_ciclo_lectivo" class="form-select"
                                         x-model="cicloId" @change="filtrarHorarios()" required
                                         {{ $grupo->secciones->isNotEmpty() ? 'disabled' : '' }}>
-                                    @foreach($ciclosLectivos as $c)
-                                        <option value="{{ $c->ciclo_lectivo_id }}"
-                                            {{ $grupo->id_ciclo_lectivo == $c->ciclo_lectivo_id ? 'selected' : '' }}>
-                                            {{ $c->nombre_ciclo }}
-                                        </option>
-                                    @endforeach
+                                    <option value="{{ $grupo->id_ciclo_lectivo }}" selected>
+                                        {{ $grupo->cicloLectivo->nombre_ciclo ?? '—' }}
+                                    </option>
                                 </select>
 
                                 @if($grupo->secciones->isNotEmpty())
-                                    {{-- Select disabled NO envía el valor. Hidden estático para asegurarlo. --}}
                                     <input type="hidden" name="id_ciclo_lectivo" value="{{ $grupo->id_ciclo_lectivo }}">
                                     <div class="form-text small text-warning">
                                         <i class="bi bi-lock-fill me-1"></i>
@@ -575,7 +588,11 @@
                             <div class="col-md-6">
                                 <label class="form-label small fw-medium">Nombre *</label>
                                 <input type="text" name="nombre" class="form-control"
-                                       value="{{ $grupo->nombre }}" maxlength="20" required>
+                                    value="{{ $grupo->nombre }}" maxlength="20" required
+                                    pattern="[a-zA-Z0-9ñÑ\-]{1,20}"
+                                    x-on:input="validarNombreGrupo($event)"
+                                    x-on:blur="validarNombreGrupo($event, true)">
+                                <div class="invalid-feedback"></div>
                             </div>
                         </div>
 

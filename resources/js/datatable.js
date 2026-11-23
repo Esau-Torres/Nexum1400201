@@ -107,5 +107,6 @@ document.addEventListener('DOMContentLoaded', function () {
     initTable('#tableregistroegreso', { columnDefs: [{ orderable: false, targets: 4}] });
     initTable('#tableprocesograduado2', { columnDefs: [{ orderable: false, targets: 8}] });
     initTable('#tablaMorosos', { order: [[3, 'desc']], columnDefs: [{ orderable: false, targets: 4 }] });
+    initTable('#cambiocarreratable', { columnDefs: [{ orderable: false, targets: 4}] });
 });
 

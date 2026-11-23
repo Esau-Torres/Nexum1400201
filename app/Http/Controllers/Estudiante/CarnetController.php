@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Estudiante;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Models\Users\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -64,5 +66,21 @@ class CarnetController extends Controller
             report($e);
             return back()->with('error', 'No se pudo subir la foto: ' . $e->getMessage());
         }
+    }
+
+    public function checkEmail(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => ['required', 'string', 'email:rfc'],
+        ]);
+
+        $email    = strtolower(trim($request->email));
+        $userId   = $request->user()->id;
+
+        $existe = User::where('email', $email)
+            ->where('id', '!=', $userId)
+            ->exists();
+
+        return response()->json(['available' => !$existe]);
     }
 }

@@ -102,22 +102,22 @@ class StudentsSheet implements FromArray, WithHeadings, WithTitle, WithStyles, W
                 }
 
                 // ---- Traer IDs reales de la BD para las listas ----
-                $tiposDocIds   = DB::table('tipo_documento_identidad')
-                                    ->orderBy('tipo_documento_id')
-                                    ->pluck('tipo_documento_id')
-                                    ->map(fn ($id) => (string) $id)
-                                    ->toArray();
+                $tiposDoc = DB::table('tipo_documento_identidad')->orderBy('tipo_documento_id')->get(['tipo_documento_id', 'nombre']);
+                $regionales = DB::table('regional_activo')->orderBy('regional_activo_id')->get(['regional_activo_id', 'sede']);
+                $carreras = Carreras::activasConPensum()->sortBy('nombre')->values();
 
-                $regionalesIds = DB::table('regional_activo')
-                                    ->orderBy('regional_activo_id')
-                                    ->pluck('regional_activo_id')
-                                    ->map(fn ($id) => (string) $id)
-                                    ->toArray();
+                // Formatear como "ID - Nombre"
+                $tiposDocOpts = $tiposDoc->map(
+                    fn ($t) => "{$t->tipo_documento_id} - {$t->nombre}"
+                )->toArray();
 
-                $carrerasIds   = Carreras::activasConPensum()
-                                    ->pluck('carrera_id')
-                                    ->map(fn ($id) => (string) $id)
-                                    ->toArray();
+                $regionalesOpts = $regionales->map(
+                    fn ($r) => "{$r->regional_activo_id} - {$r->sede}"
+                )->toArray();
+
+                $carrerasOpts = $carreras->map(
+                    fn ($c) => "{$c->carrera_id} - {$c->nombre}"
+                )->toArray();
 
                 // ---- Dropdowns ----
 
@@ -129,14 +129,9 @@ class StudentsSheet implements FromArray, WithHeadings, WithTitle, WithStyles, W
                     'Soltero(a)', 'Casado(a)', 'Divorciado(a)', 'Viudo(a)',
                 ]);
 
-                // Tipo de documento (C) — IDs reales
-                $this->addDropdown($sheet, 'C2:C500', $tiposDocIds);
-
-                // Regional (J) — IDs reales
-                $this->addDropdown($sheet, 'J2:J500', $regionalesIds);
-
-                // Carrera (K) — IDs reales
-                $this->addDropdown($sheet, 'K2:K500', $carrerasIds);
+                $this->addDropdownByRange($sheet, 'C2:C500', "'Referencias'!\$H\$2:\$H\$" . (count($tiposDocOpts) + 1));
+                $this->addDropdownByRange($sheet, 'J2:J500', "'Referencias'!\$I\$2:\$I\$" . (count($regionalesOpts) + 1));
+                $this->addDropdownByRange($sheet, 'K2:K500', "'Referencias'!\$J\$2:\$J\$" . (count($carrerasOpts) + 1));
 
                 // Fecha de nacimiento → formato de fecha
                 $sheet->getStyle('E2:E500')
@@ -146,17 +141,47 @@ class StudentsSheet implements FromArray, WithHeadings, WithTitle, WithStyles, W
                 // Comentarios de ayuda en el encabezado
                 $sheet->getComment('A1')->getText()->createTextRun('Nombre completo. Ej: Juan Pérez López');
                 $sheet->getComment('B1')->getText()->createTextRun('Correo único. Ej: juan.perez@correo.com');
-                $sheet->getComment('C1')->getText()->createTextRun('ID numérico (ver hoja Referencias). Ej: 1');
+                $sheet->getComment('C1')->getText()->createTextRun('Seleccioná un tipo de documento de la lista. El ID se extrae automáticamente.');
                 $sheet->getComment('D1')->getText()->createTextRun('Número de documento. Ej: 01234567-8');
                 $sheet->getComment('E1')->getText()->createTextRun('Formato YYYY-MM-DD. Mayor de 17 años. Ej: 2000-05-14');
                 $sheet->getComment('F1')->getText()->createTextRun('M = Masculino, F = Femenino');
                 $sheet->getComment('G1')->getText()->createTextRun('Soltero(a), Casado(a), Divorciado(a), Viudo(a)');
                 $sheet->getComment('H1')->getText()->createTextRun('Ej: 7890-1234');
                 $sheet->getComment('I1')->getText()->createTextRun('Ej: Col. Escalón, San Salvador');
-                $sheet->getComment('J1')->getText()->createTextRun('ID de la regional (ver hoja Referencias). Ej: 1');
-                $sheet->getComment('K1')->getText()->createTextRun('ID de la carrera (ver hoja Referencias). Ej: 14');
+                $sheet->getComment('J1')->getText()->createTextRun('Seleccioná una regional de la lista. El ID se extrae automáticamente.');
+                $sheet->getComment('K1')->getText()->createTextRun('Seleccioná una carrera de la lista. El ID se extrae automáticamente.');
             },
         ];
+    }
+
+    /**
+     * Agrega un dropdown que apunta a un rango en otra hoja.
+     * Evita el límite de 255 caracteres de las listas inline.
+     */
+    private function addDropdownByRange(Worksheet $sheet, string $targetRange, string $sourceRange): void
+    {
+        // Parsear el rango destino: "C2:C500"
+        [$start, $end] = explode(':', $targetRange);
+        preg_match('/^([A-Z]+)(\d+)$/', $start, $mStart);
+        preg_match('/^([A-Z]+)(\d+)$/', $end,   $mEnd);
+
+        $col     = $mStart[1];
+        $rowFrom = (int) $mStart[2];
+        $rowTo   = (int) $mEnd[2];
+
+        for ($row = $rowFrom; $row <= $rowTo; $row++) {
+            $validation = new DataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_STOP);
+            $validation->setAllowBlank(true);
+            $validation->setShowDropDown(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setErrorTitle('Valor inválido');
+            $validation->setError('Elegí un valor de la lista desplegable.');
+            $validation->setFormula1($sourceRange); // ← referencia, no literal
+
+            $sheet->getCell("{$col}{$row}")->setDataValidation($validation);
+        }
     }
 
     /**
@@ -178,10 +203,12 @@ class StudentsSheet implements FromArray, WithHeadings, WithTitle, WithStyles, W
 
         $literal = '"' . implode(',', $options) . '"';
 
-        // Guardamos contra el límite de 255 chars de Excel
-        if (strlen($literal) > 255) {
-            $literal = '"' . implode(',', array_slice($options, 0, 50)) . '"';
+        while (strlen($literal) > 255 && count($options) > 1) {
+            array_pop($options);
+            $literal = '"' . implode(',', $options) . '"';
         }
+
+        if (strlen($literal) > 255) return;
 
         // Parsear el rango: "F4:F500" → startCol=6, startRow=4, endRow=500
         [$start, $end] = explode(':', $range);
@@ -284,12 +311,16 @@ class ReferencesSheet implements FromArray, WithTitle, WithStyles, WithColumnWid
     {
         $tiposDoc   = DB::table('tipo_documento_identidad')->orderBy('tipo_documento_id')->get();
         $regionales = DB::table('regional_activo')->orderBy('regional_activo_id')->get();
-        $carreras   = Carreras::activasConPensum();
+        $carreras   = Carreras::activasConPensum()->sortBy('nombre')->values();
 
         $max = max($tiposDoc->count(), $regionales->count(), $carreras->count());
 
         $rows = [
-            ['TIPOS DE DOCUMENTO', '', 'REGIONALES / SEDES', '', 'CARRERAS', ''],
+            [
+                'TIPOS DE DOCUMENTO', '', 'REGIONALES / SEDES', '', 'CARRERAS', '',
+                '',
+                'LISTA TIPO DOC', 'LISTA REGIONAL', 'LISTA CARRERA',
+            ],
         ];
 
         for ($i = 0; $i < $max; $i++) {
@@ -300,15 +331,33 @@ class ReferencesSheet implements FromArray, WithTitle, WithStyles, WithColumnWid
                 $regionales[$i]->sede ?? '',
                 $carreras[$i]->carrera_id ?? '',
                 $carreras[$i]->nombre ?? '',
+                '',
+                isset($tiposDoc[$i]) ? "{$tiposDoc[$i]->tipo_documento_id} - {$tiposDoc[$i]->nombre}" : '',
+                isset($regionales[$i]) ? "{$regionales[$i]->regional_activo_id} - {$regionales[$i]->sede}" : '',
+                isset($carreras[$i]) ? "{$carreras[$i]->carrera_id} - {$carreras[$i]->nombre}" : '',
             ];
         }
 
         return $rows;
     }
 
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+
+                // Ocultar columnas técnicas (separador + listas)
+                foreach (['G', 'H', 'I', 'J'] as $col) {
+                    $sheet->getColumnDimension($col)->setVisible(false);
+                }
+            },
+        ];
+    }
+
     public function columnWidths(): array
     {
-        return ['A' => 10, 'B' => 30, 'C' => 12, 'D' => 30, 'E' => 10, 'F' => 40];
+        return ['A' => 10, 'B' => 30, 'C' => 12, 'D' => 30, 'E' => 10, 'F' => 40, 'G' => 3, 'H' => 40, 'I' => 40, 'J' => 50,];
     }
 
     public function styles(Worksheet $sheet): array
