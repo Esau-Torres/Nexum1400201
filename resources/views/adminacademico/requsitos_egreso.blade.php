@@ -24,6 +24,21 @@
     </div>
 
     {{-- ═══════════════════════════════════════════════════════════ --}}
+    {{-- ALERTAS                                                      --}}
+    {{-- ═══════════════════════════════════════════════════════════ --}}
+    @if(session('success'))
+        <div class="alert alert-success border-0 shadow-sm">
+            <i class="bi bi-check-circle-fill me-1"></i>{{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger border-0 shadow-sm">
+            <i class="bi bi-x-circle-fill me-1"></i>{{ session('error') }}
+        </div>
+    @endif
+
+    {{-- ═══════════════════════════════════════════════════════════ --}}
     {{-- TABLA                                                        --}}
     {{-- ═══════════════════════════════════════════════════════════ --}}
     <div class="card border-0 shadow-sm">
@@ -122,7 +137,6 @@
                                                 data-url-doc-pas="{{ route('admin-academico.egresos.documento', [$alumno->alumno_id, 'pasantia']) }}"
                                                 data-solvencia="{{ $req->solvencia_financiera ? '1' : '0' }}"
                                                 data-url-solvencia="{{ route('admin-academico.egresos.solvencia', $alumno->alumno_id) }}"
-                                                data-elegible="{{ $validacion['elegible_academico'] ? '1' : '0' }}"
                                                 data-tiene-arancel-ss="{{ $row['tiene_arancel_ss'] ? '1' : '0' }}">
                                             <i class="bi bi-gear-fill"></i> Gestionar
                                         </button>
@@ -660,16 +674,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const btn = event.relatedTarget;
         if (!btn) return;
 
-        const estadoSolvencia = document.getElementById('solvenciaEstado');
-        const btnSolv         = document.querySelector('.btn-solvencia');
-
         const puedeHs      = btn.getAttribute('data-puede-hs') === '1';
         const puedePas     = btn.getAttribute('data-puede-pas') === '1';
         const tieneDocS    = btn.getAttribute('data-doc-social') === '1';
         const tieneDocP    = btn.getAttribute('data-doc-pasantia') === '1';
         const solvente     = btn.getAttribute('data-solvencia') === '1';
         const urlSolvencia = btn.getAttribute('data-url-solvencia');
-        const elegible     = btn.getAttribute('data-elegible') === '1';
 
         /* Encabezado */
         document.getElementById('gNombre').textContent    = btn.getAttribute('data-nombre');
@@ -679,13 +689,11 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('gUvMinimas').textContent = btn.getAttribute('data-uv-minimas');
         document.getElementById('gAvisoUv').classList.toggle('d-none', puedeHs && puedePas);
 
-         if (!elegible) {
-            estadoSolvencia.className = 'alert alert-secondary border-0 small mb-2';
-            estadoSolvencia.innerHTML = '<i class="bi bi-lock-fill me-1"></i>' +
-                '<strong>No elegible.</strong> El alumno aún no ha culminado su pensum.';
-            btnSolv.disabled = true;
-            btnSolv.innerHTML = '<i class="bi bi-lock-fill me-1"></i> No disponible';
-        } else if (solvente) {
+        /* Solvencia financiera */
+        const estadoSolvencia = document.getElementById('solvenciaEstado');
+        const btnSolv         = document.querySelector('.btn-solvencia');
+
+        if (solvente) {
             estadoSolvencia.className = 'alert alert-success border-0 small mb-2';
             estadoSolvencia.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i><strong>Solvente.</strong> Todos los ciclos han sido cancelados.';
             btnSolv.disabled = true;
@@ -750,11 +758,6 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             formHs.querySelectorAll('input, select, button').forEach(el => el.disabled = false);
             document.getElementById('bloqueoHs').classList.add('d-none');
-        }
-
-        const primerTab = modalGestionar.querySelector('.nav-link[data-bs-target="#tabDatos"]');
-        if (primerTab && window.bootstrap) {
-            bootstrap.Tab.getOrCreateInstance(primerTab).show();
         }
     });
 

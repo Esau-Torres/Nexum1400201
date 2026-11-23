@@ -7,7 +7,6 @@ use App\Models\Estudiante\Alumnos;
 use App\Models\Estudiante\RequisitosEgreso;
 use App\Enums\ConceptosPagoPorCarrera;
 use Carbon\Carbon;
-use App\Enums\EstadoCiclo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -19,12 +18,6 @@ class MarcarSolvenciaFinancieraAction
 
     public function execute(Alumnos $alumno): array
     {
-
-         // ─────────────────────────────────────────────
-        // 0. Validación de elegibilidad académica (evita marcar solvencia a alumnos que aún cursan)
-        // ─────────────────────────────────────────────
-        $this->validarElegibilidadAcademica($alumno);
-
         // Conceptos correctos según el nivel académico
         $conceptos = ConceptosPagoPorCarrera::para($alumno->id_carrera);
 
@@ -199,46 +192,5 @@ class MarcarSolvenciaFinancieraAction
 
         $estado = strtoupper((string) $cargo->estado_cargo);
         return in_array($estado, ['PAGADO', 'EXONERADO'], true);
-    }
-
-     private function validarElegibilidadAcademica(Alumnos $alumno): void
-    {
-        // 1. ¿Tiene materias en curso en el ciclo vigente?
-        $cicloVigente = CicloLectivo::whereIn('estado', [
-            EstadoCiclo::ACTIVO,
-            EstadoCiclo::MATRICULA_ABIERTA,
-        ])->orderByDesc('fecha_inicio')->first();
-
-        if ($cicloVigente) {
-            $tieneCursando = DB::table('detalle_inscripcion as di')
-                ->join('inscripciones as i', 'di.id_inscripcion', '=', 'i.inscripcion_id')
-                ->where('i.id_alumno', $alumno->alumno_id)
-                ->where('i.id_ciclo_lectivo', $cicloVigente->ciclo_lectivo_id)
-                ->whereIn('di.estado_materia', ['CURSANDO', 'RETIRADA', 'REPROBADA'])
-                ->exists();
-
-            if ($tieneCursando) {
-                throw ValidationException::withMessages([
-                    'solvencia' => 'El alumno aún tiene materias en curso en el ciclo vigente. '
-                                 . 'No puede marcarse solvencia de egreso hasta finalizar el ciclo.',
-                ]);
-            }
-        }
-
-        // 2. ¿Tiene al menos un ciclo CERRADO con materias aprobadas?
-        $tieneCicloCerrado = DB::table('inscripciones as i')
-            ->join('ciclo_lectivo as cl', 'i.id_ciclo_lectivo', '=', 'cl.ciclo_lectivo_id')
-            ->join('detalle_inscripcion as di', 'di.id_inscripcion', '=', 'i.inscripcion_id')
-            ->where('i.id_alumno', $alumno->alumno_id)
-            ->where('cl.estado', 'CERRADO')
-            ->where('di.estado_materia', 'APROBADA')
-            ->exists();
-
-        if (!$tieneCicloCerrado) {
-            throw ValidationException::withMessages([
-                'solvencia' => 'El alumno no tiene ciclos cerrados con materias aprobadas. '
-                             . 'Aún no está en proceso de egreso.',
-            ]);
-        }
     }
 }

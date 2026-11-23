@@ -10,7 +10,7 @@
         <!-- ENCABEZADO CENTRADO                          -->
         <!-- ============================================ -->
         <div class="text-center mb-5">
-            <h1 class="display-5 fw-bold mb-3" style="letter-spacing: -0.5px;">PRUEBA DE NOTAS</h1>
+            <h1 class="display-5 fw-bold mb-3" style="letter-spacing: -0.5px;">Prueba de Notas</h1>
             <div class="mx-auto rounded mb-4" style="width: 50px; height: 3px; background-color: #dc3545;"></div>
 
             <!-- Card Instructiva centrada, fondo blanco -->

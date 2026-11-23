@@ -50,10 +50,8 @@ class ValidarSolvenciaAction
         // → No se exige matrícula ni cuotas del ciclo actual.
         // → Solo se valida que no tenga cuotas pendientes del ciclo anterior.
         // ═══════════════════════════════════════════════════════
-
-        $enMatriculaAbierta = $cicloActual->estado->value === 'MATRICULA_ABIERTA';
-
-        if (!$enMatriculaAbierta && !$this->tieneMateriasCursando($alumno, $cicloLectivoId)) {
+        if ($cicloActual->estado->value !== 'CERRADO'
+            && !$this->tieneMateriasCursando($alumno, $cicloLectivoId)) {
 
             if (!$esNuevoIngreso) {
                 $cicloAnterior = $this->obtenerCicloAnterior($cicloActual);

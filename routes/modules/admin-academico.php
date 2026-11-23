@@ -15,7 +15,6 @@
     use App\Http\Controllers\AdminAcademico\ReglaBeneficioController;
     use App\Http\Controllers\AdminAcademico\RequisitosEgresoController;
     use App\Http\Controllers\AdminAcademico\ProcesoGraduacionController;
-    use App\Http\Controllers\AdminAcademico\CambioCarreraController;
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('role:'.Role::ADMIN_ACADEMICO)->group(function () {
@@ -138,10 +137,6 @@
             Route::get('/graduacion/{alumnoId}/pagos-disponibles/{modalidad}', [ProcesoGraduacionController::class, 'pagosDisponibles'])->whereNumber('alumnoId')->name('graduacion.pagos-disponibles');
             Route::patch('/graduacion/{procesoId}/titulo', [ProcesoGraduacionController::class, 'actualizarTitulo'])->whereNumber('procesoId')->name('graduacion.actualizar-titulo');
             Route::get('/graduacion/{alumnoId}/historial', [ProcesoGraduacionController::class, 'historial'])->whereNumber('alumnoId')->name('graduacion.historial');
-
-            // cambio de carrera de un estudiante
-            Route::get('/cambio-carrera',  [CambioCarreraController::class, 'index'])->name('cambio-carrera');
-            Route::post('/cambio-carrera', [CambioCarreraController::class, 'store'])->name('cambio-carrera.store');
         });
     });
     

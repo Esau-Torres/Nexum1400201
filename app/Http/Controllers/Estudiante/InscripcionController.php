@@ -89,20 +89,13 @@ class InscripcionController extends Controller
 
         $seccion = Seccion::findOrFail($data['seccion_id']);
 
-        // 0. Ciclo debe estar en MATRICULA_ABIERTA
-        $ciclo = CicloLectivo::find($seccion->id_ciclo_lectivo);
-        if (!$ciclo || $ciclo->estado->value !== 'MATRICULA_ABIERTA') {
-            return back()->with('error', 'El periodo de inscripciones está cerrado.');
-        }
-
         // 1. Validación completa con la Action
         $validacion = $validarAction->execute($alumno, $seccion, $seccion->id_ciclo_lectivo);
 
         if (!$validacion['puede']) {
-            $mensaje = implode(' ', $validacion['bloqueadores']);
-            return back()
-                ->withErrors(['inscripcion' => $validacion['bloqueadores']])
-                ->with('error', 'No puedes inscribirte: ' . $mensaje);
+            return back()->withErrors([
+                'inscripcion' => $validacion['bloqueadores']
+            ])->with('error', 'No puedes inscribirte: ' . implode(' ', $validacion['bloqueadores']));
         }
 
         // 2. Reglas Laravel adicionales (defensa en profundidad)
