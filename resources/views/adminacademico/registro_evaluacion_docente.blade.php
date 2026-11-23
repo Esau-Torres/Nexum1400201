@@ -1,57 +1,76 @@
+
 @extends('layouts.app')
 
 @section('title', 'Registro de Evaluaciones Docentes')
 
+@push('styles')
+    @vite('resources/css/evaluaciones-docentes.css')
+@endpush
+
 @section('content')
-<div class="container-fluid p-4 p-lg-5">
+<div class="container-fluid p-4 p-lg-5 evaluaciones-view">
 
     {{-- ============================================================
          HEADER
          ============================================================ --}}
-    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between gap-3 p-3 mb-4 rounded-4 card">
-        <div class="d-flex align-items-center">
-            <div class="px-3 py-2 rounded-3 bg-danger bg-opacity-10" style="width:48px;height:48px;">
-                <i class="bi bi-clipboard2-data fs-4 text-danger"></i>
+    <div class="ev-header mb-4">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="ev-header-icon">
+                    <i class="bi bi-clipboard2-data"></i>
+                </div>
+
+                <div>
+                    <h1 class="mb-1">EVALUACIONES DOCENTES</h1>
+                    <p class="mb-0">
+                        Gestión de enlaces de encuestas por sección y ciclo lectivo
+                    </p>
+                </div>
             </div>
-            <div class="px-3">
-                <h1 class="h4 fw-bold mb-0">EVALUACIONES DOCENTES</h1>
-                <p class="text-muted mb-0 text-medium">
-                    Gestión de enlaces de encuestas por sección y ciclo
-                </p>
+
+            <div class="ev-header-actions">
+                <a href="{{ route('home') }}"
+                   class="btn btn-outline-secondary px-3 py-2">
+                    <i class="fa-solid fa-house me-1"></i>
+                    Inicio
+                </a>
             </div>
-        </div>
-        <div class="d-flex gap-2 align-items-end flex-wrap">
-            <a href="{{ route('home') }}"
-               class="btn bg-danger-subtle text-danger border border-danger px-3 py-2">
-                <i class="fa-solid fa-home me-1"></i> Inicio
-            </a>
         </div>
     </div>
 
     {{-- ============================================================
          FILTROS
          ============================================================ --}}
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="ev-filter-card mb-4">
         <div class="card-body">
             <form method="GET" action="{{ route('admin-academico.evaluaciones.index') }}">
                 <div class="row g-3 align-items-end">
+
+                    {{-- FILTRO CICLO --}}
                     <div class="col-md-6">
-                        <label for="filtro-ciclo" class="form-label small fw-medium text-muted">
-                            <i class="bi bi-calendar3 me-1"></i> Filtrar por ciclo lectivo
+                        <label for="filtro-ciclo" class="form-label">
+                            <i class="bi bi-calendar3 me-1"></i>
+                            Filtrar por ciclo lectivo
                         </label>
-                        <select name="id_ciclo_lectivo" id="filtro-ciclo"
-                                class="form-select" onchange="this.form.submit()">
+
+                        <select name="id_ciclo_lectivo"
+                                id="filtro-ciclo"
+                                class="form-select"
+                                onchange="this.form.submit()">
+
                             <option value="">Todos los ciclos</option>
+
                             @foreach($ciclosLectivos as $c)
                                 @php
                                     $badge = match($c->estado->value) {
                                         'MATRICULA_ABIERTA' => ' · Matrícula abierta',
                                         'ACTIVO'            => ' · Activo',
-                                        'CONFIGURACION'     => ' · En configuración',
-                                        'CERRADO'           => ' · Cerrado',
-                                        default             => '',
+                                        'CONFIGURACION'      => ' · En configuración',
+                                        'CERRADO'            => ' · Cerrado',
+                                        default              => '',
                                     };
                                 @endphp
+
                                 <option value="{{ $c->ciclo_lectivo_id }}"
                                     {{ $idCicloFiltro == $c->ciclo_lectivo_id ? 'selected' : '' }}>
                                     {{ $c->nombre_ciclo }}{{ $badge }}
@@ -59,14 +78,37 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-6 text-md-end text-medium">
-                        <a href="{{ route('admin-academico.evaluaciones.index') }}"
-                        class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-clockwise me-1"></i> Quitar filtros
-                        </a>
-                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalCrearEvaluacion">
-                            <i class="bi bi-plus-circle me-1"></i> Nueva encuesta
-                        </button>
+
+                    {{-- ACCIONES --}}
+                    <div class="col-md-6">
+                        <div class="ev-filter-actions">
+
+                            <a href="{{ route('admin-academico.evaluaciones.index') }}"
+                               class="btn btn-outline-secondary px-3 py-2">
+                                <i class="bi bi-arrow-clockwise me-1"></i>
+                                Quitar filtros
+                            </a>
+
+                            {{-- NUEVA ENCUESTA --}}
+                            @if($puedeGestionar)
+                                <button type="button"
+                                        class="btn btn-danger px-3 py-2"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalCrearEvaluacion">
+                                    <i class="bi bi-plus-circle me-1"></i>
+                                    Nueva encuesta
+                                </button>
+                            @else
+                                <button type="button"
+                                        class="btn btn-secondary px-3 py-2"
+                                        disabled
+                                        title="Solo se pueden crear encuestas en ciclos ACTIVOS">
+                                    <i class="bi bi-lock-fill me-1"></i>
+                                    Nueva encuesta
+                                </button>
+                            @endif
+
+                        </div>
                     </div>
                 </div>
             </form>
@@ -74,22 +116,54 @@
     </div>
 
     {{-- ============================================================
-         LISTADO
+         AVISO: GESTIÓN BLOQUEADA
          ============================================================ --}}
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h6 fw-bold mb-0">
-            <i class="bi bi-list-ul text-danger me-1"></i>
+    @if($idCicloFiltro && !$puedeGestionar)
+        <div class="alert alert-warning border mb-4 d-flex align-items-start gap-3">
+            <i class="bi bi-lock-fill fs-5"></i>
+
+            <div>
+                <strong class="d-block mb-1">
+                    Gestión bloqueada para este ciclo
+                </strong>
+
+                <span class="small">
+                    Solo se pueden crear, editar o eliminar encuestas en ciclos
+                    con estado <strong>ACTIVO</strong>. Este ciclo está en otro estado.
+                </span>
+            </div>
+        </div>
+    @endif
+
+    {{-- ============================================================
+         ENCABEZADO DEL LISTADO
+         ============================================================ --}}
+    <div class="ev-list-heading">
+        <h2 class="mb-0">
+            <span class="ev-list-icon">
+                <i class="bi bi-list-ul"></i>
+            </span>
+
             Encuestas registradas
-            <span class="badge bg-secondary ms-1">{{ $evaluaciones->count() }}</span>
         </h2>
+
+        <span class="ev-counter">
+            {{ $evaluaciones->count() }}
+        </span>
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div>
-            <table class="table table-hover align-middle mb-0 text-medium" id="tabla-evaluaciones">
-                <thead class="table-light">
+    {{-- ============================================================
+         TABLA DE EVALUACIONES
+         ============================================================ --}}
+    <div class="ev-table-card mb-4">
+        <div class="ev-table-container">
+
+            <table class="table table-hover align-middle mb-0 text-medium"
+                   id="tabla-evaluaciones">
+
+                <thead>
                     <tr>
-                        <th class="ps-4">Ciclo</th>
+                        <th>Ciclo</th>
                         <th>Materia</th>
                         <th>Grupo</th>
                         <th>Docente</th>
@@ -98,271 +172,554 @@
                         <th class="text-end pe-4">Acciones</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @forelse($evaluaciones as $ev)
+
                         @php
-                            $seccion = $ev->seccion;
-                            $materia = $seccion?->materia;
-                            $docente = $seccion?->docente?->user;
+                            $seccion    = $ev->seccion;
+                            $materia    = $seccion?->materia;
+                            $docente    = $seccion?->docente?->user;
+                            $cicloEv    = $ev->cicloLectivo;
+                            $evEditable = $cicloEv && $cicloEv->estado === \App\Enums\EstadoCiclo::ACTIVO;
                         @endphp
+
                         <tr>
-                            <td class="ps-4 small">
-                                {{ $ev->cicloLectivo->nombre_ciclo ?? '—' }}
-                            </td>
+
+                            {{-- CICLO --}}
                             <td>
-                                <div class="fw-semibold small">{{ $materia->nombre ?? '—' }}</div>
-                                <small class="text-muted">{{ $materia->codigo_materia ?? '' }}</small>
+                                <span class="small">
+                                    {{ $cicloEv->nombre_ciclo ?? '—' }}
+                                </span>
                             </td>
+
+                            {{-- MATERIA --}}
                             <td>
-                                <span class="badge bg-danger">
+                                <div class="fw-semibold">
+                                    {{ $materia->nombre ?? '—' }}
+                                </div>
+
+                                <small class="text-muted">
+                                    {{ $materia->codigo_materia ?? '' }}
+                                </small>
+                            </td>
+
+                            {{-- GRUPO --}}
+                            <td>
+                                <span class="ev-group-badge">
                                     Grupo {{ $seccion->nombre_grupo ?? '—' }}
                                 </span>
                             </td>
-                            <td class="small">
-                                {{ $docente->name ?? '—' }}
+
+                            {{-- DOCENTE --}}
+                            <td>
+                                <span class="small">
+                                    {{ $docente->name ?? '—' }}
+                                </span>
                             </td>
+
+                            {{-- URL --}}
                             <td>
                                 <a href="{{ $ev->url }}"
                                    target="_blank"
                                    rel="noopener noreferrer"
                                    class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-box-arrow-up-right me-1"></i> Abrir encuesta
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>
+                                    Abrir encuesta
                                 </a>
                             </td>
-                            <td class="small text-muted">
-                                {{ $ev->fecha_registro?->format('d/m/Y H:i') ?? '—' }}
+
+                            {{-- FECHA DE REGISTRO --}}
+                            <td>
+                                <span class="small text-muted">
+                                    {{ $ev->fecha_registro?->format('d/m/Y H:i') ?? '—' }}
+                                </span>
+
                                 <br>
+
                                 <small class="text-muted">
                                     por {{ $ev->registradoPor?->name ?? '—' }}
                                 </small>
                             </td>
+
+                            {{-- ACCIONES --}}
                             <td class="text-end pe-4">
-                                <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-primary"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalEditarEvaluacion{{ $ev->evaluacion_docente_id }}"
-                                            title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-outline-danger"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalEliminarEvaluacion{{ $ev->evaluacion_docente_id }}"
-                                            title="Eliminar">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
+
+                                @if($evEditable)
+
+                                    <div class="ev-actions">
+
+                                        {{-- EDITAR --}}
+                                        <button type="button"
+                                                class="btn btn-outline-primary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEditarEvaluacion{{ $ev->evaluacion_docente_id }}"
+                                                title="Editar encuesta"
+                                                aria-label="Editar encuesta">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+
+                                        {{-- ELIMINAR --}}
+                                        <button type="button"
+                                                class="btn btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEliminarEvaluacion{{ $ev->evaluacion_docente_id }}"
+                                                title="Eliminar encuesta"
+                                                aria-label="Eliminar encuesta">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+
+                                    </div>
+
+                                @else
+
+                                    <span class="badge bg-secondary-subtle text-secondary border small">
+                                        <i class="bi bi-lock-fill me-1"></i>
+                                        Ciclo no activo
+                                    </span>
+
+                                @endif
+
                             </td>
                         </tr>
+
                     @empty
+
+                        {{-- ESTADO VACÍO --}}
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-5">
-                                <i class="bi bi-clipboard-x fs-2 d-block mb-2"></i>
-                                No hay encuestas registradas
-                                {{ $idCicloFiltro ? 'en este ciclo' : '' }}.
-                                <div class="mt-3">
-                                    <button class="btn btn-sm btn-danger"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalCrearEvaluacion">
-                                        <i class="bi bi-plus-circle me-1"></i>
-                                        Registrar la primera encuesta
-                                    </button>
+                            <td colspan="7" class="ev-empty-state">
+
+                                <div class="ev-empty-icon">
+                                    <i class="bi bi-clipboard-x"></i>
                                 </div>
+
+                                <p class="mb-2 fw-semibold">
+                                    No hay encuestas registradas
+                                    {{ $idCicloFiltro ? 'en este ciclo' : '' }}.
+                                </p>
+
+                                @if($puedeGestionar)
+
+                                    <div>
+                                        <button type="button"
+                                                class="btn btn-sm btn-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalCrearEvaluacion">
+                                            <i class="bi bi-plus-circle me-1"></i>
+                                            Registrar la primera encuesta
+                                        </button>
+                                    </div>
+
+                                @else
+
+                                    <div class="small text-muted mt-3">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Seleccioná un ciclo <strong>ACTIVO</strong>
+                                        para poder registrar encuestas.
+                                    </div>
+
+                                @endif
+
                             </td>
                         </tr>
+
                     @endforelse
                 </tbody>
             </table>
+
         </div>
     </div>
 
-    {{-- Nota informativa --}}
-    <div class="alert alert-info small border-0 mt-4">
-        <i class="bi bi-info-circle-fill me-1"></i>
-        <strong>Cómo funciona:</strong>
-        Por cada <strong>sección</strong> y <strong>ciclo lectivo</strong> se puede registrar una única encuesta.
-        Una vez registrada, los estudiantes de esa sección verán el botón <em>"Evaluar docente"</em>
-        en su vista de desempeño.
-        La encuesta debe estar alojada en una URL pública (Google Forms, Microsoft Forms, etc.).
+    {{-- ============================================================
+         NOTA INFORMATIVA
+         ============================================================ --}}
+    <div class="ev-info-box">
+
+        <div class="ev-info-icon">
+            <i class="bi bi-info-circle-fill"></i>
+        </div>
+
+        <div class="ev-info-content">
+
+            <strong>Cómo funciona:</strong>
+
+            Por cada <strong>sección</strong> y <strong>ciclo lectivo</strong>
+            se puede registrar una única encuesta. Una vez registrada,
+            los estudiantes de esa sección verán el botón
+            <em>"Evaluar docente"</em> en su vista de desempeño.
+
+            La encuesta debe estar alojada en una URL pública
+            (Google Forms, Microsoft Forms, etc.).
+
+            <div class="mt-2 text-danger fw-semibold">
+                <i class="bi bi-lock-fill me-1"></i>
+                Solo se permite gestionar encuestas cuando el ciclo lectivo
+                está en estado ACTIVO.
+            </div>
+
+        </div>
     </div>
 
 </div>
 
 {{-- ================================================================
      MODAL: CREAR EVALUACIÓN
+     Solo se renderiza si el ciclo filtrado está ACTIVO.
      ================================================================ --}}
-<div class="modal fade" id="modalCrearEvaluacion" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-white border-bottom">
-                <h5 class="modal-title fw-bold">Nueva encuesta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form action="{{ route('admin-academico.evaluaciones.store') }}" method="POST">
-                @csrf
-                <div class="modal-body p-4">
+@if($puedeGestionar)
 
-                    <div class="mb-3">
-                        @if($idCicloFiltro)
-                            <input type="hidden" name="id_ciclo_lectivo" value="{{ $idCicloFiltro ?? $cicloDefault?->ciclo_lectivo_id }}">
-                        @endif
-                    </div>
+    <div class="modal fade evaluaciones-modal"
+         id="modalCrearEvaluacion"
+         tabindex="-1"
+         aria-labelledby="tituloModalCrearEvaluacion"
+         aria-hidden="true">
 
-                    <div class="mb-3">
-                        <label for="crear-id-seccion" class="form-label small fw-medium">
-                            Sección <span class="text-danger">*</span>
-                        </label>
-                        <select name="id_seccion"
-                                id="crear-id-seccion"
-                                class="form-select"
-                                required>
-                            <option value="">Primero seleccioná un ciclo...</option>
-                        </select>
-                        <div class="form-text small">
-                            Solo se muestran secciones del ciclo seleccionado que aún no tienen encuesta.
-                        </div>
-                    </div>
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
 
-                    <div class="mb-0">
-                        <label for="crear-url" class="form-label small fw-medium">
-                            URL de la encuesta <span class="text-danger">*</span>
-                        </label>
-                        <input type="url"
-                               name="url"
-                               id="crear-url"
-                               class="form-control"
-                               placeholder="https://docs.google.com/forms/d/e/..."
-                               required>
-                        <div class="form-text small">
-                            Debe comenzar con <code>http://</code> o <code>https://</code>
-                        </div>
-                    </div>
+                <div class="modal-header bg-white border-bottom">
+                    <h5 class="modal-title fw-bold" id="tituloModalCrearEvaluacion">
+                        <i class="bi bi-plus-circle text-danger me-2"></i>
+                        Nueva encuesta
+                    </h5>
 
-                </div>
-                <div class="modal-footer bg-light border-top-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-check-circle me-1"></i> Crear encuesta
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar">
                     </button>
                 </div>
-            </form>
-        </div>
-    </div>
-</div>
 
-{{-- ================================================================
-     MODALES: EDITAR / ELIMINAR (uno por evaluación)
-     ================================================================ --}}
-@foreach($evaluaciones as $ev)
-    {{-- EDITAR --}}
-    <div class="modal fade" id="modalEditarEvaluacion{{ $ev->evaluacion_docente_id }}" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-white border-bottom">
-                    <h5 class="modal-title fw-bold">
-                        Editar encuesta
-                        <small class="text-muted fw-normal">
-                            — {{ $ev->seccion?->materia?->nombre ?? '—' }}
-                        </small>
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form action="{{ route('admin-academico.evaluaciones.update', $ev) }}" method="POST">
-                    @csrf @method('PUT')
-                    <div class="modal-body p-4">
+                <form action="{{ route('admin-academico.evaluaciones.store') }}"
+                      method="POST">
 
-                        {{-- Info de la sección y ciclo (solo lectura, no editables) --}}
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-medium text-muted">Ciclo lectivo</label>
-                                <input type="text"
-                                    class="form-control bg-light"
-                                    readonly
-                                    value="{{ $ev->cicloLectivo?->nombre_ciclo ?? '—' }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-medium text-muted">Sección</label>
-                                <input type="text"
-                                    class="form-control bg-light"
-                                    readonly
-                                    value="{{ $ev->seccion?->materia?->nombre ?? '—' }} — Grupo {{ $ev->seccion?->nombre_grupo ?? '—' }}">
+                    @csrf
+
+                    <div class="modal-body">
+
+                        @if($idCicloFiltro)
+                            <input type="hidden"
+                                   name="id_ciclo_lectivo"
+                                   value="{{ $idCicloFiltro }}">
+                        @endif
+
+                        {{-- SECCIÓN --}}
+                        <div class="mb-3">
+
+                            <label for="crear-id-seccion" class="form-label">
+                                <i class="bi bi-people me-1"></i>
+                                Sección <span class="text-danger">*</span>
+                            </label>
+
+                            <select name="id_seccion"
+                                    id="crear-id-seccion"
+                                    class="form-select"
+                                    required>
+                                <option value="">Primero seleccioná un ciclo...</option>
+                            </select>
+
+                            <div class="form-text">
+                                Solo se muestran secciones del ciclo seleccionado
+                                que aún no tienen encuesta.
                             </div>
                         </div>
 
-                        <div class="alert alert-light border small mb-3">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Solo podés cambiar la URL. Si necesitás mover la encuesta a otra sección o ciclo,
-                            eliminá esta y creá una nueva.
-                        </div>
-
-                        {{-- URL editable, con ID único por evaluación --}}
+                        {{-- URL --}}
                         <div class="mb-0">
-                            <label for="edit-url-{{ $ev->evaluacion_docente_id }}"
-                                class="form-label small fw-medium">
+
+                            <label for="crear-url" class="form-label">
+                                <i class="bi bi-link-45deg me-1"></i>
                                 URL de la encuesta <span class="text-danger">*</span>
                             </label>
+
                             <input type="url"
-                                name="url"
-                                id="edit-url-{{ $ev->evaluacion_docente_id }}"
-                                class="form-control"
-                                value="{{ old('url', $ev->url) }}"
-                                placeholder="https://docs.google.com/forms/d/e/..."
-                                required>
-                            <div class="form-text small">
+                                   name="url"
+                                   id="crear-url"
+                                   class="form-control"
+                                   placeholder="https://docs.google.com/forms/d/e/..."
+                                   required>
+
+                            <div class="form-text">
                                 Debe comenzar con <code>http://</code> o <code>https://</code>
                             </div>
                         </div>
 
                     </div>
+
                     <div class="modal-footer bg-light border-top-0">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-check-circle me-1"></i> Guardar cambios
+
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">
+                            Cancelar
                         </button>
+
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Crear encuesta
+                        </button>
+
                     </div>
                 </form>
+
             </div>
         </div>
     </div>
 
-    {{-- ELIMINAR --}}
-    <div class="modal fade" id="modalEliminarEvaluacion{{ $ev->evaluacion_docente_id }}" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-danger text-white border-0">
-                    <h5 class="modal-title fw-bold">Eliminar encuesta</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <p class="mb-3">
-                        ¿Confirmás eliminar la encuesta de
-                        <strong>{{ $ev->seccion?->materia?->nombre ?? '—' }}</strong>
-                        — Grupo <strong>{{ $ev->seccion?->nombre_grupo ?? '—' }}</strong>
-                        del ciclo <strong>{{ $ev->cicloLectivo?->nombre_ciclo ?? '—' }}</strong>?
-                    </p>
-                    <div class="alert alert-warning small mb-0">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                        Los estudiantes de esta sección dejarán de ver el botón "Evaluar docente".
-                        Esta acción no se puede deshacer.
-                    </div>
-                </div>
-                <div class="modal-footer bg-light border-top-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form action="{{ route('admin-academico.evaluaciones.destroy', $ev) }}" method="POST">
-                        @csrf @method('DELETE')
-                        @if($idCicloFiltro)
-                            <input type="hidden" name="filtro_ciclo" value="{{ $idCicloFiltro }}">
-                        @endif
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-trash me-1"></i> Eliminar
+@endif
+
+{{-- ================================================================
+     MODALES: EDITAR / ELIMINAR
+     Uno por evaluación editable.
+     Solo se renderizan para ciclos ACTIVOS.
+     ================================================================ --}}
+
+@foreach($evaluaciones as $ev)
+
+    @php
+        $cicloEv    = $ev->cicloLectivo;
+        $evEditable = $cicloEv && $cicloEv->estado === \App\Enums\EstadoCiclo::ACTIVO;
+    @endphp
+
+    @if($evEditable)
+
+        {{-- ========================================================
+             MODAL: EDITAR
+             ======================================================== --}}
+        <div class="modal fade evaluaciones-modal"
+             id="modalEditarEvaluacion{{ $ev->evaluacion_docente_id }}"
+             tabindex="-1"
+             aria-labelledby="tituloModalEditar{{ $ev->evaluacion_docente_id }}"
+             aria-hidden="true">
+
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+
+                    <div class="modal-header bg-white border-bottom">
+
+                        <h5 class="modal-title fw-bold"
+                            id="tituloModalEditar{{ $ev->evaluacion_docente_id }}">
+
+                            <i class="bi bi-pencil-square text-primary me-2"></i>
+                            Editar encuesta
+
+                            <small class="text-muted fw-normal">
+                                — {{ $ev->seccion?->materia?->nombre ?? '—' }}
+                            </small>
+
+                        </h5>
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Cerrar">
                         </button>
+
+                    </div>
+
+                    <form action="{{ route('admin-academico.evaluaciones.update', $ev) }}"
+                          method="POST">
+
+                        @csrf
+                        @method('PUT')
+
+                        <div class="modal-body">
+
+                            {{-- INFORMACIÓN --}}
+                            <div class="row g-3 mb-3">
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label text-muted">
+                                        Ciclo lectivo
+                                    </label>
+
+                                    <input type="text"
+                                           class="form-control bg-light"
+                                           readonly
+                                           value="{{ $cicloEv?->nombre_ciclo ?? '—' }}">
+
+                                </div>
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label text-muted">
+                                        Sección
+                                    </label>
+
+                                    <input type="text"
+                                           class="form-control bg-light"
+                                           readonly
+                                           value="{{ $ev->seccion?->materia?->nombre ?? '—' }} — Grupo {{ $ev->seccion?->nombre_grupo ?? '—' }}">
+
+                                </div>
+
+                            </div>
+
+                            {{-- AVISO --}}
+                            <div class="alert alert-light border small mb-3">
+
+                                <i class="bi bi-info-circle me-1"></i>
+
+                                Solo podés cambiar la URL. Si necesitás mover
+                                la encuesta a otra sección o ciclo, eliminá esta
+                                y creá una nueva.
+
+                            </div>
+
+                            {{-- URL --}}
+                            <div class="mb-0">
+
+                                <label for="edit-url-{{ $ev->evaluacion_docente_id }}"
+                                       class="form-label">
+                                    URL de la encuesta
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <input type="url"
+                                       name="url"
+                                       id="edit-url-{{ $ev->evaluacion_docente_id }}"
+                                       class="form-control"
+                                       value="{{ old('url', $ev->url) }}"
+                                       placeholder="https://docs.google.com/forms/d/e/..."
+                                       required>
+
+                                <div class="form-text">
+                                    Debe comenzar con <code>http://</code> o <code>https://</code>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {{-- FOOTER --}}
+                        <div class="modal-footer bg-light border-top-0">
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal">
+                                Cancelar
+                            </button>
+
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-check-circle me-1"></i>
+                                Guardar cambios
+                            </button>
+
+                        </div>
+
                     </form>
+
                 </div>
             </div>
         </div>
-    </div>
+
+        {{-- ========================================================
+             MODAL: ELIMINAR
+             ======================================================== --}}
+        <div class="modal fade evaluaciones-modal"
+             id="modalEliminarEvaluacion{{ $ev->evaluacion_docente_id }}"
+             tabindex="-1"
+             aria-labelledby="tituloModalEliminar{{ $ev->evaluacion_docente_id }}"
+             aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+
+                    <div class="modal-header bg-danger text-white border-0">
+
+                        <h5 class="modal-title fw-bold"
+                            id="tituloModalEliminar{{ $ev->evaluacion_docente_id }}">
+                            <i class="bi bi-trash me-2"></i>
+                            Eliminar encuesta
+                        </h5>
+
+                        <button type="button"
+                                class="btn-close btn-close-white"
+                                data-bs-dismiss="modal"
+                                aria-label="Cerrar">
+                        </button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <p class="mb-3">
+
+                            ¿Confirmás eliminar la encuesta de
+
+                            <strong>
+                                {{ $ev->seccion?->materia?->nombre ?? '—' }}
+                            </strong>
+
+                            — Grupo
+
+                            <strong>
+                                {{ $ev->seccion?->nombre_grupo ?? '—' }}
+                            </strong>
+
+                            del ciclo
+
+                            <strong>
+                                {{ $cicloEv?->nombre_ciclo ?? '—' }}
+                            </strong>?
+
+                        </p>
+
+                        <div class="alert alert-warning small mb-0">
+
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+
+                            Los estudiantes de esta sección dejarán de ver
+                            el botón "Evaluar docente". Esta acción no se puede deshacer.
+
+                        </div>
+
+                    </div>
+
+                    {{-- FOOTER --}}
+                    <div class="modal-footer bg-light border-top-0">
+
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+
+                        <form action="{{ route('admin-academico.evaluaciones.destroy', $ev) }}"
+                              method="POST">
+
+                            @csrf
+                            @method('DELETE')
+
+                            @if($idCicloFiltro)
+                                <input type="hidden"
+                                       name="filtro_ciclo"
+                                       value="{{ $idCicloFiltro }}">
+                            @endif
+
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash me-1"></i>
+                                Eliminar
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    @endif
+
 @endforeach
+
 @endsection
 
+{{-- ================================================================
+     JAVASCRIPT
+     ================================================================ --}}
 @push('scripts')
 <script>
 const SECCIONES_POR_CICLO = @json($seccionesPorCiclo);
@@ -370,6 +727,7 @@ const CICLO_MODAL_CREAR    = @js($idCicloFiltro ?? $cicloDefault?->ciclo_lectivo
 
 function actualizarSeccionesDisponibles() {
     const select = document.getElementById('crear-id-seccion');
+
     if (!select) return;
 
     select.innerHTML = '';
@@ -387,6 +745,7 @@ function actualizarSeccionesDisponibles() {
     }
 
     select.innerHTML = '<option value="">Seleccione una sección...</option>';
+
     secciones.forEach(s => {
         const opt = document.createElement('option');
         opt.value = s.seccion_id;
@@ -396,12 +755,15 @@ function actualizarSeccionesDisponibles() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+
     const modalCrear = document.getElementById('modalCrearEvaluacion');
+
     if (!modalCrear) return;
 
     modalCrear.addEventListener('shown.bs.modal', function () {
         actualizarSeccionesDisponibles();
     });
+
 });
 </script>
 @endpush

@@ -9,6 +9,7 @@
     use App\Http\Controllers\Estudiante\RetirarMateriaController;
     use App\Http\Controllers\Estudiante\DesempenoDocenteController;
     use App\Http\Controllers\Estudiante\EstadoCuentaController;
+    use App\Http\Controllers\Estudiante\MisNotasController;
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('role:'.Role::ESTUDIANTE)->group(function () {
@@ -77,5 +78,8 @@
             // rutas del estado de cuenta del estudiante
             Route::get('/alumno/estado-cuenta', [EstadoCuentaController::class, 'cargosIndex'])->name('estudiante.cargos.index');
             Route::post('/alumno/estado-cuenta/pagar', [EstadoCuentaController::class, 'procesarPagoEnLinea'])->name('estudiante.cargos.pagar');
+
+            // visualizar notas 
+            Route::get('/mis-notas', [MisNotasController::class, 'index'])->name('mis-notas');
         });
     });
