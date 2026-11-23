@@ -117,7 +117,7 @@
                                                         <i class="bi bi-check-circle-fill"></i>
                                                         Inscrito
                                                     </span>
-                                                @elseif($sec['puede_inscribir'])
+                                                @elseif($sec['puede_inscribir'] && $validacionGlobal['solvente'])
                                                     <form method="POST" action="{{ route('student.inscripcion.store') }}" class="d-inline">
                                                         @csrf
                                                         <input type="hidden" name="seccion_id" value="{{ $sec['seccion_id'] }}">
@@ -127,9 +127,9 @@
                                                     </form>
                                                 @else
                                                     <button type="button"
-                                                            class="btn btn-sm btn-secondary"
-                                                            data-bs-toggle="tooltip"
-                                                            title="No puedes inscribirte">
+                                                        class="btn btn-sm btn-secondary"
+                                                        data-bs-toggle="tooltip"
+                                                        title="{{ !$validacionGlobal['solvente'] ? 'Regulariza tu solvencia para inscribirte' : 'No puedes inscribirte' }}">
                                                         Bloqueado
                                                     </button>
                                                 @endif
