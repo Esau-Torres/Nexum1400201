@@ -194,6 +194,15 @@
                                 </div>
                             </a>
                         </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('admin-academico.cambio-carrera') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('admin-academico.cambio-carrera') ? 'active' : '' }}">
+                                <i class="fa-solid fa-arrows-turn-to-dots nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Cambio de carrera</div>
+                                    <div class="nav-text-secondary">Proceso de cambio de carrera estudiantil</div>
+                                </div>
+                            </a>
+                        </li>
                     @endif
 
                     {{-- ============================================================ --}}
@@ -257,6 +266,15 @@
                                 <div>
                                     <div class="fw-medium">Record Académico</div>
                                     <div class="nav-text-secondary">Historial academico</div>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-1">
+                            <a href="{{ route('student.mis-notas') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('student.mis-notas') ? 'active' : '' }}">
+                                <i class="fa-solid fa-list-check nav-icon fs-5 me-3 text-muted"></i>
+                                <div>
+                                    <div class="fw-medium">Notas</div>
+                                    <div class="nav-text-secondary">Notas de materias actuales</div>
                                 </div>
                             </a>
                         </li>
