@@ -6,7 +6,7 @@ use App\Http\Controllers\CoordinadorFacultad\InfraestructuraHorarioController;
 use App\Http\Controllers\CoordinadorFacultad\HorariosController;
 use App\Http\Controllers\CoordinadorFacultad\SeccionesController;
 use App\Http\Controllers\CoordinadorFacultad\DashboardController;
-
+use App\Http\Controllers\CoordinadorFacultad\CorreccionNotasController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:' . Role::COORDINADOR_FACULTAD)->group(function () {
@@ -44,5 +44,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // ---- Dashboard ----
             Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
             Route::get('/dashboard/pdf', [DashboardController::class, 'pdf'])->name('dashboard.pdf');
+
+            // ---- Cambio de nota Docente ----
+            Route::get('/correccion-notas',                                    [CorreccionNotasController::class, 'index'])->name('correccion-notas.index');
+            Route::get('/correccion-notas/{seccionId}',                        [CorreccionNotasController::class, 'show'])->whereNumber('seccionId')->name('correccion-notas.show');
+            Route::put('/correccion-notas/{seccionId}/nota/{calificacionId}',  [CorreccionNotasController::class, 'update'])->whereNumber('seccionId')->whereNumber('calificacionId')->name('correccion-notas.update');
+            
     });
 });

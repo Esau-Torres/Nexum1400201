@@ -70,7 +70,7 @@
         <div class="flat-card mb-4">
             <div class="card-body p-4 flat-header border-bottom-0">
                 <h4 class="fw-bold mb-1 text-slate-800">BIENVENIDOS AL SISTEMA ACADÉMICO UMA</h4>
-                <p class="text-slate-500 mb-0">Este es tu espacio para gestionar tu información y tareas.</p>
+                <p class="text-slate-500 mb-0">Este es tu espacio para visualizar tu información y tareas.</p>
             </div>
         </div>
 
@@ -257,6 +257,54 @@
                             {{-- Cuadrícula de Información Clave --}}
                             <div class="p-4 p-md-5">
                                 <h5 class="fw-bold text-slate-800 mb-4">Información Académica</h5>
+
+                                {{-- Métricas académicas --}}
+                                <div class="row g-3 mb-3">
+                                    {{-- UV Ganadas --}}
+                                    <div class="col-md-6">
+                                        <div class="flat-info-box d-flex align-items-center gap-3">
+                                            <div class="rounded-circle bg-white shadow-sm d-flex align-items-center justify-content-center flex-shrink-0"
+                                                style="width: 56px; height: 56px;">
+                                                <i class="fa-solid fa-layer-group text-danger fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <span class="d-block text-slate-500 small fw-bold text-uppercase mb-1">
+                                                    Unidades Valorativas Ganadas
+                                                </span>
+                                                <span class="d-block text-slate-800 fw-bold fs-3">
+                                                    {{ $metricas['uv_ganadas'] ?? 0 }}
+                                                    <small class="text-slate-500 fs-6 fw-normal">UV</small>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- CUM --}}
+                                    <div class="col-md-6">
+                                        <div class="flat-info-box d-flex align-items-center gap-3">
+                                            <div class="rounded-circle bg-white shadow-sm d-flex align-items-center justify-content-center flex-shrink-0"
+                                                style="width: 56px; height: 56px;">
+                                                <i class="fa-solid fa-chart-line text-danger fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <span class="d-block text-slate-500 small fw-bold text-uppercase mb-1">
+                                                    CUM ACADÉMICO
+                                                </span>
+                                                @if (!is_null($metricas['cum'] ?? null))
+                                                    <span class="d-block fw-bold fs-3 {{ $metricas['cum'] >= 6 ? 'text-success' : 'text-danger' }}">
+                                                        {{ number_format($metricas['cum'], 2) }}
+                                                        <small class="text-slate-500 fs-6 fw-normal">/ 10</small>
+                                                    </span>
+                                                    <span class="badge {{ $metricas['cum'] >= 6 ? 'bg-success' : 'bg-danger' }} flat-badge mt-1">
+                                                        {{ $metricas['cum'] >= 6 ? 'Aprobando' : 'En riesgo' }}
+                                                    </span>
+                                                @else
+                                                    <span class="d-block text-slate-500 fw-medium fs-5">Sin notas registradas</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <div class="row g-3">
                                     <div class="col-md-6">

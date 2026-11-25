@@ -77,16 +77,16 @@ npm run dev
 
 | N° | ROL                          | CORREO                           | CONTRASEÑA       |
 | -- | ---------------------------- | -------------------------------- | ---------------- |
-| 1  | Super Administrador          | davidesau140\@gmail.com          | `Admin12345`     |
-| 2  | Administrador académico      | rrf2kp8eqk\@olipii.com           | `Academico1234`  |
-| 3  | Coordinador de facultad      | ev9u65lhlp\@bwmyga.com           | `Facultad1234`   |
-| 4  | Docente                      | powvu6ilbs\@ozsaip.com           | `Docente1234`    |
-| 5  | Directivo                    | kvrs1dql22\@bwmyga.com           | `Directivo1234`  |
-| 6  | Administrador Financiero     | prsj5367\@gmail.com              | `Financiero1234` |
-| 7  | Cajero                       | 552pko38u8\@ruutukf.com          | `Cajero1234`     |
-| 8  | Alumno Egresado Maestría     | cg224100282\@uma.edu.sv          | `User1234`       |
-| 9  | Alumno Egresado Licenciatura | mr224100122\@uma.edu.sv          | `User1234`       |
-| 10 | Alumno Becado                | angelamarcelatorres30\@gmail.com | `User1234`       |
+| 1  | Super Administrador          | davidesau140\@gmail.com          | `User1234`  |
+| 2  | Administrador académico      | rrf2kp8eqk\@olipii.com           | `User1234`  |
+| 3  | Coordinador de facultad      | ev9u65lhlp\@bwmyga.com           | `User1234`  |
+| 4  | Docente                      | powvu6ilbs\@ozsaip.com           | `User1234`  |
+| 5  | Directivo                    | kvrs1dql22\@bwmyga.com           | `User1234`  |
+| 6  | Administrador Financiero     | prsj5367\@gmail.com              | `User1234`  |
+| 7  | Cajero                       | 552pko38u8\@ruutukf.com          | `User1234`  |
+| 8  | Alumno Egresado Maestría     | cg224100282\@uma.edu.sv          | `User1234`  |
+| 9  | Alumno Egresado Licenciatura | mr224100122\@uma.edu.sv          | `User1234`  |
+| 10 | Alumno Becado                | angelamarcelatorres30\@gmail.com | `User1234`  |
 
 ## Arquitectura del proyecto
 

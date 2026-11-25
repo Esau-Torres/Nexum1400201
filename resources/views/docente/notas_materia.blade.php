@@ -74,7 +74,12 @@ $estadoColumnas[$evaluacionId] = [
                     </div>
                 </div>
 
-                <div class="d-flex gap-2 align-items-start">
+                <div class="d-flex gap-2 align-items-start flex-wrap">
+                    <!-- NUEVO: Solicitud de cambio de nota bloqueada (abre en pestaña nueva) -->
+                    <a href="{{ route('docente.notas.solicitud', $seccionId) }}" target="_blank"
+                        class="btn btn-outline-dark rounded-3 px-4">
+                        <i class="fa-solid fa-file-signature me-2"></i>Solicitud de cambio
+                    </a>
                     <button type="button" id="btnEditar" class="btn btn-outline-danger rounded-3 px-4">
                         <i class="fa-solid fa-pen me-2"></i>Editar
                     </button>
