@@ -29,6 +29,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->whereNumber('seccionId')
             ->name('notas'); // Nombre final: docente.notas
 
+        Route::get('/notas/{seccionId}/solicitud-cambio', [NotasMateriaController::class, 'solicitudCambio'])
+            ->whereNumber('seccionId')
+            ->name('notas.solicitud'); // Nombre final: docente.notas.solicitud
+
         Route::post('/notas/{seccionId}/guardar', [NotasMateriaController::class, 'store'])
             ->whereNumber('seccionId')
             ->name('notas.store'); // Nombre final: docente.notas.store
@@ -44,8 +48,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->whereNumber('seccionId')
             ->name('asistencia.store'); // Nombre final: docente.asistencia.store
     });
-    
-    Route::middleware('role:'.Role::ESTUDIANTE)->group(function () {
-        Route::get('/prueba-notas', function () { return view('docente.prueba-notas'); })->name('prueba.notas');
+
+    Route::middleware('role:' . Role::ESTUDIANTE)->group(function () {
+        Route::get('/prueba-notas', function () {
+            return view('docente.prueba-notas');
+        })->name('prueba.notas');
     });
 });

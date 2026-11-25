@@ -47,8 +47,8 @@ class NotasMateriaController extends Controller
 
         // 3. Obtener categorías de la sección, con sus evaluaciones
         $categorias = CategoriaEvaluacion::with(['evaluaciones' => function ($query) {
-                $query->orderBy('evaluacion_id');
-            }])
+            $query->orderBy('evaluacion_id');
+        }])
             ->where('id_seccion', $seccionId)
             ->whereIn('id_periodo_evaluacion', $periodos->pluck('periodo_evaluacion_id'))
             ->get()
@@ -56,14 +56,14 @@ class NotasMateriaController extends Controller
 
         // 4. Obtener estudiantes inscritos con sus calificaciones
         $detalleInscripciones = DetalleInscripcion::with([
-                'inscripcion.alumno.usuario',
-                'calificaciones' => function ($query) use ($seccionId) {
-                    // Solo traer calificaciones de evaluaciones de esta sección
-                    $query->whereHas('evaluacion.categoria', function ($q) use ($seccionId) {
-                        $q->where('id_seccion', $seccionId);
-                    });
-                },
-            ])
+            'inscripcion.alumno.usuario',
+            'calificaciones' => function ($query) use ($seccionId) {
+                // Solo traer calificaciones de evaluaciones de esta sección
+                $query->whereHas('evaluacion.categoria', function ($q) use ($seccionId) {
+                    $q->where('id_seccion', $seccionId);
+                });
+            },
+        ])
             ->where('id_seccion', $seccionId)
             ->where('estado_materia', 'CURSANDO')
             ->get()
@@ -183,5 +183,30 @@ class NotasMateriaController extends Controller
             'created' => $totalCreated,
             'updated' => $totalUpdated,
         ], 422);
+    }
+
+    /**
+     * Muestra el formulario imprimible de solicitud de cambio de calificación bloqueada.
+     */
+    public function solicitudCambio(int $seccionId)
+    {
+        $user = Auth::user();
+        $docente = $user->docente;
+
+        if (!$docente) {
+            abort(403, 'No tienes un perfil de docente asociado.');
+        }
+
+        $seccion = Seccion::with(['materia', 'cicloLectivo'])
+            ->where('seccion_id', $seccionId)
+            ->where('id_docente', $docente->docente_id)
+            ->firstOrFail();
+
+        return view('docente.solicitud_cambio_nota', [
+            'seccion' => $seccion,
+            'docenteNombre' => $user->name,
+            'docenteCodigo' => $docente->codigo_empleado ?? 'S/C',
+            'fechaGeneracion' => now()->format('d/m/Y H:i'),
+        ]);
     }
 }
