@@ -519,6 +519,15 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
+                        <a href="{{ route('coordinador-facultad.correccion-notas.index') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('coordinador-facultad.correccion-notas.index') ? 'active' : '' }}">
+                            <i class="fa-solid fa-file-lines nav-icon fs-5 me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-medium">Notas Academicas</div>
+                                <div class="nav-text-secondary">Corrección de notas academicas estudiantiles</div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
                         <a href="{{ route('coordinador-facultad.dashboard') }}" class="nav-item-custom d-flex align-items-center text-decoration-none text-dark {{ request()->routeIs('coordinador-facultad.dashboard') ? 'active' : '' }}">
                             <i class="fa-solid fa-chart-line nav-icon fs-5 me-3 text-muted"></i>
                             <div>

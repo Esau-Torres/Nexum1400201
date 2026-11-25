@@ -101,7 +101,9 @@ class MisNotasController extends Controller
 
             $catsSeccion = $categorias->get($detalle->id_seccion, collect());
 
-            // Evaluaciones planas de la sección
+            // ─────────────────────────────────────────────
+            // EVALUACIONES PLANAS (para las columnas de la tabla)
+            // ─────────────────────────────────────────────
             $evaluaciones = [];
             foreach ($periodos as $periodo) {
                 $catsPeriodo = $catsSeccion->where('id_periodo_evaluacion', $periodo->periodo_evaluacion_id);
@@ -113,33 +115,105 @@ class MisNotasController extends Controller
                             'tipo_instrumento' => $eval->tipo_instrumento,
                             'porcentaje'       => (float) $eval->porcentaje_actividad,
                             'categoria'        => $cat->tipo_categoria,
+                            'porcentaje_categoria' => (float) $cat->porcentaje_categoria,
                             'periodo_numero'   => $periodo->numero_periodo,
                             'periodo_nombre'   => $periodo->nombre,
+                            'porcentaje_periodo' => (float) $periodo->porcentaje_periodo,
                             'fecha_aplicacion' => $eval->fecha_aplicacion,
                         ];
                     }
                 }
             }
 
-            // Nota final calculada (suma ponderada)
+            // ─────────────────────────────────────────────
+            // CÁLCULO JERÁRQUICO DE LA NOTA FINAL
+            // ─────────────────────────────────────────────
             $notaFinal          = 0.0;
             $porcentajeCubierto = 0.0;
+            $detallePeriodos    = [];
 
-            foreach ($evaluaciones as $ev) {
-                $n = $notas->get($ev['evaluacion_id']);
-                if ($n) {
-                    $notaFinal          += $n['nota'] * $ev['porcentaje'] / 100;
-                    $porcentajeCubierto += $ev['porcentaje'];
+            foreach ($periodos as $periodo) {
+                $catsPeriodo = $catsSeccion->where('id_periodo_evaluacion', $periodo->periodo_evaluacion_id);
+
+                if ($catsPeriodo->isEmpty()) {
+                    continue;
                 }
+
+                $porcentajePeriodo    = (float) $periodo->porcentaje_periodo;
+                $notaPeriodo          = 0.0;
+                $porcentajeCatCubierto = 0.0;
+                $catsData             = [];
+
+                foreach ($catsPeriodo as $cat) {
+                    $porcentajeCategoria = (float) $cat->porcentaje_categoria;
+                    $notaCategoria       = 0.0;
+                    $porcentajeEvalCubierto = 0.0;
+                    $evalsData           = [];
+
+                    foreach ($cat->evaluaciones as $eval) {
+                        $n = $notas->get($eval->evaluacion_id);
+                        $porcentajeEval = (float) $eval->porcentaje_actividad;
+
+                        $evalsData[] = [
+                            'evaluacion_id' => $eval->evaluacion_id,
+                            'nombre'        => $eval->nombre_evaluacion,
+                            'porcentaje'    => $porcentajeEval,
+                            'nota'          => $n ? $n['nota'] : null,
+                        ];
+
+                        if ($n) {
+                            // Aporte de la evaluación dentro de la categoría
+                            $notaCategoria += $n['nota'] * $porcentajeEval / 100;
+                            $porcentajeEvalCubierto += $porcentajeEval;
+                        }
+                    }
+
+                    // La nota de la categoría se escala al porcentaje de la categoría
+                    // Nota categoría = (suma de aportes de evaluaciones) × (porcentaje_categoria / 100)
+                    // Pero si las evaluaciones ya suman 100% dentro de la categoría,
+                    // entonces notaCategoria ya está en escala 0-10 y se multiplica por el % de la categoría.
+                    $aporteCategoria = $notaCategoria * $porcentajeCategoria / 100;
+
+                    $notaPeriodo += $aporteCategoria;
+                    $porcentajeCatCubierto += $porcentajeCategoria;
+
+                    $catsData[] = [
+                        'tipo_categoria'        => $cat->tipo_categoria,
+                        'porcentaje_categoria'  => $porcentajeCategoria,
+                        'nota_categoria'        => round($notaCategoria, 3),
+                        'aporte_categoria'      => round($aporteCategoria, 3),
+                        'evaluaciones'          => $evalsData,
+                    ];
+                }
+
+                // Nota del período (escala 0-10) × porcentaje del período
+                $aportePeriodo = $notaPeriodo * $porcentajePeriodo / 100;
+
+                $notaFinal += $aportePeriodo;
+                $porcentajeCubierto += $porcentajePeriodo;
+
+                $detallePeriodos[] = [
+                    'periodo'               => $periodo,
+                    'porcentaje_periodo'    => $porcentajePeriodo,
+                    'nota_periodo'          => round($notaPeriodo, 3),
+                    'aporte_periodo'        => round($aportePeriodo, 3),
+                    'porcentaje_cubierto'   => round($porcentajeCatCubierto, 2),
+                    'categorias'            => $catsData,
+                ];
             }
+
+            // ─────────────────────────────────────────────
+            // REDONDEO TRUNCADO (como redondearEspecial en JS)
+            // ─────────────────────────────────────────────
+            $notaFinalRedondeada = floor($notaFinal * 10) / 10;
 
             // Estado
             $estadoBadge = match (true) {
                 $porcentajeCubierto <= 0  => ['badge-sin-calificar', 'Sin calificar'],
-                $notaFinal >= 8.0          => ['badge-aprobado', 'Excelente'],
-                $notaFinal >= 6.0          => ['badge-aprobado', 'Aprobada'],
-                $notaFinal >= 4.0          => ['badge-reprobado', 'En riesgo'],
-                default                    => ['badge-reprobado', 'Reprobada'],
+                $notaFinalRedondeada >= 8.0 => ['badge-aprobado', 'Excelente'],
+                $notaFinalRedondeada >= 6.0 => ['badge-aprobado', 'Aprobada'],
+                $notaFinalRedondeada >= 4.0 => ['badge-reprobado', 'En riesgo'],
+                default                     => ['badge-reprobado', 'Reprobada'],
             };
 
             return [
@@ -153,9 +227,10 @@ class MisNotasController extends Controller
                 'evaluaciones'           => $evaluaciones,
                 'notas'                  => $notas,
                 'nota_final_calculada'   => round($notaFinal, 3),
-                'nota_final_redondeada'  => floor($notaFinal * 10) / 10,
+                'nota_final_redondeada'  => $notaFinalRedondeada,
                 'porcentaje_cubierto'    => round($porcentajeCubierto, 2),
                 'estado_badge'           => $estadoBadge,
+                'detalle_periodos'       => $detallePeriodos,
             ];
         });
 
