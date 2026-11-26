@@ -9,6 +9,7 @@ use App\Models\Users\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use App\Models\Estudiante\Alumnos;
 use Throwable;
 
 class CarnetController extends Controller
@@ -34,8 +35,8 @@ class CarnetController extends Controller
         ]);
 
         $user   = $request->user();
-        $alumno = $user->alumno;
-
+        $alumno = Alumnos::activoDeUsuario($user->id);
+        
         if (!$alumno) {
             return back()->with('error', 'No tenés perfil de alumno.');
         }

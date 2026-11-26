@@ -284,7 +284,7 @@
                                             <span class="fw-medium">{{ $beneficio->cicloLectivo->nombre_ciclo ?? '—' }}</span>
                                         </div>
                                         <div class="col-md-6">
-                                            <span class="text-muted d-block mb-1">Convenio / Beca</span>
+                                            <span class="text-muted d-block mb-1">Institución / Becaria</span>
                                             <span class="fw-medium">{{ $beneficio->nombre_convenio }}</span>
                                         </div>
                                         <div class="col-md-6">
@@ -318,7 +318,7 @@
 
                                         {{-- Cobertura adicional --}}
                                         <div class="col-12">
-                                            <span class="text-muted d-block mb-2 mt-2">Cobertura adicional</span>
+                                            <span class="text-muted d-block mb-2 mt-2">Inclusiones en exoneración de pagos</span>
                                             <div class="d-flex gap-2 flex-wrap">
                                                 <span class="badge {{ $beneficio->incluye_matricula ? 'bg-success-subtle text-success border border-success' : 'bg-secondary-subtle text-secondary border' }}">
                                                     <i class="bi {{ $beneficio->incluye_matricula ? 'bi-check-circle-fill' : 'bi-x-circle-fill' }} me-1"></i>
@@ -430,7 +430,7 @@
                                                         </select>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <label class="form-label fw-medium small">Nombre del convenio *</label>
+                                                        <label class="form-label fw-medium small">Institución / Becaria *</label>
                                                         <input type="text" name="nombre_convenio" class="form-control"
                                                             required placeholder="Ej: Convenio UMA-FUSAL">
                                                     </div>

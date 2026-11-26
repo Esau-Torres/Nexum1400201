@@ -414,6 +414,13 @@
                             </div>
                         </div>
 
+                        @php
+                            $bloqueadoPorMaterias = ($materiasEnCurso ?? collect())->isNotEmpty();
+                            $bloqueadoPorSolvencia = !$esGraduado && !$resumenFinanciero['solvente'];
+                            $bloqueadoPorArancel = !$esGraduado && !$resumenFinanciero['arancel_pagado'];
+                            $puedeProcesar = !$bloqueadoPorMaterias && !$bloqueadoPorSolvencia && !$bloqueadoPorArancel;
+                        @endphp
+
                         <div class="cc-form-footer">
                             <div class="cc-form-security-note">
                                 <i class="bi bi-shield-check" aria-hidden="true"></i>
@@ -421,8 +428,7 @@
                             </div>
                             <div class="cc-form-actions">
                                 <a href="{{ route('admin-academico.cambio-carrera') }}" class="cc-cancel-button">Cancelar</a>
-                                <button type="submit" class="cc-submit-button"
-                                    @if (($materiasEnCurso ?? collect())->isNotEmpty()) disabled @endif>
+                                <button type="submit" class="cc-submit-button" @if (!$puedeProcesar) disabled @endif>
                                     <i class="bi bi-check2-circle" aria-hidden="true"></i>
                                     Procesar cambio
                                 </button>

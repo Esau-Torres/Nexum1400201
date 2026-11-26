@@ -40,7 +40,7 @@
                     @forelse($alumnos as $alumno)
                         @php
                             $usuario = $alumno->usuario;
-                            $docs    = $alumno->documentos;
+                            $docs = $alumno->documentos_heredados;
                             $uid     = $alumno->alumno_id;
                         @endphp
                         <tr>
@@ -106,7 +106,7 @@
         @forelse($alumnos as $alumno)
             @php
                 $usuario = $alumno->usuario;
-                $docs    = $alumno->documentos;
+                $docs    = $alumno->documentos_heredados;
                 $uid     = $alumno->alumno_id;
             @endphp
             <div class="col-md-6">
@@ -178,7 +178,7 @@
 @foreach($alumnos as $alumno)
     @php
         $usuario = $alumno->usuario;
-        $docs    = $alumno->documentos;
+        $docs    = $alumno->documentos_heredados;
         $uid     = $alumno->alumno_id;
         $prefijo = "edit-{$uid}";
     @endphp
@@ -451,11 +451,20 @@
                             <div class="row g-3 mb-4">
                                 @foreach($campos as $campo => [$label, $icon, $disco])
                                     @php
+                                        // $docs ya viene de afuera: $docs = $alumno->documentos_heredados;
+                                        $docsOwnerId = $alumno->documentos
+                                            ? $alumno->alumno_id
+                                            : $alumno->id_alumno_origen;
+
                                         $ruta     = $docs->$campo ?? null;
                                         $existe   = $ruta && \Storage::disk($disco)->exists($ruta);
                                         $esImagen = $ruta && in_array(strtolower(pathinfo($ruta, PATHINFO_EXTENSION)), ['jpg','jpeg','png']);
-                                        $url      = $existe
-                                            ? route('admin-academico.documentos.download', ['alumno' => $uid, 'campo' => $campo])
+
+                                        $url = $existe
+                                            ? route('admin-academico.documentos.download', [
+                                                'alumno' => $docsOwnerId,
+                                                'campo'  => $campo,
+                                            ])
                                             : null;
                                     @endphp
 
@@ -603,7 +612,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="border rounded-3 p-3 bg-light">
-                                            <small class="text-muted d-block mb-1">Convenio / resolución</small>
+                                            <small class="text-muted d-block mb-1">Institución / resolución</small>
                                             <strong>{{ $beneficioActivo->nombre_convenio }}</strong>
                                             @if($beneficioActivo->resolucion_academica)
                                                 <div class="small text-muted">RA: {{ $beneficioActivo->resolucion_academica }}</div>
@@ -725,7 +734,7 @@
                                         {{-- Convenio --}}
                                         <div class="col-md-6">
                                             <label class="form-label small fw-medium">
-                                                Nombre del convenio / beca <span class="text-danger">*</span>
+                                                Nombre de la institución / beca <span class="text-danger">*</span>
                                             </label>
                                             <input type="text" name="nombre_convenio"
                                                 class="form-control form-control-sm @error('nombre_convenio') is-invalid @enderror"

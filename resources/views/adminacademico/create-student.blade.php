@@ -402,7 +402,7 @@
                             {{-- Nombre del convenio --}}
                             <div class="col-md-6">
                                 <label for="nombre_convenio" class="form-label fw-medium small">
-                                    Nombre del convenio / beca <span class="text-danger">*</span>
+                                    Nombre de la institución / becaria <span class="text-danger">*</span>
                                 </label>
                                 <input type="text"
                                     name="nombre_convenio"

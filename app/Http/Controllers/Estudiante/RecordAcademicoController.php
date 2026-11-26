@@ -7,12 +7,14 @@ use App\Actions\Student\ValidarPuedeRetirarMateriaAction;
 use App\Models\Estudiante\DetalleInscripcion;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Estudiante\Alumnos;
 
 class RecordAcademicoController extends Controller
 {
     public function index(Request $request, ObtenerRecordAcademicoAction $action, ValidarPuedeRetirarMateriaAction $validarRetiro)
     {
-        $alumno = $request->user()->alumno;
+        $alumno = Alumnos::activoDeUsuario($request->user()->id);
+        
         abort_if(!$alumno, 403);
 
         $detalles = $action->execute($alumno);

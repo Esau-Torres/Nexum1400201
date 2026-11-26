@@ -39,7 +39,7 @@ class CorreccionNotasController extends Controller
         return view('coordinador-facultad.correccion-notas', [
             'secciones'              => $secciones,
             'cicloActivo'            => $cicloActivo,
-            'seccion'                => null,          // 👈 explícito
+            'seccion'                => null,
             'evaluacionesPorPeriodo' => [],
             'estudiantes'            => collect(),
             'periodos'               => collect(),

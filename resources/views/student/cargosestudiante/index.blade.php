@@ -27,7 +27,7 @@
         <div class="col-md-8">
             <h2 class="fw-bold text-dark mb-1"><i class="bi bi-wallet2 me-2" style="color: #dc3545;"></i> MI ESTADO DE CUENTA</h2>
             <p class="text-muted mb-0">
-                <span class="fw-bold text-dark">{{ Auth::user()->name ?? 'Estudiante' }}</span> | {{ Auth::user()->alumno->carrera->nombre ?? 'Carrera no definida' }} <br>
+                <span class="fw-bold text-dark">{{ Auth::user()->name ?? 'Estudiante' }}</span> | {{ \App\Models\Estudiante\Alumnos::activoDeUsuario(Auth::id())?->carrera?->nombre ?? 'Carrera no definida' }} <br>
 
                 @php
                     // Buscamos el ciclo directamente en la BD con los 3 estados operativos (a prueba de ENUM)
@@ -38,7 +38,7 @@
 
                     // Buscamos si el estudiante actual tiene un beneficio activo en la BD
                     $beneficioActivo = \Illuminate\Support\Facades\DB::table('beneficios_estudiante')
-                        ->where('id_alumno', Auth::user()->alumno->alumno_id ?? 0)
+                        ->where('id_alumno', \App\Models\Estudiante\Alumnos::activoDeUsuario(Auth::id())?->alumno_id ?? 0)
                         ->where('estado', 'ACTIVO')
                         ->first();
 

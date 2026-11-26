@@ -69,7 +69,7 @@
                                 </tr>
                                 <tr>
                                     <td style="padding:8px 0; border-bottom:1px solid #eee; color:#666;">
-                                        Convenio / Beca
+                                       Institución / Becaria
                                     </td>
                                     <td style="padding:8px 0; border-bottom:1px solid #eee; font-weight:600;">
                                         {{ $beneficio->nombre_convenio }}

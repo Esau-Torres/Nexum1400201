@@ -9,14 +9,15 @@ use App\Models\Academico\PeriodoEvaluacion;
 use App\Models\Estudiante\DetalleInscripcion;
 use App\Models\Estudiante\Inscripcion;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Estudiante\Alumnos;
 
 class MisNotasController extends Controller
 {
     public function index()
     {
         $user   = Auth::user();
-        $alumno = $user->alumno;
-
+        $alumno = Alumnos::activoDeUsuario($user->id);
+        
         if (!$alumno) {
             abort(403, 'No tienes un perfil de estudiante asociado.');
         }

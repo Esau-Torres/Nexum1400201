@@ -142,6 +142,7 @@
             // cambio de carrera de un estudiante
             Route::get('/cambio-carrera',  [CambioCarreraController::class, 'index'])->name('cambio-carrera');
             Route::post('/cambio-carrera', [CambioCarreraController::class, 'store'])->name('cambio-carrera.store');
+            
         });
     });
     

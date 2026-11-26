@@ -1,0 +1,1866 @@
+/* ============================================================
+   NEXUM · CORRECCIÓN DE NOTAS
+   Sistema visual 60 / 30 / 10 · Desktop, tablet y mobile
+   60% superficies claras | 30% neutros | 10% acento institucional
+   ============================================================ */
+
+/* 01. Design tokens y base */
+.cn-page {
+    --cn-bg: #f3f5f8;
+    --cn-surface: #ffffff;
+    --cn-surface-2: #f8f9fc;
+    --cn-neutral: #e8ebf0;
+    --cn-neutral-strong: #d8dee8;
+    --cn-text: #172033;
+    --cn-text-2: #475569;
+    --cn-muted: #718096;
+    --cn-border: #e8ecf2;
+    --cn-border-strong: #d9e0e9;
+    --cn-accent: #dc3545;
+    --cn-accent-dark: #bf2636;
+    --cn-accent-soft: #fff0f2;
+    --cn-accent-wash: #fff7f8;
+    --cn-teal: #0d9488;
+    --cn-teal-soft: #e3f5f2;
+    --cn-blue: #2675c8;
+    --cn-blue-soft: #eaf3fc;
+    --cn-amber: #b96b0b;
+    --cn-amber-soft: #fff4df;
+    --cn-shadow-sm: 0 3px 12px rgba(19, 31, 54, .045);
+    --cn-shadow-md: 0 12px 30px rgba(19, 31, 54, .075);
+
+    width: 100%;
+    min-width: 0;
+    min-height: 65vh;
+    padding: clamp(12px, 2.3vw, 30px) !important;
+    color: var(--cn-text);
+    background: var(--cn-bg);
+    border-radius: 22px;
+    overflow: clip;
+}
+
+.cn-page,
+.cn-page *,
+.cn-page *::before,
+.cn-page *::after {
+    box-sizing: border-box;
+}
+
+.cn-shell {
+    width: min(100%, 1560px);
+    min-width: 0;
+    margin-inline: auto;
+}
+
+.cn-page :where(h1, h2, h3, h4, h5, p) {
+    overflow-wrap: anywhere;
+}
+
+.cn-page :where(button, a, input, textarea) {
+    font: inherit;
+}
+
+.cn-page a {
+    text-decoration: none;
+}
+
+/* 02. Hero / encabezados */
+.cn-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 26px;
+    padding: clamp(22px, 3vw, 36px);
+    margin-bottom: 28px;
+    border: 1px solid rgba(255, 255, 255, .85);
+    border-radius: 22px;
+    background:
+        radial-gradient(circle at 88% 12%, rgba(220, 53, 69, .09), transparent 25%),
+        linear-gradient(135deg, #ffffff 0%, #fbfcfe 68%, #fff7f8 100%);
+    box-shadow: var(--cn-shadow-sm);
+    isolation: isolate;
+}
+
+.cn-hero::after {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 5px;
+    content: "";
+    background: linear-gradient(180deg, var(--cn-accent), #f18b96);
+    border-radius: 22px 0 0 22px;
+}
+
+.cn-hero-main {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.cn-eyebrow,
+.cn-section-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--cn-accent-dark);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+}
+
+.cn-eyebrow {
+    margin-bottom: 12px;
+}
+
+.cn-eyebrow-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cn-accent);
+    box-shadow: 0 0 0 4px rgba(220, 53, 69, .1);
+}
+
+.cn-hero h1 {
+    margin: 0;
+    color: var(--cn-text);
+    font-size: clamp(1.7rem, 3vw, 2.45rem);
+    font-weight: 850;
+    letter-spacing: -.055em;
+    line-height: 1.13;
+}
+
+.cn-hero-description {
+    max-width: 720px;
+    margin: 11px 0 17px;
+    color: var(--cn-text-2);
+    font-size: .94rem;
+    line-height: 1.65;
+}
+
+.cn-meta-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px 12px;
+}
+
+.cn-meta-pill,
+.cn-meta-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 34px;
+    max-width: 100%;
+    color: var(--cn-text-2);
+    font-size: .8rem;
+    line-height: 1.4;
+}
+
+.cn-meta-pill {
+    padding: 7px 11px;
+    border: 1px solid var(--cn-border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .9);
+}
+
+.cn-meta-pill i,
+.cn-meta-text i {
+    flex: 0 0 auto;
+    color: var(--cn-accent);
+}
+
+.cn-meta-pill strong {
+    color: var(--cn-text);
+}
+
+.cn-meta-pill-muted {
+    background: var(--cn-surface-2);
+}
+
+.cn-home-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0 17px;
+    color: var(--cn-text-2);
+    border: 1px solid var(--cn-border-strong);
+    border-radius: 12px;
+    background: #fff;
+    font-size: .85rem;
+    font-weight: 750;
+    transition: .2s ease;
+}
+
+.cn-home-button:hover {
+    color: var(--cn-accent-dark);
+    border-color: rgba(220, 53, 69, .35);
+    background: var(--cn-accent-soft);
+    transform: translateY(-2px);
+}
+
+/* Encabezado de detalle */
+.cn-hero-detail {
+    align-items: flex-start;
+    padding-block: 25px;
+}
+
+.cn-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    color: var(--cn-accent-dark);
+    font-size: .82rem;
+    font-weight: 750;
+    transition: gap .2s ease;
+}
+
+.cn-back-link:hover {
+    gap: 12px;
+    color: var(--cn-accent-dark);
+}
+
+.cn-detail-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.cn-detail-code {
+    display: inline-flex;
+    margin-bottom: 9px;
+    padding: 5px 9px;
+    color: var(--cn-accent-dark);
+    border: 1px solid #f7cbd0;
+    border-radius: 7px;
+    background: var(--cn-accent-soft);
+    font-size: .74rem;
+    font-weight: 850;
+    letter-spacing: .04em;
+}
+
+.cn-hero-detail h1 {
+    font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+}
+
+.cn-detail-meta {
+    margin-top: 17px;
+}
+
+.cn-student-total {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 112px;
+    min-height: 90px;
+    padding: 12px;
+    border: 1px solid #f2d6da;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #fff, #fff3f5);
+}
+
+.cn-student-total strong {
+    color: var(--cn-accent-dark);
+    font-size: 1.9rem;
+    font-weight: 850;
+    line-height: 1.1;
+}
+
+.cn-student-total span {
+    margin-top: 5px;
+    color: var(--cn-muted);
+    font-size: .72rem;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+/* 03. Alertas */
+.cn-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    padding: 15px 17px;
+    margin: 0 0 25px;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    font-size: .86rem;
+    line-height: 1.65;
+}
+
+.cn-alert-icon {
+    display: grid;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border-radius: 9px;
+    font-size: 1rem;
+}
+
+.cn-alert-success {
+    color: #087f70;
+    border-color: #c8ebe4;
+    background: #effaf7;
+}
+
+.cn-alert-success .cn-alert-icon {
+    color: #087f70;
+    background: #d7f3eb;
+}
+
+.cn-alert-danger {
+    color: #a92b3b;
+    border-color: #f4d0d5;
+    background: #fff5f6;
+}
+
+.cn-alert-danger .cn-alert-icon {
+    color: var(--cn-accent-dark);
+    background: #ffe3e7;
+}
+
+.cn-alert-info {
+    color: #28577f;
+    border-color: #d7e7f5;
+    background: #f1f7fc;
+}
+
+.cn-alert-info .cn-alert-icon {
+    color: var(--cn-blue);
+    background: #dfedfa;
+}
+
+.cn-alert-info strong {
+    display: block;
+    margin-bottom: 2px;
+    color: #214b71;
+    font-size: .88rem;
+}
+
+.cn-alert-info p {
+    margin: 0;
+}
+
+/* 04. Encabezados de sección */
+.cn-content-section {
+    min-width: 0;
+}
+
+.cn-section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    margin: 0 2px 16px;
+}
+
+.cn-section-kicker {
+    margin-bottom: 6px;
+    font-size: .66rem;
+}
+
+.cn-section-heading h2 {
+    margin: 0;
+    color: var(--cn-text);
+    font-size: clamp(1.2rem, 2vw, 1.48rem);
+    font-weight: 820;
+    letter-spacing: -.035em;
+}
+
+.cn-section-heading p {
+    margin: 6px 0 0;
+    color: var(--cn-muted);
+    font-size: .83rem;
+    line-height: 1.55;
+}
+
+.cn-count-pill {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    color: var(--cn-text-2);
+    border: 1px solid var(--cn-border);
+    border-radius: 999px;
+    background: #fff;
+    font-size: .75rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.cn-count-pill i {
+    color: var(--cn-accent);
+}
+
+/* 05. Paneles y barras de panel */
+.cn-panel {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--cn-border);
+    border-radius: 18px;
+    background: var(--cn-surface);
+    box-shadow: var(--cn-shadow-sm);
+}
+
+.cn-panel-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 17px 21px;
+    border-bottom: 1px solid var(--cn-border);
+    background: linear-gradient(90deg, #fff, #fbfcfe);
+}
+
+.cn-panel-topbar-icon {
+    display: grid;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    color: var(--cn-accent);
+    border-radius: 12px;
+    background: var(--cn-accent-soft);
+    font-size: 1.1rem;
+}
+
+.cn-panel-topbar h3 {
+    margin: 0;
+    color: var(--cn-text);
+    font-size: .92rem;
+    font-weight: 800;
+}
+
+.cn-panel-topbar p {
+    margin: 3px 0 0;
+    color: var(--cn-muted);
+    font-size: .74rem;
+}
+
+.cn-table-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    color: var(--cn-muted);
+    border-bottom: 1px solid var(--cn-border);
+    background: #fbfcfe;
+    font-size: .73rem;
+}
+
+.cn-table-hint i {
+    color: var(--cn-accent);
+}
+
+/* 06. Tabla de secciones */
+.cn-table-wrap {
+    width: 100%;
+    min-width: 0;
+    overflow: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-color: #cbd3df transparent;
+    scrollbar-width: thin;
+}
+
+.cn-table-wrap::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.cn-table-wrap::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background: #cbd3df;
+}
+
+.cn-table-wrap::-webkit-scrollbar-track {
+    background: #f5f6f8;
+}
+
+.cn-sections-table {
+    width: 100%;
+    min-width: 850px;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.cn-sections-table thead th {
+    padding: 15px 16px;
+    color: #657187;
+    border: 0;
+    border-bottom: 1px solid var(--cn-border);
+    background: #f7f8fb;
+    font-size: .69rem;
+    font-weight: 850;
+    letter-spacing: .075em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.cn-sections-table thead th:first-child,
+.cn-sections-table tbody td:first-child {
+    padding-left: 22px;
+}
+
+.cn-sections-table tbody td {
+    padding: 16px;
+    color: var(--cn-text-2);
+    border: 0;
+    border-bottom: 1px solid #edf0f4;
+    background: #fff;
+    font-size: .84rem;
+    vertical-align: middle;
+    transition: background .18s ease;
+}
+
+.cn-sections-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.cn-sections-table tbody tr:hover td {
+    background: #fff9fa;
+}
+
+.cn-code-tag {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 5px 8px;
+    color: var(--cn-accent-dark);
+    border: 1px solid #f3d1d6;
+    border-radius: 7px;
+    background: var(--cn-accent-soft);
+    font-size: .73rem;
+    font-weight: 850;
+    letter-spacing: .02em;
+    white-space: nowrap;
+}
+
+.cn-table-primary {
+    color: var(--cn-text);
+    font-size: .86rem;
+    font-weight: 760;
+    line-height: 1.45;
+}
+
+.cn-table-secondary {
+    display: block;
+    margin-top: 4px;
+    color: var(--cn-muted);
+    font-size: .73rem;
+}
+
+.cn-group-tag {
+    display: inline-flex;
+    padding: 5px 9px;
+    color: #526176;
+    border-radius: 7px;
+    background: #f0f2f6;
+    font-size: .75rem;
+    font-weight: 750;
+}
+
+.cn-student-count {
+    display: inline-grid;
+    min-width: 32px;
+    height: 32px;
+    padding-inline: 6px;
+    place-items: center;
+    color: #087f70;
+    border: 1px solid #ccebe4;
+    border-radius: 9px;
+    background: #effaf7;
+    font-size: .82rem;
+    font-weight: 850;
+}
+
+.cn-review-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 8px 12px;
+    color: #fff;
+    border: 1px solid var(--cn-accent);
+    border-radius: 9px;
+    background: var(--cn-accent);
+    box-shadow: 0 4px 10px rgba(220, 53, 69, .14);
+    font-size: .76rem;
+    font-weight: 800;
+    white-space: nowrap;
+    transition: .2s ease;
+}
+
+.cn-review-button:hover {
+    color: #fff;
+    border-color: var(--cn-accent-dark);
+    background: var(--cn-accent-dark);
+    box-shadow: 0 6px 13px rgba(220, 53, 69, .2);
+    transform: translateY(-1px);
+}
+
+/* 07. Tarjetas de secciones (móvil/tablet) */
+.cn-mobile-view {
+    display: none;
+}
+
+.cn-section-card-list,
+.cn-student-card-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.cn-section-card {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid var(--cn-border);
+    border-radius: 17px;
+    background: #fff;
+    box-shadow: var(--cn-shadow-sm);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.cn-section-card:hover {
+    border-color: #f0cbd0;
+    box-shadow: var(--cn-shadow-md);
+    transform: translateY(-2px);
+}
+
+.cn-section-card-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+}
+
+.cn-section-card-icon {
+    display: grid;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    color: var(--cn-accent);
+    border-radius: 13px;
+    background: var(--cn-accent-soft);
+    font-size: 1.15rem;
+}
+
+.cn-section-card-title {
+    min-width: 0;
+    flex: 1;
+}
+
+.cn-section-card-title h3 {
+    margin: 8px 0 3px;
+    color: var(--cn-text);
+    font-size: .98rem;
+    font-weight: 820;
+    line-height: 1.4;
+}
+
+.cn-section-card-title p {
+    margin: 0;
+    color: var(--cn-muted);
+    font-size: .75rem;
+    line-height: 1.5;
+}
+
+.cn-section-card-data {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 17px 0 15px;
+    padding: 14px 0;
+    border-top: 1px solid var(--cn-border);
+    border-bottom: 1px solid var(--cn-border);
+}
+
+.cn-data-item {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.cn-data-item span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--cn-muted);
+    font-size: .7rem;
+    font-weight: 700;
+}
+
+.cn-data-item span i {
+    color: var(--cn-accent);
+}
+
+.cn-data-item strong {
+    color: var(--cn-text-2);
+    font-size: .8rem;
+    font-weight: 760;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.cn-data-item-wide {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cn-data-item-wide strong {
+    display: grid;
+    min-width: 30px;
+    height: 30px;
+    padding-inline: 7px;
+    place-items: center;
+    color: #087f70;
+    border-radius: 8px;
+    background: var(--cn-teal-soft);
+}
+
+.cn-review-button-mobile {
+    display: flex;
+    width: 100%;
+    min-height: 43px;
+    justify-content: space-between;
+    padding-inline: 14px;
+}
+
+/* 08. Detalle: tabla de calificaciones */
+.cn-grades-table-wrap {
+    max-height: min(68vh, 760px);
+}
+
+.cn-grades-table {
+    width: max-content;
+    min-width: 100%;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.cn-grades-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    min-width: 126px;
+    max-width: 190px;
+    padding: 14px 12px;
+    color: #5d697e;
+    border: 0;
+    border-bottom: 1px solid var(--cn-border-strong);
+    background: #f5f7fa;
+    font-size: .75rem;
+    font-weight: 820;
+    line-height: 1.4;
+    white-space: normal;
+    vertical-align: middle;
+}
+
+.cn-grades-table thead th small {
+    display: block;
+    margin-top: 5px;
+    color: var(--cn-muted);
+    font-size: .67rem;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+.cn-grades-table .cn-student-column {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    width: 270px;
+    min-width: 270px;
+    max-width: 270px;
+    text-align: left;
+    background: #eef1f6;
+    box-shadow: 4px 0 9px rgba(19, 31, 54, .045);
+}
+
+.cn-grades-table tbody .cn-student-column {
+    z-index: 2;
+    background: #fff;
+}
+
+.cn-grades-table tbody td {
+    min-width: 126px;
+    padding: 13px 10px;
+    color: var(--cn-text-2);
+    border: 0;
+    border-bottom: 1px solid #edf0f4;
+    background: #fff;
+    font-size: .84rem;
+    vertical-align: middle;
+}
+
+.cn-grades-table tbody tr:hover td {
+    background: #fff9fa;
+}
+
+.cn-grades-table tbody tr:hover .cn-student-column {
+    background: #fff5f6;
+}
+
+.cn-student-cell {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+}
+
+.cn-avatar-initials {
+    display: grid;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    color: #9c2937;
+    border: 1px solid #f4d4d8;
+    border-radius: 11px;
+    background: linear-gradient(145deg, #fff4f5, #ffe8eb);
+    font-size: .9rem;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.cn-student-identity {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.cn-student-identity strong {
+    color: var(--cn-text);
+    font-size: .81rem;
+    font-weight: 780;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.cn-student-identity small {
+    color: var(--cn-muted);
+    font-size: .7rem;
+}
+
+.cn-grade-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    white-space: nowrap;
+}
+
+.cn-grade-value {
+    color: var(--cn-text);
+    font-size: .94rem;
+    font-weight: 850;
+    font-variant-numeric: tabular-nums;
+}
+
+.cn-deferred-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 21px;
+    padding: 3px 6px;
+    color: #12618e;
+    border: 1px solid #c9e5f7;
+    border-radius: 6px;
+    background: var(--cn-blue-soft);
+    font-size: .62rem;
+    font-weight: 850;
+    line-height: 1.2;
+}
+
+.cn-edit-grade-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 30px;
+    height: 30px;
+    min-height: 30px;
+    padding: 0;
+    color: var(--cn-accent);
+    border: 1px solid #f2c8ce;
+    border-radius: 8px;
+    background: #fff;
+    font-size: .78rem;
+    transition: .18s ease;
+}
+
+.cn-edit-grade-button:hover,
+.cn-edit-grade-button:focus-visible {
+    color: #fff;
+    border-color: var(--cn-accent);
+    background: var(--cn-accent);
+    box-shadow: 0 3px 8px rgba(220, 53, 69, .16);
+}
+
+.cn-no-grade {
+    color: #a0a9b7;
+    font-size: .9rem;
+}
+
+/* 09. Tarjetas de estudiantes para tablet y móvil */
+.cn-student-card {
+    min-width: 0;
+    padding: 17px;
+    border: 1px solid var(--cn-border);
+    border-radius: 17px;
+    background: #fff;
+    box-shadow: var(--cn-shadow-sm);
+}
+
+.cn-student-card-header {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+}
+
+.cn-avatar-large {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    font-size: 1rem;
+}
+
+.cn-student-card-identity {
+    min-width: 0;
+    flex: 1;
+}
+
+.cn-student-card-identity h3 {
+    margin: 0 0 4px;
+    color: var(--cn-text);
+    font-size: .92rem;
+    font-weight: 820;
+    line-height: 1.4;
+}
+
+.cn-student-card-identity span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--cn-muted);
+    font-size: .72rem;
+}
+
+.cn-student-index {
+    align-self: flex-start;
+    padding: 4px 7px;
+    color: #6b7588;
+    border-radius: 7px;
+    background: #f1f3f6;
+    font-size: .68rem;
+    font-weight: 800;
+}
+
+.cn-student-card-divider {
+    height: 1px;
+    margin: 15px 0 12px;
+    background: var(--cn-border);
+}
+
+.cn-mobile-evaluations-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.cn-mobile-evaluations-heading > span {
+    color: var(--cn-text-2);
+    font-size: .77rem;
+    font-weight: 850;
+}
+
+.cn-mobile-evaluations-heading small {
+    color: var(--cn-muted);
+    font-size: .65rem;
+    text-align: right;
+}
+
+.cn-mobile-evaluations {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+}
+
+.cn-mobile-evaluation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+    padding: 11px 12px;
+    border: 1px solid #edf0f4;
+    border-radius: 11px;
+    background: #fafbfd;
+}
+
+.cn-mobile-evaluation-info {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cn-mobile-evaluation-info strong {
+    color: var(--cn-text);
+    font-size: .78rem;
+    font-weight: 780;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.cn-mobile-evaluation-info > span {
+    color: var(--cn-muted);
+    font-size: .67rem;
+    line-height: 1.4;
+}
+
+.cn-mobile-evaluation-action {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.cn-mobile-grade {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 40px;
+}
+
+.cn-mobile-grade strong {
+    color: var(--cn-text);
+    font-size: 1.05rem;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+
+.cn-edit-grade-mobile {
+    width: auto;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 9px;
+}
+
+.cn-edit-grade-mobile span {
+    font-size: .68rem;
+    font-weight: 800;
+}
+
+.cn-pending-grade {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 8px;
+    color: #93600d;
+    border: 1px solid #f5e2bd;
+    border-radius: 7px;
+    background: var(--cn-amber-soft);
+    font-size: .65rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+/* 10. Estado vacío */
+.cn-empty-state {
+    display: flex;
+    min-height: 245px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+    border: 1px dashed #d4dbe5;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .8);
+    text-align: center;
+}
+
+.cn-empty-icon {
+    display: grid;
+    width: 58px;
+    height: 58px;
+    margin-bottom: 14px;
+    place-items: center;
+    color: #8793a6;
+    border-radius: 18px;
+    background: #eef1f5;
+    font-size: 1.55rem;
+}
+
+.cn-empty-state h3 {
+    margin: 0 0 6px;
+    color: var(--cn-text);
+    font-size: 1.02rem;
+    font-weight: 820;
+}
+
+.cn-empty-state p {
+    max-width: 440px;
+    margin: 0;
+    color: var(--cn-muted);
+    font-size: .82rem;
+    line-height: 1.6;
+}
+
+/* 11. Modal */
+.cn-correction-modal .modal-dialog {
+    width: min(100% - 28px, 540px);
+    max-width: 540px;
+    margin-inline: auto;
+}
+
+.cn-correction-modal .modal-content {
+    overflow: hidden;
+    border: 1px solid rgba(22, 32, 51, .08);
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 24px 70px rgba(16, 24, 40, .2);
+}
+
+.cn-correction-modal .modal-header {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 21px 23px;
+    border: 0;
+    background: linear-gradient(115deg, #fff4f5, #fff 82%);
+}
+
+.cn-modal-icon {
+    display: grid;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    color: #fff;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #e64a59, #c82333);
+    box-shadow: 0 6px 14px rgba(220, 53, 69, .2);
+    font-size: 1.15rem;
+}
+
+.cn-modal-heading {
+    min-width: 0;
+    flex: 1;
+}
+
+.cn-correction-modal .modal-title {
+    margin: 0;
+    color: var(--cn-text);
+    font-size: 1.05rem;
+    font-weight: 850;
+}
+
+.cn-modal-heading p {
+    margin: 4px 0 0;
+    color: var(--cn-muted);
+    font-size: .75rem;
+}
+
+.cn-correction-modal .btn-close {
+    flex: 0 0 auto;
+    margin: 0 0 0 auto;
+    opacity: .65;
+}
+
+.cn-correction-modal .btn-close:hover {
+    opacity: 1;
+}
+
+.cn-correction-modal .modal-body {
+    padding: 22px 24px 24px;
+}
+
+.cn-modal-context {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 13px;
+    margin-bottom: 20px;
+    border: 1px solid var(--cn-border);
+    border-radius: 12px;
+    background: var(--cn-surface-2);
+}
+
+.cn-modal-context > div {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.cn-modal-context span {
+    color: var(--cn-muted);
+    font-size: .67rem;
+    font-weight: 750;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.cn-modal-context strong {
+    color: var(--cn-text);
+    font-size: .78rem;
+    font-weight: 800;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.cn-correction-modal .mb-3 {
+    margin-bottom: 17px !important;
+}
+
+.cn-correction-modal .form-label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--cn-text);
+    font-size: .8rem;
+    font-weight: 800;
+}
+
+.cn-correction-modal .form-control {
+    min-height: 45px;
+    padding: 10px 12px;
+    color: var(--cn-text);
+    border: 1px solid var(--cn-border-strong);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: none;
+    font-size: .86rem;
+    transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.cn-correction-modal textarea.form-control {
+    min-height: 105px;
+    resize: vertical;
+    line-height: 1.55;
+}
+
+.cn-correction-modal .form-control:focus {
+    border-color: var(--cn-accent);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, .11);
+}
+
+.cn-correction-modal .form-control:disabled {
+    color: var(--cn-text-2);
+    border-color: var(--cn-border);
+    background: #f1f3f6;
+    opacity: 1;
+}
+
+.cn-correction-modal .form-control::placeholder {
+    color: #9aa4b2;
+}
+
+.cn-correction-modal .form-control.is-invalid {
+    border-color: var(--cn-accent);
+}
+
+.cn-correction-modal .invalid-feedback {
+    margin-top: 6px;
+    font-size: .74rem;
+}
+
+.cn-field-hint {
+    display: block;
+    margin-top: 6px;
+    color: var(--cn-muted);
+    font-size: .68rem;
+    line-height: 1.4;
+}
+
+.cn-correction-modal .modal-footer {
+    display: flex;
+    gap: 9px;
+    padding: 15px 23px;
+    border-top: 1px solid var(--cn-border);
+    background: #fafbfd;
+}
+
+.cn-modal-cancel,
+.cn-modal-submit {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 15px;
+    border-radius: 10px;
+    font-size: .8rem;
+    font-weight: 800;
+    transition: .18s ease;
+}
+
+.cn-modal-cancel {
+    color: var(--cn-text-2);
+    border: 1px solid var(--cn-border-strong);
+    background: #fff;
+}
+
+.cn-modal-cancel:hover {
+    color: var(--cn-text);
+    border-color: #bbc5d2;
+    background: #f1f3f6;
+}
+
+.cn-modal-submit {
+    color: #fff;
+    border: 1px solid var(--cn-accent);
+    background: var(--cn-accent);
+    box-shadow: 0 4px 10px rgba(220, 53, 69, .15);
+}
+
+.cn-modal-submit:hover {
+    color: #fff;
+    border-color: var(--cn-accent-dark);
+    background: var(--cn-accent-dark);
+}
+
+.cn-modal-submit:disabled {
+    cursor: wait;
+    opacity: .75;
+}
+
+/* 12. Estados de foco / accesibilidad */
+.cn-page :focus-visible,
+.cn-correction-modal :focus-visible {
+    outline: 3px solid rgba(220, 53, 69, .24);
+    outline-offset: 2px;
+}
+
+.cn-page .btn:focus-visible,
+.cn-correction-modal .btn:focus-visible {
+    box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cn-page *,
+    .cn-page *::before,
+    .cn-page *::after,
+    .cn-correction-modal * {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
+
+/* 13. Tablet: usar tarjetas en vez de tablas */
+@media (max-width: 991.98px) {
+    .cn-page {
+        padding: 18px !important;
+        border-radius: 17px;
+    }
+
+    .cn-hero {
+        padding: 24px;
+    }
+
+    .cn-desktop-view {
+        display: none !important;
+    }
+
+    .cn-mobile-view {
+        display: grid !important;
+    }
+
+    .cn-section-card-list,
+    .cn-student-card-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cn-detail-title-row {
+        align-items: flex-start;
+    }
+}
+
+/* 14. Móvil */
+@media (max-width: 767.98px) {
+    .cn-page {
+        width: 100%;
+        padding: 11px !important;
+        border-radius: 13px;
+        overflow: visible;
+    }
+
+    .cn-hero {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 17px;
+        padding: 21px 17px 18px 20px;
+        margin-bottom: 20px;
+        border-radius: 17px;
+    }
+
+    .cn-hero::after {
+        border-radius: 17px 0 0 17px;
+    }
+
+    .cn-eyebrow {
+        margin-bottom: 9px;
+        font-size: .64rem;
+    }
+
+    .cn-hero h1 {
+        font-size: clamp(1.55rem, 7vw, 1.9rem);
+        letter-spacing: -.045em;
+        line-height: 1.18;
+    }
+
+    .cn-hero-description {
+        margin: 8px 0 13px;
+        font-size: .82rem;
+        line-height: 1.55;
+    }
+
+    .cn-meta-list {
+        align-items: flex-start;
+        gap: 7px;
+    }
+
+    .cn-meta-pill,
+    .cn-meta-text {
+        min-height: 31px;
+        font-size: .72rem;
+    }
+
+    .cn-meta-text {
+        padding: 5px 2px;
+    }
+
+    .cn-home-button {
+        width: 100%;
+        min-height: 43px;
+    }
+
+    .cn-hero-detail {
+        gap: 15px;
+    }
+
+    .cn-back-link {
+        margin-bottom: 13px;
+        font-size: .78rem;
+    }
+
+    .cn-detail-title-row {
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .cn-detail-code {
+        margin-bottom: 7px;
+        font-size: .68rem;
+    }
+
+    .cn-hero-detail h1 {
+        font-size: clamp(1.25rem, 5.5vw, 1.55rem);
+        line-height: 1.28;
+    }
+
+    .cn-student-total {
+        min-width: 77px;
+        min-height: 69px;
+        padding: 8px;
+        border-radius: 12px;
+    }
+
+    .cn-student-total strong {
+        font-size: 1.45rem;
+    }
+
+    .cn-student-total span {
+        font-size: .58rem;
+    }
+
+    .cn-detail-meta {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 7px;
+        margin-top: 14px;
+    }
+
+    .cn-detail-meta .cn-meta-pill {
+        width: fit-content;
+        max-width: 100%;
+        min-height: 30px;
+        overflow-wrap: anywhere;
+        white-space: normal;
+    }
+
+    .cn-alert {
+        gap: 10px;
+        padding: 12px;
+        margin-bottom: 21px;
+        border-radius: 12px;
+        font-size: .77rem;
+        line-height: 1.6;
+    }
+
+    .cn-alert-icon {
+        flex-basis: 27px;
+        width: 27px;
+        height: 27px;
+        font-size: .9rem;
+    }
+
+    .cn-alert-info strong {
+        font-size: .81rem;
+    }
+
+    .cn-section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 9px;
+        margin: 0 2px 13px;
+    }
+
+    .cn-section-heading h2 {
+        font-size: 1.2rem;
+    }
+
+    .cn-section-heading p {
+        margin-top: 5px;
+        font-size: .75rem;
+        line-height: 1.5;
+    }
+
+    .cn-section-kicker {
+        font-size: .61rem;
+    }
+
+    .cn-count-pill {
+        padding: 6px 10px;
+        font-size: .69rem;
+    }
+
+    .cn-section-card-list,
+    .cn-student-card-list {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .cn-section-card {
+        padding: 15px;
+        border-radius: 15px;
+    }
+
+    .cn-section-card-icon {
+        flex-basis: 38px;
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        font-size: 1rem;
+    }
+
+    .cn-section-card-title h3 {
+        margin-top: 7px;
+        font-size: .9rem;
+    }
+
+    .cn-section-card-title p {
+        font-size: .7rem;
+    }
+
+    .cn-section-card-data {
+        gap: 10px;
+        margin: 13px 0;
+        padding: 12px 0;
+    }
+
+    .cn-data-item span {
+        font-size: .65rem;
+    }
+
+    .cn-data-item strong {
+        font-size: .75rem;
+    }
+
+    .cn-review-button-mobile {
+        min-height: 42px;
+        font-size: .76rem;
+    }
+
+    .cn-student-card {
+        padding: 14px;
+        border-radius: 15px;
+    }
+
+    .cn-avatar-large {
+        flex-basis: 40px;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        font-size: .92rem;
+    }
+
+    .cn-student-card-identity h3 {
+        font-size: .83rem;
+    }
+
+    .cn-student-card-identity span {
+        font-size: .68rem;
+    }
+
+    .cn-mobile-evaluations-heading > span {
+        font-size: .73rem;
+    }
+
+    .cn-mobile-evaluations-heading small {
+        font-size: .61rem;
+    }
+
+    .cn-mobile-evaluation {
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .cn-mobile-evaluation-info strong {
+        font-size: .75rem;
+    }
+
+    .cn-mobile-evaluation-info > span {
+        font-size: .64rem;
+    }
+
+    .cn-mobile-grade strong {
+        font-size: .98rem;
+    }
+
+    .cn-edit-grade-mobile {
+        min-width: 32px;
+        height: 32px;
+        padding-inline: 8px;
+    }
+
+    .cn-edit-grade-mobile span {
+        display: none;
+    }
+
+    .cn-pending-grade {
+        padding: 5px 6px;
+        font-size: .6rem;
+    }
+
+    .cn-empty-state {
+        min-height: 210px;
+        padding: 25px 16px;
+        border-radius: 15px;
+    }
+
+    .cn-empty-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 15px;
+        font-size: 1.35rem;
+    }
+
+    .cn-empty-state h3 {
+        font-size: .94rem;
+    }
+
+    .cn-empty-state p {
+        font-size: .76rem;
+    }
+
+    .cn-correction-modal .modal-dialog {
+        width: calc(100% - 20px);
+        max-width: none;
+        margin: 10px auto;
+    }
+
+    .cn-correction-modal .modal-content {
+        border-radius: 16px;
+    }
+
+    .cn-correction-modal .modal-header {
+        gap: 10px;
+        padding: 16px;
+    }
+
+    .cn-modal-icon {
+        flex-basis: 38px;
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        font-size: 1rem;
+    }
+
+    .cn-correction-modal .modal-title {
+        font-size: .92rem;
+    }
+
+    .cn-modal-heading p {
+        font-size: .67rem;
+        line-height: 1.4;
+    }
+
+    .cn-correction-modal .modal-body {
+        padding: 16px;
+    }
+
+    .cn-modal-context {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+        padding: 11px;
+        margin-bottom: 16px;
+    }
+
+    .cn-modal-context strong {
+        font-size: .75rem;
+    }
+
+    .cn-correction-modal .form-label {
+        font-size: .76rem;
+    }
+
+    .cn-correction-modal .form-control {
+        min-height: 43px;
+        font-size: .83rem;
+    }
+
+    .cn-correction-modal .modal-footer {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+        gap: 8px;
+        padding: 12px 15px;
+    }
+
+    .cn-modal-cancel,
+    .cn-modal-submit {
+        min-width: 0;
+        min-height: 42px;
+        padding: 8px 9px;
+        font-size: .72rem;
+        white-space: normal;
+    }
+}
+
+/* 15. Teléfonos pequeños */
+@media (max-width: 380px) {
+    .cn-page {
+        padding: 8px !important;
+    }
+
+    .cn-hero {
+        padding: 18px 13px 16px 16px;
+    }
+
+    .cn-hero h1 {
+        font-size: 1.48rem;
+    }
+
+    .cn-hero-detail h1 {
+        font-size: 1.18rem;
+    }
+
+    .cn-student-total {
+        min-width: 66px;
+        min-height: 62px;
+    }
+
+    .cn-student-total strong {
+        font-size: 1.28rem;
+    }
+
+    .cn-meta-pill {
+        padding: 6px 8px;
+        font-size: .67rem;
+    }
+
+    .cn-mobile-evaluation {
+        gap: 7px;
+        padding: 9px 8px;
+    }
+
+    .cn-mobile-evaluation-info strong {
+        font-size: .71rem;
+    }
+
+    .cn-mobile-grade {
+        min-width: 34px;
+    }
+
+    .cn-edit-grade-mobile {
+        min-width: 30px;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+    }
+
+    .cn-pending-grade {
+        gap: 3px;
+        font-size: .56rem;
+    }
+
+    .cn-correction-modal .modal-footer {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ============================================================
+   NEXUM - CONTROL EXCLUSIVO DE VISTAS RESPONSIVE
+   Escritorio y tablet: solamente tablas
+   Celular: solamente tarjetas
+   ============================================================ */
+
+/* Estado predeterminado: escritorio */
+.cn-page .cn-desktop-view {
+    display: block !important;
+}
+
+.cn-page .cn-mobile-view {
+    display: none !important;
+}
+
+/* Celulares: ocultar tablas y mostrar tarjetas */
+@media screen and (max-width: 767.98px) {
+
+    .cn-page .cn-desktop-view {
+        display: none !important;
+    }
+
+    .cn-page .cn-mobile-view {
+        display: grid !important;
+    }
+
+}
+
+/* Tablet y escritorio: ocultar tarjetas y mostrar tablas */
+@media screen and (min-width: 768px) {
+
+    .cn-page .cn-desktop-view {
+        display: block !important;
+    }
+
+    .cn-page .cn-mobile-view {
+        display: none !important;
+    }
+
+}

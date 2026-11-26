@@ -9,13 +9,14 @@ use App\Http\Controllers\Controller;
 use App\Rules\Student\StoreSituacionRule;
 use App\Models\Estudiante\SituacionUsuario;
 use Illuminate\Http\Request;
+use App\Models\Estudiante\Alumnos;
 
 class SituacionController extends Controller
 {
     public function index(Request $request)
     {
         $user   = $request->user();
-        $alumno = $user->alumno;
+        $alumno = Alumnos::activoDeUsuario($user->id);
 
         $situaciones = SituacionUsuario::deUsuario($user->id)
             ->visiblesParaAlumno() 

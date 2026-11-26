@@ -126,7 +126,7 @@ class StudentModifyController extends Controller
             $action->execute(
                 alumno: $alumno,
                 request: $request,
-                estadoDocumentos: $alumno->documentos->estado_documentos ?? 'PENDIENTE',
+                estadoDocumentos: $alumno->documentos_heredados?->estado_documentos ?? 'PENDIENTE',
                 revisadoPor: $request->user()->id,
             );
 
