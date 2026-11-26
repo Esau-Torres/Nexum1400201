@@ -8,7 +8,7 @@ use App\Models\Estudiante\CargoEstudiante;
 use App\Models\Adfinanciero\ConceptoPago;
 use Illuminate\Support\Facades\DB;
 use App\Mail\ReciboPagoMail;
-use Illuminate\Support\Facades\Mail; 
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 

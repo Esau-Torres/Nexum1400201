@@ -14,6 +14,7 @@ use App\Rules\Student\MaxReprobacionesRule;
 use App\Enums\EstadoCiclo;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use App\Models\Estudiante\Alumnos;
 
 class InscripcionController extends Controller
 {
@@ -22,7 +23,9 @@ class InscripcionController extends Controller
         ObtenerSeccionesDisponiblesAction $seccionesAction,
         ValidarPuedeInscribirseAction $validarAction
     ) {
-        $alumno = $request->user()->alumno;
+
+        $alumno = Alumnos::activoDeUsuario($request->user()->id);
+
         abort_if(!$alumno, 403);
 
         $ciclo = CicloLectivo::where('estado', EstadoCiclo::MATRICULA_ABIERTA->value)
@@ -80,7 +83,7 @@ class InscripcionController extends Controller
         ValidarPuedeInscribirseAction $validarAction,
         InscribirMateriaAction $inscribirAction
     ) {
-        $alumno = $request->user()->alumno;
+        $alumno = Alumnos::activoDeUsuario($request->user()->id);
         abort_if(!$alumno, 403);
 
         $data = $request->validate([

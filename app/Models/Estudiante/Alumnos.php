@@ -16,6 +16,8 @@ Use App\Models\Academico\CargoEstudiante;
 use App\Models\Estudiante\RequisitosEgreso;
 use App\Models\Academico\ProcesoGraduacion;
 use App\Enums\EstadoBeneficio;
+use App\Enums\EstadoEstudiante;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Alumnos extends Model
 {
@@ -24,9 +26,14 @@ class Alumnos extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'id_usuario', 'id_carrera', 'codigo_estudiante',
-        'correo_institucional', 'estado_carrera',
-        'foto_carnet', 'foto_carnet_validada_at', 
+        'id_usuario', 
+        'id_carrera', 
+        'codigo_estudiante',
+        'correo_institucional', 
+        'estado_carrera',
+        'foto_carnet', 
+        'foto_carnet_validada_at', 
+        'id_alumno_origen',
     ];
 
     protected function casts(): array
@@ -85,6 +92,129 @@ class Alumnos extends Model
         return $this->hasMany(CargoEstudiante::class, 'id_alumno', 'alumno_id');
     }
 
+    // nuevos helpers
+    public function origen(): BelongsTo
+    {
+        return $this->belongsTo(Alumnos::class, 'id_alumno_origen', 'alumno_id');
+    }
+
+    /**
+     * Accessor al enum, sin cambiar el cast original.
+     * Uso: $alumno->estado_enum === EstadoEstudiante::ACTIVO
+     */
+    protected function estadoEnum(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => EstadoEstudiante::tryFrom($this->estado_carrera ?? ''),
+        );
+    }
+
+    /**
+     * Helper booleano para no repetir comparaciones.
+     */
+    public function estaActivo(): bool
+    {
+        return $this->estado_carrera === EstadoEstudiante::ACTIVO->value;
+    }
+
+    public function estaGraduado(): bool
+    {
+        return $this->estado_carrera === EstadoEstudiante::GRADUADO->value;
+    }
+
+    public function puedeReactivarse(): bool
+    {
+        return $this->estado_carrera === EstadoEstudiante::CAMBIO_VOLUNTARIO->value;
+    }
+
+    /**
+     * Expedientes derivados (si este expediente fue el origen de un cambio).
+     */
+    public function derivados(): HasMany
+    {
+        return $this->hasMany(Alumnos::class, 'id_alumno_origen', 'alumno_id');
+    }
+
+    /**
+     * Documentos del expediente. Si este expediente nació de un cambio,
+     * usa los documentos del expediente origen.
+     */
+    public function documentosEfectivos(): HasOne
+    {
+        // Si tiene documentos propios, los usa; si no, los del origen.
+        // Esto se resuelve en PHP porque Eloquent no hace fallback condicional.
+        return $this->hasOne(AlumnoDocumentos::class, 'id_alumno', 'alumno_id');
+    }
+
+    /**
+     * Helper: devuelve los documentos (propios o heredados del origen).
+     */
+    public function getDocumentosHeredadosAttribute(): ?AlumnoDocumentos
+    {
+        // Caso 1: el expediente tiene documentos propios → los devuelve
+        if ($this->documentos) {
+            return $this->documentos;
+        }
+
+        // Caso 2: el expediente es derivado → busca los del origen
+        if ($this->id_alumno_origen) {
+            return AlumnoDocumentos::where('id_alumno', $this->id_alumno_origen)->first();
+        }
+
+        // Caso 3: sin documentos propios ni origen → null
+        return null;
+    }
+
+    /**
+     * Devuelve el expediente activo del usuario (o el graduado único si no hay activo).
+     */
+    public static function activoDeUsuario(int $userId): ?self
+    {
+        // 1. Prioridad: expediente en sesión
+        $alumnoIdSesion = session('alumno_id_activo');
+        if ($alumnoIdSesion) {
+            $alumno = self::where('alumno_id', $alumnoIdSesion)
+                ->where('id_usuario', $userId)
+                ->first();
+            if ($alumno) {
+                return $alumno;
+            }
+        }
+
+        // 2. Fallback: el ACTIVO
+        $activo = self::where('id_usuario', $userId)
+            ->where('estado_carrera', EstadoEstudiante::ACTIVO->value)
+            ->first();
+
+        if ($activo) {
+            return $activo;
+        }
+
+        // 3. Si no hay ACTIVO, y hay un único GRADUADO, devolverlo
+        $graduados = self::where('id_usuario', $userId)
+            ->where('estado_carrera', EstadoEstudiante::GRADUADO->value)
+            ->get();
+
+        return $graduados->count() === 1 ? $graduados->first() : null;
+    }
+
+    /**
+     * Scope: expedientes activos.
+     */
+    public function scopeActivos(Builder $query): Builder
+    {
+        return $query->where('estado_carrera', EstadoEstudiante::ACTIVO->value);
+    }
+
+    /**
+     * Scope: expediente activo de un usuario (debe haber máximo uno).
+     */
+    public function scopeActivoDeUsuario(Builder $query, int $userId): Builder
+    {
+        return $query->where('id_usuario', $userId)->where('estado_carrera', EstadoEstudiante::ACTIVO->value);
+    }
+
+
     public function scopePendientes(Builder $query): Builder
     {
         return $query->where('estado_carrera', 'PENDIENTE');
@@ -118,7 +248,7 @@ class Alumnos extends Model
 
     public function getFotoExpedienteUrlAttribute(): ?string
     {
-        if (!$this->documentos?->fotografia_personal) {
+        if (!$this->documentos_heredados?->fotografia_personal) {
             return null;
         }
 

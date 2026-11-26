@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\AdminAcademico;
 
-use App\Actions\AdminAcademic\ProcesarCambioCarreraAction;
+use App\Actions\AdminAcademic\RegistrarCambioCarreraAction;
 use App\Enums\EstadoCiclo;
 use App\Models\Academico\CicloLectivo;
 use App\Models\Estudiante\Alumnos;
@@ -21,7 +21,7 @@ use Illuminate\Support\Collection;
 class CambioCarreraController extends Controller
 {
     public function __construct(
-        protected ProcesarCambioCarreraAction $procesarCambio
+        protected RegistrarCambioCarreraAction $cambiarCarrera,
     ) {}
 
     /**
@@ -49,11 +49,11 @@ class CambioCarreraController extends Controller
 
             $materiasEnCurso = $this->materiasEnCurso($alumnoSeleccionado);
 
-            $esGraduado = $this->procesarCambio->esGraduado($alumnoSeleccionado);
+            $esGraduado = $this->cambiarCarrera->esGraduado($alumnoSeleccionado);
 
             $materiasReprobadas = $this->obtenerMateriasReprobadasTresVeces($alumnoSeleccionado);
 
-            $carreras = ProcesarCambioCarreraAction::carrerasPermitidas(
+            $carreras = RegistrarCambioCarreraAction::carrerasPermitidas(
                 $alumnoSeleccionado,
                 $motivo,
                 $materiaReprobadaId ? (int) $materiaReprobadaId : null
@@ -64,6 +64,7 @@ class CambioCarreraController extends Controller
 
         // Listado/buscador de alumnos
         $alumnos = Alumnos::with('usuario', 'carrera')
+            ->whereIn('estado_carrera', ['ACTIVO', 'GRADUADO'])
             ->when($request->filled('q'), function ($q) use ($request) {
                 $q->whereHas('usuario', function ($sub) use ($request) {
                     $sub->where('name', 'ilike', "%{$request->q}%")
@@ -103,17 +104,12 @@ class CambioCarreraController extends Controller
             'motivo'               => ['required', 'in:VOLUNTARIO,FORZOSO_REPROBACION'],
             'materia_reprobada_id' => ['nullable', 'exists:materias,materia_id', 'required_if:motivo,FORZOSO_REPROBACION'],
             'es_graduado'          => ['nullable', 'boolean'],
-        ], [
-            'alumno_id.required'               => 'Seleccione un estudiante.',
-            'nueva_carrera_id.required'        => 'Seleccione la nueva carrera.',
-            'motivo.required'                  => 'Indique el motivo del cambio.',
-            'materia_reprobada_id.required_if' => 'Debe seleccionar la materia reprobada en 3ra matrícula.',
         ]);
 
         $alumno = Alumnos::findOrFail($validated['alumno_id']);
 
         try {
-            $resultado = $this->procesarCambio->execute(
+            $resultado = $this->cambiarCarrera->execute(
                 alumno:             $alumno,
                 nuevaCarreraId:     (int) $validated['nueva_carrera_id'],
                 motivo:             $validated['motivo'],
@@ -122,13 +118,11 @@ class CambioCarreraController extends Controller
             );
 
             return redirect()
-                ->route('admin-academico.cambio-carrera', ['alumno_id' => $alumno->alumno_id])
-                ->with('success', $resultado['message']);
+                ->route('admin-academico.cambio-carrera', ['alumno_id' => $resultado['nuevo_alumno']->alumno_id])
+                ->with('success', $resultado['message'] . ' Código nuevo: ' . $resultado['nuevo_alumno']->codigo_estudiante);
         } catch (\Throwable $e) {
             report($e);
-            return back()
-                ->withInput()
-                ->with('error', 'No se pudo procesar el cambio: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'No se pudo procesar el cambio: ' . $e->getMessage());
         }
     }
     

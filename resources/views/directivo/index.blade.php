@@ -5,9 +5,18 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="container-fluid px-4 mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-dark"><i class="bi bi-graph-up-arrow text-danger me-2"></i> DASHBOARD EJECUTIVO DE INGRESOS</h2>
-        <span class="badge bg-secondary">Modo Consulta Institucional</span>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <h2 class="fw-bold text-dark mb-0">
+            <i class="bi bi-graph-up-arrow text-danger me-2"></i> DASHBOARD EJECUTIVO DE INGRESOS
+        </h2>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-secondary py-2 px-3">Modo Consulta Institucional</span>
+            <a href="{{ route('directivo.dashboard.pdf', request()->query()) }}"
+            class="btn btn-danger btn-sm fw-bold shadow-sm d-inline-flex align-items-center gap-1">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span>Descargar PDF</span>
+            </a>
+        </div>
     </div>
 
     <!-- ================= FILTROS DE BÚSQUEDA modificado 17/11 ================= -->

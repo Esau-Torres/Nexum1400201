@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use App\Models\Estudiante\Alumnos;
 
 class HomeController extends Controller
 {
@@ -13,32 +14,35 @@ class HomeController extends Controller
     {
         $usuario = auth()->user();
 
-        // Redirecciones según el rol
         if ($usuario->hasRole('DOCENTE')) {
             return redirect()->route('docente.home');
         }
 
         $relations = ['roles', 'regionalactivo'];
-
         $metricas = null;
+        $alumnoActivo = null;
 
         if ($usuario->hasRole('ESTUDIANTE')) {
-            $relations[] = 'alumno.carrera.facultad';
-            $relations[] = 'alumno.documentos';
-            $relations[] = 'alumno.beneficioCicloActual.cicloLectivo';
+            $alumnoActivo = Alumnos::activoDeUsuario($usuario->id);
+
+            if ($alumnoActivo) {
+                $alumnoActivo->load([
+                    'carrera.facultad',
+                    'documentos',
+                    'beneficioCicloActual.cicloLectivo',
+                ]);
+
+                $metricas = $this->calcularMetricasAcademicas($alumnoActivo->alumno_id);
+            }
 
             $usuario->load($relations);
 
-            if ($usuario->alumno) {
-                $metricas = $this->calcularMetricasAcademicas($usuario->alumno->alumno_id);
-            }
-
-            return view('home', compact('usuario', 'metricas'));
+            return view('home', compact('usuario', 'metricas', 'alumnoActivo'));
         }
 
         $usuario->load($relations);
 
-        return view('home', compact('usuario', 'metricas'));
+        return view('home', compact('usuario', 'metricas', 'alumnoActivo'));
     }
 
     /**

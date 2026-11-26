@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Actions\Student\ObtenerPensumAlumnoAction;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf; // Requiere barryvdh/laravel-dompdf
+use App\Models\Estudiante\Alumnos;
 
 class PensumController extends Controller
 {
     public function index(Request $request, ObtenerPensumAlumnoAction $action)
     {
-        $alumno = $request->user()->alumno;
+        $alumno = Alumnos::activoDeUsuario($request->user()->id);
         
         $pensumPorCiclos = $action->execute($alumno);
 
@@ -20,7 +21,7 @@ class PensumController extends Controller
 
     public function descargarPdf(Request $request, ObtenerPensumAlumnoAction $action)
     {
-        $alumno = $request->user()->alumno;
+        $alumno = Alumnos::activoDeUsuario($request->user()->id);
         $pensumPorCiclos = $action->execute($alumno);
 
         $pdf = Pdf::loadView( 'student.pdf', compact('pensumPorCiclos', 'alumno') )

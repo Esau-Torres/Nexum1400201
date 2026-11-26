@@ -80,7 +80,7 @@
                 {{-- ========================================================================= --}}
                 {{-- 1. VISTA EXCLUSIVA ESTUDIANTE --}}
                 {{-- ========================================================================= --}}
-                @if($usuario->hasRole('ESTUDIANTE') && $usuario->alumno)
+                @if($usuario->hasRole('ESTUDIANTE') && $alumnoActivo)
 
                     {{-- LÓGICA DE VALIDACIÓN DE SOLVENCIA ESTRICTA (INTACTA) --}}
                     @php
@@ -96,7 +96,7 @@
                             // Buscamos TODOS los cargos pendientes
                             $cargosPendientes = \Illuminate\Support\Facades\DB::table('cargo_estudiante')
                                 ->join('concepto_pago', 'cargo_estudiante.id_concepto', '=', 'concepto_pago.concepto_pago_id')
-                                ->where('cargo_estudiante.id_alumno', $usuario->alumno->alumno_id)
+                                ->where('cargo_estudiante.id_alumno', $alumnoActivo->alumno_id)
                                 ->where('cargo_estudiante.estado_cargo', 'PENDIENTE')
                                 ->select('cargo_estudiante.*', 'concepto_pago.nombre as nombre_arancel')
                                 ->orderBy('cargo_estudiante.fecha_vencimiento', 'asc')
@@ -234,7 +234,7 @@
                                     </div>
                                     <div class="text-center text-md-start">
                                         <h3 class="fw-bold mb-1 text-slate-800">{{ $usuario->name }}</h3>
-                                        <p class="text-slate-500 mb-3">{{ $usuario->alumno->correo_institucional ?? $usuario->email }}</p>
+                                        <p class="text-slate-500 mb-3">{{ $alumnoActivo->correo_institucional ?? $usuario->email }}</p>
 
                                         <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2">
                                             <span class="badge bg-danger text-white flat-badge">
@@ -311,7 +311,7 @@
                                         <div class="flat-info-box">
                                             <span class="d-block text-slate-500 small fw-bold text-uppercase mb-1">Facultad</span>
                                             <span class="d-block fs-6 text-slate-800 fw-medium">
-                                                {{ $usuario->alumno->carrera->facultad->nombre ?? 'No registrada' }}
+                                                {{ $alumnoActivo->carrera->facultad->nombre ?? 'No registrada' }}
                                             </span>
                                         </div>
                                     </div>
@@ -319,12 +319,12 @@
                                         <div class="flat-info-box">
                                             <span class="d-block text-slate-500 small fw-bold text-uppercase mb-1">Carrera</span>
                                             <span class="d-block fs-6 text-slate-800 fw-medium">
-                                                {{ $usuario->alumno->carrera->nombre ?? 'No registrada' }}
+                                                {{ $alumnoActivo->carrera->nombre ?? 'No registrada' }}
                                             </span>
                                         </div>
                                     </div>
 
-                                    @php $beneficioActivo = $usuario->alumno->beneficioCicloActual; @endphp
+                                    @php $beneficioActivo = $alumnoActivo->beneficioCicloActual; @endphp
                                     <div class="col-md-4">
                                         <div class="flat-info-box">
                                             <span class="d-block text-slate-500 small fw-bold text-uppercase mb-1">Condición Beca</span>
@@ -344,7 +344,7 @@
                                         <div class="flat-info-box">
                                             <span class="d-block text-slate-500 small fw-bold text-uppercase mb-1">Código Estudiante</span>
                                             <span class="d-block fs-6 text-slate-800 fw-bold font-monospace">
-                                                {{ $usuario->alumno->codigo_estudiante }}
+                                                {{ $alumnoActivo->codigo_estudiante }}
                                             </span>
                                             <span class="d-block text-slate-500 small mt-1">
                                                 Sede: {{ $usuario->regionalactivo->sede ?? 'No asignada' }}
@@ -355,19 +355,19 @@
                                     <div class="col-md-4">
                                         <div class="flat-info-box">
                                             <span class="d-block text-slate-500 small fw-bold text-uppercase mb-1">Estado Expediente</span>
-                                            @if($usuario->alumno->documentos)
-                                                @if($usuario->alumno->documentos->estado_documentos === 'APROBADO')
+                                            @if($alumnoActivo->documentos_heredados)
+                                                @if($alumnoActivo->documentos_heredados->estado_documentos === 'APROBADO')
                                                     <span class="d-block text-success fw-medium fs-6">Documentos Aprobados</span>
-                                                @elseif($usuario->alumno->documentos->estado_documentos === 'PENDIENTE')
+                                                @elseif($alumnoActivo->documentos_heredados->estado_documentos === 'PENDIENTE')
                                                     <span class="d-block text-warning fw-medium fs-6">En Revisión</span>
                                                 @else
-                                                    <span class="d-block text-danger fw-medium fs-6">{{ $usuario->alumno->documentos->estado_documentos }}</span>
+                                                    <span class="d-block text-danger fw-medium fs-6">{{ $alumnoActivo->documentos_heredados->estado_documentos }}</span>
                                                 @endif
                                             @else
                                                 <span class="d-block text-slate-800 fw-medium fs-6">Sin Cargar</span>
                                             @endif
 
-                                            <span class="d-block text-slate-500 small mt-1">Carrera: {{ ucfirst(strtolower($usuario->alumno->estado_carrera)) }}</span>
+                                            <span class="d-block text-slate-500 small mt-1">Carrera: {{ ucfirst(strtolower($alumnoActivo->estado_carrera)) }}</span>
                                         </div>
                                     </div>
                                 </div>

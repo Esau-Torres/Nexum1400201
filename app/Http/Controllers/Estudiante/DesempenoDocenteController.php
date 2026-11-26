@@ -8,13 +8,14 @@ use App\Models\Estudiante\DetalleInscripcion;
 use App\Models\Estudiante\Inscripcion;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Models\Estudiante\Alumnos;
 
 class DesempenoDocenteController extends Controller
 {
     public function index(Request $request): View
     {
         $user = $request->user();
-        $alumno = $user->alumno;
+        $alumno = Alumnos::activoDeUsuario($user->id);
 
         if (!$alumno) {
             abort(403, 'No tenés perfil de alumno.');

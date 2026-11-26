@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Estudiante; // ¡El namespace cambió a Estudiant
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Adfinanciero\ConceptoPago;
 use App\Models\Adfinanciero\CicloLectivo;
 use App\Models\Adfinanciero\CicloArancelPeriodo;
 use App\Models\Estudiante\CargoEstudiante;
+use App\Models\Estudiante\Alumnos;
 
 class EstadoCuentaController extends Controller
 {
@@ -16,19 +18,19 @@ class EstadoCuentaController extends Controller
     public function cargosIndex(Request $request)
     {
         // 1. Obtenemos el ID del alumno logueado
-        $alumnoId = \Illuminate\Support\Facades\Auth::user()->alumno->alumno_id ?? null;
+        $alumnoId = Alumnos::activoDeUsuario(Auth::id())?->alumno_id;
 
         // --- NUEVA LÓGICA DE SEGURIDAD ABSOLUTA (BLOQUEOS Y AUTOPAGO) ---
         $bloquearPantalla = false;
         $mesPrimeraCuota = '';
         $tipoAutopayServidor = null;
 
-        $cicloActivo = \Illuminate\Support\Facades\DB::table('ciclo_lectivo')->where('estado', 'ACTIVO')->first();
+        $cicloActivo = DB::table('ciclo_lectivo')->where('estado', 'ACTIVO')->first();
 
         if ($alumnoId && $cicloActivo) {
 
             // REGLA A: ¿Tiene deudas de ciclos pasados?
-            $tieneDeudaAnterior = \Illuminate\Support\Facades\DB::table('cargo_estudiante')
+            $tieneDeudaAnterior = DB::table('cargo_estudiante')
                 ->where('id_alumno', $alumnoId)
                 ->where('id_ciclo_lectivo', '!=', $cicloActivo->ciclo_lectivo_id)
                 ->where('estado_cargo', 'PENDIENTE')
@@ -160,7 +162,7 @@ class EstadoCuentaController extends Controller
             'cargos_ids.*' => 'exists:cargo_estudiante,cargo_id'
         ]);
 
-        $alumnoId = \Illuminate\Support\Facades\Auth::user()->alumno->alumno_id ?? null;
+        $alumnoId = Alumnos::activoDeUsuario(Auth::id())?->alumno_id;
 
         if (!$alumnoId) {
             return back()->with('error', 'No se encontró la información del estudiante.');
@@ -275,7 +277,9 @@ class EstadoCuentaController extends Controller
                 $correoEstudiante = $usuario->email;
 
                 $nombreEstudiante = $usuario->name;
-                $codigoEstudiante = $usuario->alumno->codigo_estudiante ?? 'N/A';
+
+                $alumnoActivo = Alumnos::activoDeUsuario($usuario->id);
+                $codigoEstudiante = $alumnoActivo?->codigo_estudiante ?? 'N/A';
 
                 $pagoParaCorreo = \App\Models\Adfinanciero\Pago::with([
                     'detalles.concepto',

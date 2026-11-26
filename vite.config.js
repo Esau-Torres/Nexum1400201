@@ -12,6 +12,7 @@ export default defineConfig({
                 'resources/css/evaluaciones-docentes.css',
                 'resources/css/reglas-academicas.css',
                 'resources/css/notas-estudiante.css',
+                'resources/css/correccion-notas.css',
                 'resources/css/roles-permisos.css',
                 'resources/css/profile.css',
                 'resources/css/toast.css',

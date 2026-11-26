@@ -7,12 +7,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Estudiante\DetalleInscripcion;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use App\Models\Estudiante\Alumnos;
 
 class RetirarMateriaController extends Controller
 {
     public function retirar(Request $request, int $detalleId, RetirarMateriaAction $action)
     {
-        $alumno = $request->user()->alumno;
+        $alumno = Alumnos::activoDeUsuario($request->user()->id);
+        
         abort_if(!$alumno, 403);
 
         $data = $request->validate([

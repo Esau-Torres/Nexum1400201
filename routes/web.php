@@ -8,6 +8,7 @@ use App\Http\Controllers\Cajero\CajeroController;
 use App\Http\Controllers\Directivo\DirectivoController;
 use App\Http\Controllers\Estudiante\CarnetController;
 use App\Http\Controllers\Estudiante\FotoPerfilController;
+use App\Models\Estudiante\Alumnos;
 
 // ============================================
 // RUTAS PÚBLICAS
@@ -30,11 +31,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
 
     // estudiante
-    Route::get('/profile', function () { $user = auth()->user();
-        if ($user->alumno) {
-            $user->alumno->load('documentos', 'carrera.facultad');
+    Route::get('/profile', function () {
+        $user = auth()->user();
+        $alumnoActivo = Alumnos::activoDeUsuario($user->id);
+
+        if ($alumnoActivo) {
+            $alumnoActivo->load(['carrera.facultad', 'documentos']);
         }
-        return view('profile'); })->name('profile');
+
+        $alumno = $alumnoActivo;
+
+
+        return view('profile', compact('alumnoActivo',  'alumno'));
+    })->name('profile');
     Route::get('/mi-foto', [FotoPerfilController::class, 'show'])->name('estudiante.foto');
     Route::post('/profile/carnet', [CarnetController::class, 'store'])->name('estudiante.carnet.store');
     Route::get('/user/profile/check-email', [CarnetController::class, 'checkEmail'])->name('user-profile.check-email')->middleware('throttle:30,1');

@@ -19,6 +19,8 @@ use App\Rules\Graduacion\PuedeReprogramarDefensaRule;
 use App\Rules\Graduacion\ProcesoNoAgotadoRule;
 use App\Rules\Graduacion\ArancelMatriculaPreEspecializacionPagadoRule;
 use App\Rules\Graduacion\CuotasPreEspecializacionCompletasRule;
+use Illuminate\Support\Facades\Log;
+use App\Enums\EstadoEstudiante;
 
 class ActualizarEstadoProcesoGraduacionAction
 {
@@ -200,6 +202,8 @@ class ActualizarEstadoProcesoGraduacionAction
             if (!$proceso->id_pago_derechos_grado) {
                 $proceso->id_pago_derechos_grado = $this->buscarPagoDerechosGrado($proceso);
             }
+
+            $this->marcarAlumnoComoGraduado($proceso);
         }
 
         // ─────────────────────────────────────────────
@@ -302,5 +306,38 @@ class ActualizarEstadoProcesoGraduacionAction
             $grupo->estado_grupo = 'CANCELADO';
             $grupo->save();
         }
+    }
+
+    /**
+     * Marca el expediente del alumno como GRADUADO cuando su proceso
+     * de graduación llega a ese estado.
+     */
+    private function marcarAlumnoComoGraduado(ProcesoGraduacion $proceso): void
+    {
+        $alumno = $proceso->alumno;
+
+        if (!$alumno) {
+            return;
+        }
+
+        // Evitar degradar un expediente que ya está GRADUADO
+        if ($alumno->estado_carrera === EstadoEstudiante::GRADUADO->value) {
+            return;
+        }
+
+        // Solo marcar como GRADUADO si el expediente está ACTIVO
+        // (si está CAMBIO_VOLUNTARIO o CAMBIO_REPROBATORIO, no se toca)
+        if ($alumno->estado_carrera !== EstadoEstudiante::ACTIVO->value) {
+            return;
+        }
+
+        $alumno->update(['estado_carrera' => EstadoEstudiante::GRADUADO->value]);
+
+        Log::info('Expediente marcado como GRADUADO', [
+            'alumno_id'   => $alumno->alumno_id,
+            'id_usuario'  => $alumno->id_usuario,
+            'proceso_id'  => $proceso->proceso_id,
+            'fecha'       => now()->toDateTimeString(),
+        ]);
     }
 }
