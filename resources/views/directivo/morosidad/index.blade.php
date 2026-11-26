@@ -5,12 +5,19 @@
 
 <div class="container-fluid px-4 py-4" style="background-color: #f4f6f9; min-height: 100vh;">
     <!-- Encabezado -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-center gap-3 mb-4">
         <div class="d-flex align-items-center">
             <i class="bi bi-wallet2 text-danger fs-3 me-3"></i>
-            <h2 class="fw-bold mb-0 text-dark text-uppercase" style="letter-spacing: 0.5px;"> DASHBOARD MOROSIDAD Y CUENTAS POR COBRAR</h2>
+            <h2 class="fw-bold mb-0 text-dark text-uppercase" style="letter-spacing: 0.5px;">DASHBOARD MOROSIDAD Y CUENTAS POR COBRAR</h2>
         </div>
-        <span class="badge bg-secondary px-3 py-2 rounded-2">Modo Consulta Institucional</span>
+        <div class="d-flex align-items-center gap-2 ms-auto flex-shrink-0">
+            <span class="badge bg-secondary px-3 py-2 rounded-2 text-nowrap">Modo Consulta Institucional</span>
+            <a href="{{ route('directivo.morosidad.pdf', request()->query()) }}"
+               class="btn btn-danger btn-sm fw-bold shadow-sm d-inline-flex align-items-center gap-1 text-nowrap">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span>Descargar PDF</span>
+            </a>
+        </div>
     </div>
 
     <!-- ================= FILTROS cambio 17/11================= -->

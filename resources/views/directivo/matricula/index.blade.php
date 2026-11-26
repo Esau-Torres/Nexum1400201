@@ -5,16 +5,21 @@
 
 <div class="container-fluid px-4 mt-4 mb-5">
     <!-- ================= ENCABEZADO ================= -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+    <div class="d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-center gap-3 mb-4">
         <div class="d-flex align-items-center">
             <h3 class="fw-bolder mb-0 text-uppercase d-flex align-items-center" style="color: #2c3e50; letter-spacing: 0.5px;">
                 <i class="bi bi-person-badge text-danger me-3"></i> DASHBOARD DE ANÁLISIS DE POBLACIÓN
             </h3>
         </div>
-        <div class="mt-3 mt-md-0">
-            <span class="badge bg-secondary text-white px-3 py-2 rounded-2 fw-semibold">
+        <div class="d-flex align-items-center gap-2 ms-auto flex-shrink-0">
+            <span class="badge bg-secondary text-white px-3 py-2 rounded-2 fw-semibold text-nowrap">
                 Modo Consulta Institucional
             </span>
+            <a href="{{ route('directivo.matricula.pdf', request()->query()) }}"
+               class="btn btn-danger btn-sm fw-bold shadow-sm d-inline-flex align-items-center gap-1 text-nowrap">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span>Descargar PDF</span>
+            </a>
         </div>
     </div>
 

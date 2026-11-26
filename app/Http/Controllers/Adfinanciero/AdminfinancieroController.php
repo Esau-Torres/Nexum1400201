@@ -422,7 +422,7 @@ class AdminfinancieroController extends Controller
                 ->where('cargo_estudiante.id_ciclo_lectivo', $cicloActivo->ciclo_lectivo_id);
             });
 
-            // REGLA 2: Excluir alumnos MOROSOS de ciclos ANTERIORES (Magia para ocultar a Melisa)
+            // REGLA 2: Excluir alumnos MOROSOS de ciclos ANTERIORES
             $query->whereNotExists(function($q) use ($cicloActivo) {
                 $q->select(\Illuminate\Support\Facades\DB::raw(1))
                 ->from('cargo_estudiante')
@@ -430,6 +430,8 @@ class AdminfinancieroController extends Controller
                 ->where('cargo_estudiante.id_ciclo_lectivo', '!=', $cicloActivo->ciclo_lectivo_id) // Que el ciclo sea distinto al actual
                 ->where('cargo_estudiante.estado_cargo', 'PENDIENTE'); // Y que la deuda siga pendiente
             });
+
+            $this->aplicarCandadoAcademicoCargos($query);
         }
 
         if ($search) {
@@ -464,6 +466,39 @@ class AdminfinancieroController extends Controller
 
             if (!$alumno || !$cicloActivo) {
                 return redirect()->back()->with('error', 'Error: No se encontró al estudiante o no hay un ciclo activo.');
+            }
+
+            // CANDADO DE SEGURIDAD: Estado del alumno, egreso y materias pendientes
+            if ($alumno->estado_carrera !== 'ACTIVO') {
+                return redirect()->back()->with('error', 'No se pueden generar cargos: el estudiante no está en estado ACTIVO.');
+            }
+
+            $esEgresado = DB::table('requisitos_egreso')
+                ->where('id_alumno', $alumno->alumno_id)
+                ->where('estado_egreso', 'EGRESADO')
+                ->exists();
+
+            if ($esEgresado) {
+                return redirect()->back()->with('error', 'No se pueden generar cargos: el estudiante ya está registrado como EGRESADO.');
+            }
+
+            $tieneMateriasPendientes = DB::table('pensum as p')
+                ->join('pensum_materia as pm', 'pm.id_pensum', '=', 'p.pensum_id')
+                ->where('p.id_carrera', $alumno->id_carrera)
+                ->where('p.estado', 'ACTIVO')
+                ->whereNotExists(function ($sub) use ($alumno) {
+                    $sub->select(DB::raw(1))
+                        ->from('inscripciones as i')
+                        ->join('detalle_inscripcion as di', 'di.id_inscripcion', '=', 'i.inscripcion_id')
+                        ->join('seccion as s', 's.seccion_id', '=', 'di.id_seccion')
+                        ->where('i.id_alumno', $alumno->alumno_id)
+                        ->whereColumn('s.id_materia', 'pm.id_materia')
+                        ->where('di.estado_materia', 'APROBADA');
+                })
+                ->exists();
+
+            if (!$tieneMateriasPendientes) {
+                return redirect()->back()->with('error', 'No se pueden generar cargos: el estudiante ya aprobó todas las materias de su pensum.');
             }
 
             // 2. OBTENEMOS LOS ARANCELES BASE (Incluyendo el Laboratorio)
@@ -703,7 +738,6 @@ class AdminfinancieroController extends Controller
         }
     }
 
-
     // NUEVA FUNCIÓN: GENERACIÓN MASIVA PARA TODOS LOS ESTUDIANTES PENDIENTES
     public function cargosStoreMasivo(Request $request)
     {
@@ -737,6 +771,11 @@ class AdminfinancieroController extends Controller
                     ->where('cargo_estudiante.estado_cargo', 'PENDIENTE');
                 })
                 ->get();
+
+            // REGLAS 3 y 4: Excluir egresados y alumnos con pensum 100% aprobado
+            $this->aplicarCandadoAcademicoCargos($queryAlumnos);
+
+            $alumnos = $queryAlumnos->get();
 
             if ($alumnos->isEmpty()) {
                 return redirect()->back()->with('error', 'No hay estudiantes pendientes y solventes para generar cargos en este ciclo.');
@@ -923,4 +962,33 @@ class AdminfinancieroController extends Controller
         }
     }
 
+    // vista de generar deuda, no genera si tiene materia pendiente
+    private function aplicarCandadoAcademicoCargos($query)
+    {
+        return $query
+            // REGLA 3: Excluir alumnos que ya están marcados como EGRESADO en requisitos_egreso
+            ->whereNotExists(function ($q) {
+                $q->select(\Illuminate\Support\Facades\DB::raw(1))
+                    ->from('requisitos_egreso as re')
+                    ->whereColumn('re.id_alumno', 'alumnos.alumno_id')
+                    ->where('re.estado_egreso', 'EGRESADO');
+            })
+            // REGLA 4: Incluir solo si tiene al menos 1 materia del pensum ACTIVO que NO esté APROBADA
+            ->whereExists(function ($q) {
+                $q->select(\Illuminate\Support\Facades\DB::raw(1))
+                    ->from('pensum as p')
+                    ->join('pensum_materia as pm', 'pm.id_pensum', '=', 'p.pensum_id')
+                    ->whereColumn('p.id_carrera', 'alumnos.id_carrera')
+                    ->where('p.estado', 'ACTIVO')
+                    ->whereNotExists(function ($sub) {
+                        $sub->select(\Illuminate\Support\Facades\DB::raw(1))
+                            ->from('inscripciones as i')
+                            ->join('detalle_inscripcion as di', 'di.id_inscripcion', '=', 'i.inscripcion_id')
+                            ->join('seccion as s', 's.seccion_id', '=', 'di.id_seccion')
+                            ->whereColumn('i.id_alumno', 'alumnos.alumno_id')
+                            ->whereColumn('s.id_materia', 'pm.id_materia')
+                            ->where('di.estado_materia', 'APROBADA');
+                    });
+            });
+    }
 }

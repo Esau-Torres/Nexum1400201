@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\Adfinanciero\Pago;
+use Barryvdh\DomPDF\Facade\Pdf; //metodo para el pdf
 
 class DirectivoController extends Controller
 {
@@ -209,6 +210,160 @@ class DirectivoController extends Controller
         ));
     }
 
+    // Descargar Informe PDF del Dashboard Ejecutivo de Ingresos
+    public function pdfIngresos(Request $request)
+    {
+        $ciclos = DB::table('ciclo_lectivo')->orderBy('ciclo_lectivo_id', 'desc')->get();
+
+        $cicloActivo = $ciclos->whereIn('estado', ['ACTIVO', 'MATRICULA_ABIERTA', 'CONFIGURACION'])->first()
+            ?? $ciclos->first();
+
+        $cicloId = $request->input('ciclo_id') ?: $cicloActivo?->ciclo_lectivo_id;
+        $mesSeleccionado = $request->input('mes');
+        $facultadSeleccionada = $request->input('facultad_id');
+        $carreraSeleccionada = $request->input('carrera_id');
+
+        $cicloSeleccionadoObj = $ciclos->firstWhere('ciclo_lectivo_id', $cicloId);
+        $anioSeleccionado = $cicloSeleccionadoObj ? $cicloSeleccionadoObj->anio : date('Y');
+
+        // Nombres legibles de los filtros para mostrarlos en el encabezado del PDF
+        $nombreFacultad = $facultadSeleccionada
+            ? DB::table('facultades')->where('facultad_id', $facultadSeleccionada)->value('nombre')
+            : 'Todas las Facultades';
+
+        $nombreCarrera = $carreraSeleccionada
+            ? DB::table('carreras')->where('carrera_id', $carreraSeleccionada)->value('nombre')
+            : 'Todas las Carreras';
+
+        // Misma consulta base de tu dashboard
+        $queryBase = DB::table('detalle_pago')
+            ->join('pago', 'detalle_pago.id_pago', '=', 'pago.pago_id')
+            ->join('concepto_pago', 'detalle_pago.id_concepto', '=', 'concepto_pago.concepto_pago_id')
+            ->leftJoin('cargo_estudiante', 'detalle_pago.id_cargo', '=', 'cargo_estudiante.cargo_id')
+            ->join('alumnos', 'pago.id_alumno', '=', 'alumnos.alumno_id')
+            ->leftJoin('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id')
+            ->leftJoin('facultades', 'carreras.id_facultad', '=', 'facultades.facultad_id')
+            ->where(function ($q) use ($cicloId, $mesSeleccionado, $anioSeleccionado, $cicloSeleccionadoObj) {
+                $q->where('cargo_estudiante.id_ciclo_lectivo', $cicloId);
+
+                $q->orWhere(function ($subQ) use ($mesSeleccionado, $anioSeleccionado, $cicloSeleccionadoObj) {
+                    $subQ->whereNull('detalle_pago.id_cargo');
+
+                    if ($mesSeleccionado) {
+                        $subQ->whereMonth('pago.fecha_pago', $mesSeleccionado);
+                    } else {
+                        if ($cicloSeleccionadoObj) {
+                            $nombreCiclo = strtoupper($cicloSeleccionadoObj->nombre_ciclo);
+                            $esCiclo2 = str_contains($nombreCiclo, '02') || str_contains($nombreCiclo, ' 2') || str_contains($nombreCiclo, 'II');
+
+                            $mesesPermitidos = $esCiclo2 ? [7, 8, 9, 10, 11, 12] : [1, 2, 3, 4, 5, 6];
+
+                            $subQ->whereIn(DB::raw('EXTRACT(MONTH FROM pago.fecha_pago)'), $mesesPermitidos)
+                                 ->whereYear('pago.fecha_pago', $anioSeleccionado);
+                        }
+                    }
+                });
+            });
+
+        if ($anioSeleccionado) {
+            $queryBase->whereYear('pago.fecha_pago', $anioSeleccionado);
+        }
+
+        if ($mesSeleccionado) {
+            $queryBase->where(function ($q) use ($mesSeleccionado) {
+                $q->whereMonth('pago.fecha_pago', $mesSeleccionado)
+                  ->orWhereNull('detalle_pago.id_cargo');
+            });
+        }
+
+        if ($facultadSeleccionada) {
+            $queryBase->where('facultades.facultad_id', $facultadSeleccionada);
+        }
+
+        if ($carreraSeleccionada) {
+            $queryBase->where('carreras.carrera_id', $carreraSeleccionada);
+        }
+
+        // KPIs
+        $totalIngresos = (clone $queryBase)->sum('detalle_pago.subtotal');
+        $totalTransacciones = (clone $queryBase)->distinct('pago.pago_id')->count('pago.pago_id');
+        $ingresoPromedio = $totalTransacciones > 0 ? ($totalIngresos / $totalTransacciones) : 0;
+
+        // Comparativa vs ciclo anterior
+        $cicloAnterior = $cicloId
+            ? DB::table('ciclo_lectivo')
+                ->where('ciclo_lectivo_id', '<', $cicloId)
+                ->orderBy('ciclo_lectivo_id', 'desc')
+                ->first()
+            : null;
+
+        $ingresosAnterior = 0;
+        $transaccionesAnterior = 0;
+        $promedioAnterior = 0;
+
+        if ($cicloAnterior) {
+            $queryAnterior = DB::table('detalle_pago')
+                ->join('pago', 'detalle_pago.id_pago', '=', 'pago.pago_id')
+                ->leftJoin('cargo_estudiante', 'detalle_pago.id_cargo', '=', 'cargo_estudiante.cargo_id')
+                ->where('cargo_estudiante.id_ciclo_lectivo', $cicloAnterior->ciclo_lectivo_id)
+                ->whereYear('pago.fecha_pago', $cicloAnterior->anio);
+
+            $ingresosAnterior = $queryAnterior->sum('detalle_pago.subtotal');
+            $transaccionesAnterior = $queryAnterior->count('*');
+            $promedioAnterior = $transaccionesAnterior > 0 ? ($ingresosAnterior / $transaccionesAnterior) : 0;
+        }
+
+        $difIngresos = $totalIngresos - $ingresosAnterior;
+        $difTransacciones = $totalTransacciones - $transaccionesAnterior;
+        $difPromedio = $ingresoPromedio - $promedioAnterior;
+
+        $porcIngresos = $ingresosAnterior > 0 ? ($difIngresos / $ingresosAnterior) * 100 : ($totalIngresos > 0 ? 100 : 0);
+        $porcTransacciones = $transaccionesAnterior > 0 ? ($difTransacciones / $transaccionesAnterior) * 100 : ($totalTransacciones > 0 ? 100 : 0);
+        $porcPromedio = $promedioAnterior > 0 ? ($difPromedio / $promedioAnterior) * 100 : ($ingresoPromedio > 0 ? 100 : 0);
+
+        // Análisis por carrera y facultad
+        $ingresosPorCarrera = (clone $queryBase)
+            ->select(DB::raw("COALESCE(carreras.nombre, 'Otras Transacciones') as carrera"), DB::raw('SUM(detalle_pago.subtotal) as total'))
+            ->groupBy('carreras.nombre')
+            ->orderByDesc('total')
+            ->get();
+
+        $ingresosPorFacultad = (clone $queryBase)
+            ->select(DB::raw("COALESCE(facultades.nombre, 'Otras Transacciones') as facultad"), DB::raw('SUM(detalle_pago.subtotal) as total'))
+            ->groupBy('facultades.nombre')
+            ->orderByDesc('total')
+            ->get();
+
+        // Evolución mensual
+        $evolucion = (clone $queryBase)
+            ->select(
+                DB::raw("TO_CHAR(pago.fecha_pago, 'YYYY-MM') as mes_anio"),
+                DB::raw('SUM(detalle_pago.subtotal) as total')
+            )
+            ->groupBy('mes_anio')
+            ->orderBy('mes_anio')
+            ->get();
+
+        $fechaGeneracion = Carbon::now()->format('d/m/Y H:i');
+
+        $pdf = Pdf::loadView('directivo.pdf.ingresos', compact(
+            'cicloSeleccionadoObj', 'mesSeleccionado', 'anioSeleccionado',
+            'nombreFacultad', 'nombreCarrera', 'fechaGeneracion',
+            'totalIngresos', 'totalTransacciones', 'ingresoPromedio',
+            'difIngresos', 'porcIngresos',
+            'difTransacciones', 'porcTransacciones',
+            'difPromedio', 'porcPromedio',
+            'ingresosPorCarrera', 'ingresosPorFacultad', 'evolucion'
+        ))
+            ->setPaper('a4', 'portrait')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('isRemoteEnabled', true);
+
+        return $pdf->download('informe_ingresos_' . $anioSeleccionado . '.pdf');
+    }
+
+//-----------------------------------------------------------------------------
+
     //Funcion para la dashboard de matricula
     public function matricula(Request $request)
     {
@@ -398,6 +553,173 @@ class DirectivoController extends Controller
         ));
     }
 
+    // Descargar Informe PDF del Dashboard de Análisis de Población (Matrícula)
+    public function pdfMatricula(Request $request)
+    {
+        // 1. OBTENCIÓN DE FILTROS
+        $cicloId = $request->input('ciclo_id');
+
+        if (!$cicloId) {
+            $cicloId = DB::table('ciclo_lectivo')->where('estado', 'ACTIVO')->value('ciclo_lectivo_id')
+                       ?? DB::table('ciclo_lectivo')->max('ciclo_lectivo_id');
+        }
+
+        $facultadId = $request->input('facultad_id');
+        $carreraId = $request->input('carrera_id');
+
+        $cicloSeleccionadoObj = DB::table('ciclo_lectivo')->where('ciclo_lectivo_id', $cicloId)->first();
+
+        // Nombres legibles de filtros para el encabezado del PDF
+        $nombreFacultad = $facultadId
+            ? DB::table('facultades')->where('facultad_id', $facultadId)->value('nombre')
+            : 'Todas las Facultades';
+
+        $nombreCarrera = $carreraId
+            ? DB::table('carreras')->where('carrera_id', $carreraId)->value('nombre')
+            : 'Todas las Carreras';
+
+        // 2. CONSULTA BASE DE MATRÍCULA (idéntica a tu dashboard)
+        $queryBase = DB::table('inscripciones')
+            ->join('alumnos', 'inscripciones.id_alumno', '=', 'alumnos.alumno_id')
+            ->leftJoin('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id')
+            ->leftJoin('facultades', 'carreras.id_facultad', '=', 'facultades.facultad_id')
+            ->where('inscripciones.id_ciclo_lectivo', $cicloId);
+
+        if ($facultadId) {
+            $queryBase->where('carreras.id_facultad', $facultadId);
+        }
+        if ($carreraId) {
+            $queryBase->where('alumnos.id_carrera', $carreraId);
+        }
+
+        $totalMatriculados = (clone $queryBase)->distinct('inscripciones.id_alumno')->count('inscripciones.id_alumno');
+
+        // 3. INDICADORES
+        $nuevoIngreso = (clone $queryBase)
+            ->whereNotExists(function ($query) use ($cicloId) {
+                $query->select(DB::raw(1))
+                    ->from('inscripciones as i2')
+                    ->whereColumn('i2.id_alumno', 'inscripciones.id_alumno')
+                    ->where('i2.id_ciclo_lectivo', '<', $cicloId);
+            })
+            ->distinct('inscripciones.id_alumno')
+            ->count('inscripciones.id_alumno');
+
+        $alumnosRetenidos = $totalMatriculados - $nuevoIngreso;
+
+        // Variación vs ciclo anterior
+        $varMatricula = '0.0%';
+        $cicloAnterior = DB::table('ciclo_lectivo')
+            ->where('ciclo_lectivo_id', '<', $cicloId)
+            ->orderByDesc('ciclo_lectivo_id')
+            ->first();
+
+        if ($cicloAnterior) {
+            $queryAnterior = DB::table('inscripciones')
+                ->join('alumnos', 'inscripciones.id_alumno', '=', 'alumnos.alumno_id')
+                ->leftJoin('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id')
+                ->where('inscripciones.id_ciclo_lectivo', $cicloAnterior->ciclo_lectivo_id);
+
+            if ($facultadId) $queryAnterior->where('carreras.id_facultad', $facultadId);
+            if ($carreraId) $queryAnterior->where('alumnos.id_carrera', $carreraId);
+
+            $matriculaAnterior = (clone $queryAnterior)->distinct('inscripciones.id_alumno')->count('inscripciones.id_alumno');
+
+            if ($matriculaAnterior > 0) {
+                $porcentaje = (($totalMatriculados - $matriculaAnterior) / $matriculaAnterior) * 100;
+                $signo = $porcentaje > 0 ? '+' : '';
+                $varMatricula = $signo . number_format($porcentaje, 1) . '%';
+            }
+        }
+
+        // Estudiantes Activos e Inactivos (misma lógica de ciclo vivo vs cerrado)
+        $estadosVivos = ['CONFIGURACION', 'MATRICULA_ABIERTA', 'ACTIVO'];
+        $esCicloVivo = ($cicloSeleccionadoObj && in_array($cicloSeleccionadoObj->estado, $estadosVivos));
+
+        $estudiantesActivos = (clone $queryBase)
+            ->where('alumnos.estado_carrera', 'ACTIVO')
+            ->distinct('inscripciones.id_alumno')
+            ->count('inscripciones.id_alumno');
+
+        $estudiantesInactivos = (clone $queryBase)
+            ->where('alumnos.estado_carrera', 'INACTIVO')
+            ->distinct('inscripciones.id_alumno')
+            ->count('inscripciones.id_alumno');
+
+        // Estudiantes Egresados (desde requisitos_egreso)
+        $queryEgresados = DB::table('requisitos_egreso')
+            ->join('alumnos', 'requisitos_egreso.id_alumno', '=', 'alumnos.alumno_id')
+            ->leftJoin('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id')
+            ->where('requisitos_egreso.estado_egreso', 'EGRESADO');
+
+        if ($facultadId) {
+            $queryEgresados->where('carreras.id_facultad', $facultadId);
+        }
+        if ($carreraId) {
+            $queryEgresados->where('alumnos.id_carrera', $carreraId);
+        }
+
+        $estudiantesEgresados = $queryEgresados
+            ->distinct('requisitos_egreso.id_alumno')
+            ->count('requisitos_egreso.id_alumno');
+
+
+        if ($esCicloVivo) {
+            $queryAlumnos = DB::table('alumnos')
+                ->leftJoin('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id');
+
+            if ($facultadId) {
+                $queryAlumnos->where('carreras.id_facultad', $facultadId);
+            }
+            if ($carreraId) {
+                $queryAlumnos->where('alumnos.id_carrera', $carreraId);
+            }
+
+            $estudiantesActivos = (clone $queryAlumnos)->where('alumnos.estado_carrera', 'ACTIVO')->count();
+            $estudiantesInactivos = (clone $queryAlumnos)->where('alumnos.estado_carrera', 'INACTIVO')->count();
+        }
+
+        // 4. AGRUPACIONES POR CARRERA Y FACULTAD (nombres completos para el informe)
+        $matriculaPorCarrera = (clone $queryBase)
+            ->select(DB::raw("COALESCE(carreras.nombre, 'Sin Carrera') as carrera"), DB::raw('COUNT(DISTINCT inscripciones.id_alumno) as total'))
+            ->groupBy('carreras.nombre')
+            ->orderByDesc('total')
+            ->get();
+
+        $matriculaPorFacultad = (clone $queryBase)
+            ->select(DB::raw("COALESCE(facultades.nombre, 'Sin Facultad') as facultad"), DB::raw('COUNT(DISTINCT inscripciones.id_alumno) as total'))
+            ->groupBy('facultades.nombre')
+            ->orderByDesc('total')
+            ->get();
+
+        // 5. EVOLUCIÓN HISTÓRICA
+        $evolucionHistorica = DB::table('inscripciones')
+            ->join('ciclo_lectivo', 'inscripciones.id_ciclo_lectivo', '=', 'ciclo_lectivo.ciclo_lectivo_id')
+            ->select('ciclo_lectivo.nombre_ciclo', 'ciclo_lectivo.anio', DB::raw('COUNT(DISTINCT id_alumno) as total'))
+            ->groupBy('ciclo_lectivo.ciclo_lectivo_id', 'ciclo_lectivo.nombre_ciclo', 'ciclo_lectivo.anio')
+            ->orderBy('ciclo_lectivo.ciclo_lectivo_id')
+            ->take(6)
+            ->get();
+
+        $fechaGeneracion = Carbon::now()->format('d/m/Y H:i');
+        $anioCiclo = $cicloSeleccionadoObj?->anio ?? date('Y');
+
+        $pdf = Pdf::loadView('directivo.pdf.matricula', compact(
+            'cicloSeleccionadoObj', 'esCicloVivo', 'nombreFacultad', 'nombreCarrera', 'fechaGeneracion',
+            'totalMatriculados', 'varMatricula', 'nuevoIngreso', 'alumnosRetenidos',
+            'estudiantesActivos', 'estudiantesInactivos', 'estudiantesEgresados',
+            'matriculaPorCarrera', 'matriculaPorFacultad', 'evolucionHistorica'
+        ))
+
+            ->setPaper('a4', 'portrait')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('isRemoteEnabled', true);
+
+        return $pdf->download('informe_matricula_' . $anioCiclo . '.pdf');
+    }
+
+
+//-----------------------------------------------------------------------------
     //Funcion para la dashboard de morosidad
     public function morosidad(Request $request)
     {
@@ -709,5 +1031,251 @@ class DirectivoController extends Controller
         ));
     }
 
+    // Descargar Informe PDF del Dashboard de Morosidad y Cuentas por Cobrar
+    public function pdfMorosidad(Request $request)
+    {
+        // 1. OBTENCIÓN DE FILTROS
+        $ciclos = DB::table('ciclo_lectivo')->orderByDesc('ciclo_lectivo_id')->get();
+
+        $cicloActivo = $ciclos->whereIn('estado', ['ACTIVO', 'MATRICULA_ABIERTA', 'CONFIGURACION'])->first()
+            ?? $ciclos->first();
+
+        $cicloId = $request->input('ciclo_id') ?: $cicloActivo?->ciclo_lectivo_id;
+        $cicloSeleccionadoObj = $ciclos->firstWhere('ciclo_lectivo_id', $cicloId);
+
+        $facultadId = $request->input('facultad_id');
+        $carreraId = $request->input('carrera_id');
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin = $request->input('fecha_fin');
+        $hoy = Carbon::now()->format('Y-m-d');
+
+        // Textos legibles de filtros para el encabezado del PDF
+        $nombreFacultad = $facultadId
+            ? DB::table('facultades')->where('facultad_id', $facultadId)->value('nombre')
+            : 'Todas las Facultades';
+
+        $nombreCarrera = $carreraId
+            ? DB::table('carreras')->where('carrera_id', $carreraId)->value('nombre')
+            : 'Todas las Carreras';
+
+        if ($fechaInicio && $fechaFin) {
+            $rangoFechas = Carbon::parse($fechaInicio)->format('d/m/Y') . ' al ' . Carbon::parse($fechaFin)->format('d/m/Y');
+        } elseif ($fechaInicio) {
+            $rangoFechas = 'Desde ' . Carbon::parse($fechaInicio)->format('d/m/Y');
+        } elseif ($fechaFin) {
+            $rangoFechas = 'Hasta ' . Carbon::parse($fechaFin)->format('d/m/Y');
+        } else {
+            $rangoFechas = 'Todo el ciclo';
+        }
+
+        // 2. CONSULTA BASE (idéntica a tu dashboard)
+        $abonos = DB::table('detalle_pago')
+            ->select('id_cargo', DB::raw('SUM(subtotal) as total_abonado'))
+            ->groupBy('id_cargo');
+
+        $queryBase = DB::table('cargo_estudiante')
+            ->join('alumnos', 'cargo_estudiante.id_alumno', '=', 'alumnos.alumno_id')
+            ->join('users', 'alumnos.id_usuario', '=', 'users.id')
+            ->leftJoin('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id')
+            ->leftJoin('facultades', 'carreras.id_facultad', '=', 'facultades.facultad_id')
+            ->leftJoinSub($abonos, 'abonos', function ($join) {
+                $join->on('cargo_estudiante.cargo_id', '=', 'abonos.id_cargo');
+            })
+            ->where('cargo_estudiante.id_ciclo_lectivo', $cicloId)
+            ->where('cargo_estudiante.estado_cargo', '=', 'PENDIENTE')
+            ->whereRaw('(COALESCE(cargo_estudiante.monto_neto_estudiante, 0) - COALESCE(abonos.total_abonado, 0)) > 0');
+
+        if ($facultadId) {
+            $queryBase->where('carreras.id_facultad', $facultadId);
+        }
+        if ($carreraId) {
+            $queryBase->where('alumnos.id_carrera', $carreraId);
+        }
+        if ($fechaInicio && $fechaFin) {
+            $queryBase->whereBetween('cargo_estudiante.fecha_vencimiento', [$fechaInicio, $fechaFin]);
+        } elseif ($fechaInicio) {
+            $queryBase->where('cargo_estudiante.fecha_vencimiento', '>=', $fechaInicio);
+        } elseif ($fechaFin) {
+            $queryBase->where('cargo_estudiante.fecha_vencimiento', '<=', $fechaFin);
+        }
+
+        $calcSaldo = "(COALESCE(cargo_estudiante.monto_neto_estudiante, 0) - COALESCE(abonos.total_abonado, 0)) +
+            (CASE
+                WHEN cargo_estudiante.fecha_vencimiento < '{$hoy}' THEN
+                    CASE
+                        WHEN EXTRACT(DAY FROM cargo_estudiante.fecha_vencimiento) = 18 THEN 10
+                        ELSE 5
+                    END
+                ELSE 0
+            END)";
+
+        // 3. KPIs PRINCIPALES
+        $deudaTotal = (clone $queryBase)->sum(DB::raw($calcSaldo));
+        $cuotasPendientes = (clone $queryBase)->count('cargo_estudiante.cargo_id');
+        $estudiantesMorosos = (clone $queryBase)
+            ->where('cargo_estudiante.fecha_vencimiento', '<', $hoy)
+            ->count(DB::raw('DISTINCT cargo_estudiante.id_alumno'));
+        $cuotasVencidas = (clone $queryBase)
+            ->where('cargo_estudiante.fecha_vencimiento', '<', $hoy)
+            ->sum(DB::raw($calcSaldo));
+
+        $totalCargosGenerados = DB::table('cargo_estudiante')
+            ->where('id_ciclo_lectivo', $cicloId)
+            ->where('estado_cargo', '!=', 'ANULADO');
+
+        if ($fechaInicio && $fechaFin) {
+            $totalCargosGenerados->whereBetween('fecha_vencimiento', [$fechaInicio, $fechaFin]);
+        } elseif ($fechaInicio) {
+            $totalCargosGenerados->where('fecha_vencimiento', '>=', $fechaInicio);
+        } elseif ($fechaFin) {
+            $totalCargosGenerados->where('fecha_vencimiento', '<=', $fechaFin);
+        }
+
+        $totalCargosGenerados = $totalCargosGenerados->sum('monto_neto_estudiante');
+        $indiceMorosidad = $totalCargosGenerados > 0 ? round(($cuotasVencidas / $totalCargosGenerados) * 100, 1) : 0;
+
+        // 4. VARIACIONES VS CICLO ANTERIOR
+        $varDeuda = 0; $varEstudiantes = 0; $varCuotas = 0; $varVencidas = 0; $varIndice = 0;
+
+        $cicloAnterior = $cicloId
+            ? DB::table('ciclo_lectivo')
+                ->where('ciclo_lectivo_id', '<', $cicloId)
+                ->orderByDesc('ciclo_lectivo_id')
+                ->first()
+            : null;
+
+        if ($cicloAnterior) {
+            $cicloAnteriorId = $cicloAnterior->ciclo_lectivo_id;
+
+            $queryAnterior = DB::table('cargo_estudiante')
+                ->join('alumnos', 'cargo_estudiante.id_alumno', '=', 'alumnos.alumno_id')
+                ->leftJoin('carreras', 'alumnos.id_carrera', '=', 'carreras.carrera_id')
+                ->leftJoinSub($abonos, 'abonos', function ($join) {
+                    $join->on('cargo_estudiante.cargo_id', '=', 'abonos.id_cargo');
+                })
+                ->where('cargo_estudiante.id_ciclo_lectivo', $cicloAnteriorId)
+                ->where('cargo_estudiante.estado_cargo', '=', 'PENDIENTE')
+                ->whereRaw('(COALESCE(cargo_estudiante.monto_neto_estudiante, 0) - COALESCE(abonos.total_abonado, 0)) > 0');
+
+            if ($facultadId) $queryAnterior->where('carreras.id_facultad', $facultadId);
+            if ($carreraId) $queryAnterior->where('alumnos.id_carrera', $carreraId);
+            if ($fechaInicio && $fechaFin) {
+                $queryAnterior->whereBetween('cargo_estudiante.fecha_vencimiento', [$fechaInicio, $fechaFin]);
+            } elseif ($fechaInicio) {
+                $queryAnterior->where('cargo_estudiante.fecha_vencimiento', '>=', $fechaInicio);
+            } elseif ($fechaFin) {
+                $queryAnterior->where('cargo_estudiante.fecha_vencimiento', '<=', $fechaFin);
+            }
+
+            $deudaAnterior = (clone $queryAnterior)->sum(DB::raw($calcSaldo));
+            $cuotasAnterior = (clone $queryAnterior)->count('cargo_estudiante.cargo_id');
+            $estudiantesAnterior = (clone $queryAnterior)
+                ->where('cargo_estudiante.fecha_vencimiento', '<', $hoy)
+                ->count(DB::raw('DISTINCT cargo_estudiante.id_alumno'));
+            $vencidasAnterior = (clone $queryAnterior)
+                ->where('cargo_estudiante.fecha_vencimiento', '<', $hoy)
+                ->sum(DB::raw($calcSaldo));
+
+            $totalCargosAnterior = DB::table('cargo_estudiante')
+                ->where('id_ciclo_lectivo', $cicloAnteriorId)
+                ->where('estado_cargo', '!=', 'ANULADO');
+
+            if ($fechaInicio && $fechaFin) {
+                $totalCargosAnterior->whereBetween('fecha_vencimiento', [$fechaInicio, $fechaFin]);
+            } elseif ($fechaInicio) {
+                $totalCargosAnterior->where('fecha_vencimiento', '>=', $fechaInicio);
+            } elseif ($fechaFin) {
+                $totalCargosAnterior->where('fecha_vencimiento', '<=', $fechaFin);
+            }
+
+            $totalCargosAnterior = $totalCargosAnterior->sum('monto_neto_estudiante');
+            $indiceAnterior = $totalCargosAnterior > 0 ? round(($vencidasAnterior / $totalCargosAnterior) * 100, 1) : 0;
+
+            $varDeuda = $deudaAnterior > 0 ? round((($deudaTotal - $deudaAnterior) / $deudaAnterior) * 100, 1) : ($deudaTotal > 0 ? 100 : 0);
+            $varCuotas = $cuotasAnterior > 0 ? round((($cuotasPendientes - $cuotasAnterior) / $cuotasAnterior) * 100, 1) : ($cuotasPendientes > 0 ? 100 : 0);
+            $varEstudiantes = $estudiantesAnterior > 0 ? round((($estudiantesMorosos - $estudiantesAnterior) / $estudiantesAnterior) * 100, 1) : ($estudiantesMorosos > 0 ? 100 : 0);
+            $varVencidas = $vencidasAnterior > 0 ? round((($cuotasVencidas - $vencidasAnterior) / $vencidasAnterior) * 100, 1) : ($cuotasVencidas > 0 ? 100 : 0);
+            $varIndice = round($indiceMorosidad - $indiceAnterior, 1);
+        }
+
+        // 5. EVOLUCIÓN DE LA DEUDA (Principal y Recargos)
+        $evolucion = (clone $queryBase)
+            ->select(
+                DB::raw("TO_CHAR(cargo_estudiante.fecha_vencimiento, 'YYYY-MM') as mes_anio"),
+                DB::raw("SUM(COALESCE(cargo_estudiante.monto_neto_estudiante, 0) - COALESCE(abonos.total_abonado, 0)) as deuda_neta"),
+                DB::raw("SUM(CASE
+                    WHEN cargo_estudiante.fecha_vencimiento < '$hoy' THEN
+                        CASE WHEN EXTRACT(DAY FROM cargo_estudiante.fecha_vencimiento) = 18 THEN 10 ELSE 5 END
+                    ELSE 0
+                END) as recargos")
+            )
+            ->groupBy('mes_anio')
+            ->orderBy('mes_anio', 'ASC')
+            ->get();
+
+        // 6. MOROSIDAD POR FACULTAD (Solo cargos vencidos, igual que tu gráfica de dona)
+        $facultadesData = (clone $queryBase)
+            ->where('cargo_estudiante.fecha_vencimiento', '<', $hoy)
+            ->select(
+                DB::raw("COALESCE(facultades.nombre, 'Sin Facultad') as nombre_facultad"),
+                DB::raw("SUM($calcSaldo) as total_deuda")
+            )
+            ->groupBy('facultades.nombre', 'facultades.facultad_id')
+            ->orderByDesc('total_deuda')
+            ->get();
+
+        // 7. MAYOR DEUDA POR CARRERA (Nombres completos para el informe)
+        $deudaPorCarrera = (clone $queryBase)
+            ->select(
+                DB::raw("COALESCE(carreras.nombre, 'Sin Carrera') as carrera"),
+                DB::raw("SUM($calcSaldo) as total")
+            )
+            ->groupBy('carreras.nombre')
+            ->orderByDesc('total')
+            ->get();
+
+        // 8. LISTA DE ESTUDIANTES CON CUOTAS PENDIENTES (Todos los que coincidan con los filtros)
+        $estudiantesMorososLista = (clone $queryBase)
+            ->select(
+                'users.name as nombre',
+                'alumnos.codigo_estudiante as codigo',
+                DB::raw("COALESCE(facultades.nombre, 'N/A') as facultad"),
+                DB::raw("COALESCE(carreras.nombre, 'N/A') as carrera"),
+                DB::raw('COUNT(cargo_estudiante.cargo_id) as cuotas'),
+                DB::raw("SUM($calcSaldo) as monto"),
+                DB::raw('MIN(cargo_estudiante.fecha_vencimiento) as cuota_mas_antigua')
+            )
+            ->groupBy('alumnos.alumno_id', 'users.name', 'alumnos.codigo_estudiante', 'facultades.nombre', 'carreras.nombre')
+            ->orderByDesc('monto')
+            ->get()
+            ->map(function ($est) {
+                $diasVencidos = Carbon::now()->diffInDays(Carbon::parse($est->cuota_mas_antigua), false) * -1;
+
+                $est->estado = 'No Vencida';
+                $est->color = 'secondary';
+
+                if ($diasVencidos > 90) { $est->estado = '> 90 días'; $est->color = 'danger'; }
+                elseif ($diasVencidos > 60) { $est->estado = '61 - 90 días'; $est->color = 'warning'; }
+                elseif ($diasVencidos > 30) { $est->estado = '31 - 60 días'; $est->color = 'warning'; }
+                elseif ($diasVencidos > 0) { $est->estado = '1 - 30 días'; $est->color = 'info'; }
+
+                return $est;
+            });
+
+        $fechaGeneracion = Carbon::now()->format('d/m/Y H:i');
+        $anioCiclo = $cicloSeleccionadoObj?->anio ?? date('Y');
+
+        $pdf = Pdf::loadView('directivo.pdf.morosidad', compact(
+            'cicloSeleccionadoObj', 'nombreFacultad', 'nombreCarrera', 'rangoFechas', 'fechaGeneracion',
+            'deudaTotal', 'estudiantesMorosos', 'cuotasPendientes', 'cuotasVencidas', 'indiceMorosidad',
+            'varDeuda', 'varEstudiantes', 'varCuotas', 'varVencidas', 'varIndice',
+            'evolucion', 'facultadesData', 'deudaPorCarrera', 'estudiantesMorososLista'
+        ))
+            ->setPaper('a4', 'portrait')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('isRemoteEnabled', true);
+
+        return $pdf->download('informe_morosidad_' . $anioCiclo . '.pdf');
+    }
 
 }
