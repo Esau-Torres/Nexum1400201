@@ -281,17 +281,66 @@
                                         'mayo' => 5, 'junio' => 6, 'julio' => 7, 'agosto' => 8,
                                         'septiembre' => 9, 'octubre' => 10, 'noviembre' => 11, 'diciembre' => 12
                                     ];
+                                    $nombresMeses = [
+                                        1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+                                        5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+                                        9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+                                    ];
 
-                                    foreach($pagos as $pago) {
-                                        foreach($pago->detalles as $detalle) {
+                                    foreach ($pagos as $pago) {
+                                        $fechaPago = \Carbon\Carbon::parse($pago->fecha_pago);
+
+                                        foreach ($pago->detalles as $detalle) {
                                             $detalle->recibo_padre = $pago->numero_recibo;
-                                            $detalle->fecha_padre = $pago->fecha_pago;
+                                            $detalle->fecha_padre  = $pago->fecha_pago;
 
-                                            $nombreMes = strtolower(trim($detalle->cargo->mes_arancel ?? ''));
-                                            $detalle->mes_num = $ordenMeses[$nombreMes] ?? 0;
+                                            // 1. Resolver Mes (del cargo si existe; si no, de fecha_pago)
+                                            $mesArancel = trim($detalle->cargo->mes_arancel ?? '');
+                                            if ($mesArancel !== '') {
+                                                $detalle->mes_mostrar = $mesArancel;
+                                                $detalle->mes_num     = $ordenMeses[strtolower($mesArancel)] ?? $fechaPago->month;
+                                            } else {
+                                                $detalle->mes_mostrar = $nombresMeses[$fechaPago->month] ?? 'N/A';
+                                                $detalle->mes_num     = $fechaPago->month;
+                                            }
 
+                                            // 2. Resolver Ciclo (del cargo si existe; si no, buscar por fecha/semestre en $ciclos)
+                                            $cicloObj = $detalle->cargo?->ciclo;
+
+                                            if (!$cicloObj) {
+                                                // A) Intentar por rango de fechas del ciclo
+                                                $cicloObj = $ciclos->first(function ($c) use ($fechaPago) {
+                                                    if (empty($c->fecha_inicio) || empty($c->fecha_fin)) {
+                                                        return false;
+                                                    }
+                                                    return $fechaPago->between(
+                                                        \Carbon\Carbon::parse($c->fecha_inicio)->startOfDay(),
+                                                        \Carbon\Carbon::parse($c->fecha_fin)->endOfDay()
+                                                    );
+                                                });
+
+                                                // B) Si no coincidió por fechas, buscar por año y semestre (01 = Ene-Jun, 02 = Jul-Dic)
+                                                if (!$cicloObj) {
+                                                    $numSemestre = $fechaPago->month <= 6 ? '01' : '02';
+                                                    $cicloObj = $ciclos->first(function ($c) use ($fechaPago, $numSemestre) {
+                                                        return (int) $c->anio === (int) $fechaPago->year
+                                                            && (str_contains((string) ($c->nombre_ciclo ?? ''), $numSemestre)
+                                                                || (string) ($c->numero_ciclo ?? '') === $numSemestre);
+                                                    });
+                                                }
+
+                                                // C) Respaldo: ciclo actual/activo
+                                                if (!$cicloObj) {
+                                                    $cicloObj = $cicloActual ?? $cicloActivo ?? null;
+                                                }
+                                            }
+
+                                            $detalle->ciclo_mostrar = $cicloObj
+                                                ? "{$cicloObj->nombre_ciclo} - {$cicloObj->anio}"
+                                                : "Año {$fechaPago->year}";
+
+                                            $detalle->anio_num      = $cicloObj->anio ?? $fechaPago->year;
                                             $detalle->peso_concepto = str_contains(strtoupper($detalle->concepto->nombre ?? ''), 'MATR') ? 0 : 1;
-                                            $detalle->anio_num = $detalle->cargo->ciclo->anio ?? 9999;
 
                                             $kardex->push($detalle);
                                         }
@@ -311,12 +360,12 @@
                                         </td>
                                         <td>
                                             <span class="badge border" style="background-color: #f8f9fa; color: #121212;">
-                                                {{ $detalle->cargo->ciclo->nombre_ciclo ?? 'N/A' }} - {{ $detalle->cargo->ciclo->anio ?? '' }}
+                                                {{ $detalle->ciclo_mostrar }}
                                             </span>
                                         </td>
                                         <td>
                                             <span class="text-capitalize text-dark" style="font-size: 0.95rem;">
-                                                {{ $detalle->cargo->mes_arancel ?? 'N/A' }}
+                                                {{ $detalle->mes_mostrar }}
                                             </span>
                                         </td>
                                         <td class="text-dark">
