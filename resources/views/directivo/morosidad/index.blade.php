@@ -671,24 +671,27 @@
     // ==========================================
     // 1. BUSCADOR EN TIEMPO REAL PARA LA TABLA
     // ==========================================
-    document.getElementById('buscadorEstudiantes').addEventListener('keyup', function() {
-        // Obtenemos lo que el usuario escribe, en minúsculas y sin acentos
-        let filtro = this.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        let filas = document.querySelectorAll('#tablaMorosos tbody .fila-estudiante');
+    const buscadorEstudiantes = document.getElementById('buscadorEstudiantes');
+    if (buscadorEstudiantes) {
+        buscadorEstudiantes.addEventListener('keyup', function() {
+            // Obtenemos lo que el usuario escribe, en minúsculas y sin acentos
+            let filtro = this.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            let filas = document.querySelectorAll('#tablaMorosos tbody .fila-estudiante');
 
-        filas.forEach(function(fila) {
-            // Obtenemos los textos de la tabla, en minúsculas y sin acentos
-            let nombre = fila.querySelector('.nombre-estudiante').textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            let codigo = fila.querySelector('.codigo-estudiante').textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            filas.forEach(function(fila) {
+                // Obtenemos los textos de la tabla, en minúsculas y sin acentos
+                let nombre = fila.querySelector('.nombre-estudiante').textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                let codigo = fila.querySelector('.codigo-estudiante').textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-            // Comparamos si coincide
-            if (nombre.includes(filtro) || codigo.includes(filtro)) {
-                fila.style.display = '';
-            } else {
-                fila.style.display = 'none';
-            }
+                // Comparamos si coincide
+                if (nombre.includes(filtro) || codigo.includes(filtro)) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
         });
-    });
+    }
 
     // ==========================================
     // 2. LÓGICA DE FILTROS EN CASCADA (Facultad -> Carrera)
